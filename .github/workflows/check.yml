@@ -1,0 +1,36 @@
+name: check
+on:
+  push:
+  pull_request:
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.19.0 (GitHub release)
+        run: |
+          curl -sSL -o "$RUNNER_TEMP/lean.tar.zst" https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-linux.tar.zst
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$HOME"
+          echo "$HOME/lean-4.19.0-linux/bin" >> "$GITHUB_PATH"
+      - name: Cold gate (warnings as errors, no sorry, no custom axiom, escape scan)
+        run: bash lean/check.sh
+      - name: Replay recorded GPT-2 steps through the proved functions
+        run: lean/.lake/build/bin/prlm decide tests/fixture.bin
+      - name: Standing control, a tampered pick must fail
+        run: |
+          if lean/.lake/build/bin/prlm decide tests/fixture-tampered.bin; then
+            echo "tampered fixture passed: replay check is broken"; exit 1
+          fi
+      - name: Log hash chain intact
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          prev, n = "0" * 64, 0
+          for line in open("out/log.jsonl", "rb"):
+              line = line.rstrip(b"\n")
+              r = json.loads(line)
+              assert r["prev"] == prev and r["id"] == n, f"chain broken at {n}"
+              prev, n = hashlib.sha256(line).hexdigest(), n + 1
+          print("log records", n, "head", prev[:16])
+          PY

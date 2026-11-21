@@ -13,6 +13,7 @@ cat > /tmp/prlm_axioms.lean <<'X'
 import Prlm.Core
 import Prlm.AlgoSearch
 import Prlm.Skip
+import Prlm.Sparse
 open Prlm
 #print axioms best_perm
 #print axioms max_unique
@@ -30,6 +31,7 @@ open Prlm
 #print axioms gen_reweight
 #print axioms accept_gen
 #print axioms accept_batch
+#print axioms best_split
 #print axioms AlgoSearch.mem_arch
 #print axioms AlgoSearch.cheb_target
 X

@@ -15,6 +15,7 @@
 -/
 import Prlm.Core
 import Prlm.AlgoSearch
+import Prlm.Sparse
 
 open Prlm
 
@@ -46,6 +47,10 @@ structure Tally where
   boundStable : Nat := 0
   boundStableRight : Nat := 0
   changed : Nat := 0
+  sparseEq : Nat := 0
+  support : Nat := 0
+  work : Nat := 0
+  workMax : Nat := 0
 
 def showOpt : Option Int → String
   | none => "none"
@@ -84,7 +89,21 @@ partial def loop (b : ByteArray) (o : Nat) (t : Tally) (verbose : Bool) : IO Tal
   let bound : Bool := match c with
     | some ⟨_, _, some m⟩ => decide (0 < m) && l.all (fun y => decide (-m < 2 * δ y.1 ∧ 2 * δ y.1 < m))
     | _ => false
+  -- exact sparse reweighting (best_split): moved candidates plus the best
+  -- unmoved one; work = |S| + rank of the first unmoved candidate in the
+  -- old order (the order is computed once per content and reused)
+  let inS : Nat → Bool := fun tk => δ tk != 0
+  let moved := l.filter (fun c => inS c.1)
+  let sp := best (shift δ moved ++ (best (l.filter (fun c => !inS c.1))).toList)
+  let pSp : Int := match sp with | some r => (r.1 : Int) | none => -1
+  let order := l.mergeSort (fun a b => decide (Better a b) || decide (a = b))
+  let rank := (order.findIdx? (fun c => !inS c.1)).getD order.length
+  let w := moved.length + rank + 1
   let t := { t with
+    sparseEq := t.sparseEq + (if pSp == pRec then 1 else 0),
+    support := t.support + moved.length,
+    work := t.work + w,
+    workMax := max t.workMax w,
     steps := t.steps + 1,
     agree := t.agree + (if pick == hp then 1 else 0),
     agreeRe := t.agreeRe + (if pRe == hpRe then 1 else 0),
@@ -109,8 +128,8 @@ def main (args : List String) : IO UInt32 := do
   | ["decide", f] | ["decide", f, "-v"] =>
     let b ← IO.FS.readBinFile f
     let t ← loop b 0 {} (args.length == 3)
-    IO.println s!"steps {t.steps} agree {t.agree} agreeRe {t.agreeRe} reEqRec {t.reEqRec} certified {t.certified} boundStable {t.boundStable} boundStableRight {t.boundStableRight} changed {t.changed}"
-    return (if t.agree == t.steps && t.agreeRe == t.steps && t.reEqRec == t.steps then 0 else 1)
+    IO.println s!"steps {t.steps} agree {t.agree} agreeRe {t.agreeRe} reEqRec {t.reEqRec} certified {t.certified} boundStable {t.boundStable} boundStableRight {t.boundStableRight} changed {t.changed} sparseEq {t.sparseEq} support {t.support} work {t.work} workMax {t.workMax}"
+    return (if t.agree == t.steps && t.agreeRe == t.steps && t.reEqRec == t.steps && t.sparseEq == t.steps then 0 else 1)
   | ["front", f] =>
     let rows := parseVecs (← IO.FS.readFile f)
     let vecs := rows.map Prod.snd

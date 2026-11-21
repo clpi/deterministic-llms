@@ -1,0 +1,23 @@
+{
+  "written": "2026-11-21T01:35Z, before reweight.py and skip2.py existed",
+  "ask": "Chris 2026-11-21T01:17Z: 'Improve end to end', after merging PR 1.",
+  "targets": "the three weakest measured points: the cone test decided 2% to 3% of steps without recompute (E8); verified skipping saved 4% to 13% of calls with almost no cross-history reuse (S3, S4); the repository had no CI",
+  "A_sparse_reweighting": {
+    "rule": "Prlm/Sparse.lean best_split: new pick = best of the moved candidates (nonzero feature change) plus the best unmoved candidate, the first unmoved one in the old order",
+    "data": "regenerated replays: T1 35 prompts with weights 0 and change = the declared prlm-theta weights (rep 1.5, noloop 4); T3 topic, end and ban prompts (20 each) with weights 0 and change = topic 4, end 4, ban +8 (the corrected sign)",
+    "measures": ["steps where the sparse pick equals the full recompute (must be all)", "work per step = moved candidates + rank of the first unmoved + 1, vs 50,257 for a full rescore", "the old box test's decided count on the same steps, for comparison"]
+  },
+  "B_drafting": {
+    "same_as": "tasks/SKIP_CONTRACT.json: same 55 histories in the same order, same reply and stop rule, same clean replay (read back from the log), verified mode only",
+    "sources": {
+      "gen": "earlier generated tokens of any history (the S1 fact store, as before)",
+      "ctx": "gen plus the current history's own prompt tokens",
+      "all": "ctx plus every earlier history's prompt",
+      "all+corpus": "all plus the TRAIN-corpus documents (shared text that no test prompt comes from)"
+    },
+    "match": "longest suffix match: try k = 8 down to 1 and draft up to 8 tokens after the most recent occurrence",
+    "measures": ["reply and stop-certificate mismatches vs clean (must be 0)", "model calls vs 479", "accepted drafted tokens by origin: same history (generated), same history (prompt), earlier history, corpus", "wall seconds, one run each, no KV cache"]
+  },
+  "C_ci": "a GitHub Actions workflow that installs Lean 4.19.0 from GitHub releases, runs lean/check.sh, and replays a committed fixture of recorded GPT-2 steps through the proved functions (exit 0), plus a tampered copy that must exit 1",
+  "verdict_rule": "an improvement counts only if exactness holds (0 mismatches) and the measured cost goes down on the same histories; every regression is reported"
+}
