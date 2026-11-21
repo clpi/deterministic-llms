@@ -80,3 +80,37 @@ and the automaton owns cost.
 - Native or Idol implementations (Python harness, Lean replay only).
 - Exact cone region per step (only the sufficient box was measured).
 - Weight decompilation beyond the token embedding (H-D).
+
+## Forward skipping by continuation equivalences (2026-11-21)
+
+Ask: Chris 2026-11-21T00:07Z. Contract tasks/SKIP_CONTRACT.json, logged as
+record 3391 before harness/skip.py existed. Model: GPT-2 small (the same
+pinned file). Chris's message cites a Qwen run that certified shared
+reply-bound accounting across histories; no such run is in this
+project's ledger or files (searched for "qwen" across everything), so
+nothing here builds on it and no Qwen result is claimed. 55 histories (20
+DEV, then 35 TEST), replies end at the first newline or period token or
+at 24 tokens; 479 reply tokens in the clean replay.
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| S1 | Verified skipping is exact | VERIFIED | k = 2, 4, 8: 0/55 reply mismatches, 0/55 stop-certificate mismatches (step, token, integer margin, certified, reason), 0 pick or margin mismatches at any step |
+| S2 | Its premise holds here: one forward over content plus draft gives the same logits as per-step forwards | VERIFIED on this run | 479/479 positions bitwise equal in every verified configuration (onnxruntime 1.29.0 CPU, 4 threads) |
+| S3 | Skipping saves model calls on real histories | VERIFIED but small | calls vs clean 479: k2 418 (13% saved), k4 438 (9%), k8 459 (4%). Gamed ceiling (store seeded with the clean replay's own continuation): 81 to 83 (83%) |
+| S4 | The work is shared across histories | REFUTED on this data | accepted drafted tokens from the same history vs an earlier one: k2 64 vs 3, k4 45 vs 0, k8 23 vs 0. Almost all reuse is a history repeating itself (greedy loops), not one history reusing another's continuation |
+| S5 | Unverified skipping (trust the class, no model call) is exact | REFUTED | reply mismatches k2 20/55, k4 3/55, k8 1/55. It also cannot produce a stop certificate at all: the margin needs the logits it skipped (stop certificates differ 55/55 even when seeded with the right answer) |
+| S6 | Wall time | measured once, small | verified k2 15.2 s vs 17.2 s for the empty-store control (same machine, one run each); k8 19.7 s, slower than control despite fewer calls (longer verify sequences, rejected drafts). This ONNX model has no KV cache, so every call recomputes the prefix; the numbers do not carry over to a KV-cached server |
+| S7 | Draft acceptance is exactly the rule's generation | VERIFIED (proved) | Prlm/Skip.lean `accept_gen`; `accept_batch` makes S2 an explicit PREMISE rather than an assumption hidden in the proof |
+| S8 | Do-nothing control | VERIFIED | empty store: 479 calls, identical to clean replay |
+
+Gate correction: lean/check.sh built only the executable's imports and
+did not fail when the axiom check itself errored. Fixed (builds the
+library and the executable, exits 1 on any axiom-check error); a
+tamper control with an inserted sorry now fails the gate (exit 1). The
+first-pass gate result stands because every module was an import of the
+executable then.
+
+UNMEASURED: Qwen or any other model; equivalence classes other than the
+last k tokens (for example classes keyed on hidden state); probability
+mass pooled across histories (each witness's mass is recorded, nothing
+pools it); a KV-cached runtime.

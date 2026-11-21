@@ -87,6 +87,7 @@ prev}`, the shape of `Canon.Rec`):
 | Parameter locality | `scores_local`, `dot_set_zero`, `gen_local` | An axis that is zero on the candidates leaves the scores, the pick and every generation unchanged, whatever its weight. |
 | Caching is invisible | `gen_cache` | A cache of base scores that is correct on its keys gives the same generation. |
 | Prefix | `gen_prefix` | Outputs extend their content. |
+| Draft acceptance (forward skipping) | `accept_gen`, `accept_batch` | Tokens accepted from a drafted continuation are exactly the rule's next tokens; equal scores give equal acceptance (the batched-forward equality is a PREMISE, measured). |
 | Pareto tools (reused, srce PR 7) | `AlgoSearch.mem_arch`, `cheb_target` | The archive is exactly the Pareto front, order independent; Chebyshev weights solved from a front point make it a minimizer. |
 
 The link to behavior: `lean/Main.lean` is compiled from these definitions.

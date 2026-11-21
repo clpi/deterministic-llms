@@ -1,5 +1,5 @@
-✔ [7/8] Built Main:c.o
-✔ [8/8] Built prlm
+✔ [9/10] Built Main:c.o
+✔ [10/10] Built prlm
 Build completed successfully.
 'Prlm.best_perm' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Prlm.max_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -15,4 +15,6 @@ Build completed successfully.
 'Prlm.gen_cache' depends on axioms: [propext, Quot.sound]
 'Prlm.stepRe_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Prlm.gen_reweight' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.accept_gen' depends on axioms: [propext]
+'Prlm.accept_batch' depends on axioms: [propext, Quot.sound]
 check: pass

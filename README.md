@@ -10,13 +10,15 @@ certified best-first rule and rewritable incrementally.
   UNMEASURED) and its receipt.
 - `lean/`: Lean 4.19.0 package. `Prlm/Core.lean` holds the definitions and
   proofs; `Main.lean` is the executable that replays recorded decoding
-  steps through those same definitions; `Prlm/AlgoSearch.lean` is copied
+  steps through those same definitions; `Prlm/Skip.lean` proves draft acceptance for forward skipping;
+  `Prlm/AlgoSearch.lean` is copied
   unchanged from software-redundant-compute-expands PR 7 (Pareto archive,
   Chebyshev weights). `check.sh` is the cold gate.
 - `tasks/`: the frozen tasks (`make_tasks.py` builds `tasks.json`) and the
   contract, both logged before any axis or decoder code existed.
 - `harness/`: model wrapper, axes, decoders, the contract run (`run.py`),
-  the post-hoc adaptive-weight study (`adapt.py`), and `report.py`, which
+  the post-hoc adaptive-weight study (`adapt.py`), the forward-skipping
+  test (`skip.py`, contract `tasks/SKIP_CONTRACT.json`), and `report.py`, which
   rebuilds every number from the log.
 - `out/log.jsonl`: the hash-chained, append-only log of every input,
   output and measurement. `out/REPORT.md` is generated from it.
@@ -33,6 +35,7 @@ cp lean/.lake/build/bin/prlm /tmp/claude-0/prlm
 cd harness
 PRLM_LOG=../out/rerun.jsonl python3 run.py declare t1 t2 t3 repro alt sweep replay
 python3 adapt.py
+python3 skip.py && python3 skip.py origin
 python3 report.py
 ```
 

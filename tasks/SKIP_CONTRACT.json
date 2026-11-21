@@ -1,0 +1,17 @@
+{
+  "written": "2026-11-21T00:20Z, before skip.py existed",
+  "ask": "Chris 2026-11-21T00:07Z: record an equivalence across several future token steps as one reusable fact on the one append-only graph; a new history reaching the class attaches its own witness and probability mass; use the witnesses to skip real forwards and verify that the reply and the stop certificate match a clean replay.",
+  "model": "GPT-2 small LM head ONNX, the same pinned file as log record 0 (no Qwen weights here: huggingface.co is blocked by the proxy)",
+  "histories": "20 DEV prompts (first 32 tokens of TRAIN-corpus documents, as in adapt.py) then the 35 T1 TEST prompts, in that fixed order; facts accumulate across histories in arrival order",
+  "rule": "prlm-0: certified best-first over round(256*logit), weights 0",
+  "reply_and_stop": "generate until the first token whose text contains a newline or '.', inclusive, or 24 tokens; the stop certificate is (stop step, stop token, its integer margin, certified flag, reason newline|period|length)",
+  "clean_replay": "one model call per token, each a forward over the full prefix, empty cache per history",
+  "equivalence_class": "the last k tokens of the content, k in {2, 4, 8}; a fact maps the class to the continuation of up to 8 tokens that a witness history produced after it; each history that reaches the class appends a witness record with its own log-probability mass for the continuation tokens it accepted",
+  "modes": {
+    "verified": "draft the fact's continuation and check it with ONE forward over content+draft; accept drafted tokens while each equals the certified pick computed from that forward's logits; the first disagreeing position emits the computed pick instead",
+    "unverified": "emit the fact's continuation with no model call at all, until it ends or the stop rule fires"
+  },
+  "controls": {"do-nothing": "empty fact store: must equal clean replay with the same model calls", "gamed": "fact store seeded with the clean replay's own continuations of the same history (reads the answer): the ceiling of skipping, labelled GAMED"},
+  "measures": ["reply tokens equal to clean replay (per history)", "stop certificate equal, field by field", "every step's pick and margin equal", "model calls vs clean replay calls, tokens per call", "logits at verified positions bitwise equal to the clean replay's logits at the same content", "wall seconds (one container, no KV cache in this ONNX model: each call recomputes the whole prefix)"],
+  "verdict_rule": "a mode is sound on this run only with 0 reply mismatches and 0 stop-certificate mismatches over all histories; every mismatch is listed"
+}
