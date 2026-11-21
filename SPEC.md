@@ -141,3 +141,34 @@ the same-weight random-direction control does, at no larger fluency cost.
 If it does not, H-D is refuted for embedding directions. Everything beyond
 that (attention or MLP weights, a whole model rewritten as a PRLM,
 executable compressed bytes) is UNMEASURED.
+
+## 7. Models and architectures (2026-11-21)
+
+**Which path defines base(c, v).** The rule, the certificate, sparse
+reweighting and the Lean replay act on recorded integer scores, so they
+are exact for any model. Whether those scores are the same along
+different computation paths depends on the model and the runtime. The
+paths are a full recompute per step, one call over a longer sequence, and
+a KV cache or recurrent state. A PRLM therefore fixes one path as the
+definition of base(c, v). Here that is the full per-step recompute. Any
+other path, such as drafting verification, a cache or quantized kernels,
+is admitted only after a measured check against it. On the models here,
+float32 paths kept every pick, but dynamic int8 quantization did not
+(CLAIMS.md M3 to M5).
+
+**Architecture as a parameter.** `harness/arch.py` builds a model from a
+config: layer kinds (attention, selective SSM, RWKV, GRU, LSTM, mixed),
+positions (learned, RoPE, ALiBi), KV heads (MHA, GQA, MQA), feed-forward
+(GELU, SwiGLU, MoE top-k, RWKV channel mix) and norm (LayerNorm, RMSNorm).
+Every property is measured through two entry points only, `full` (all
+positions in one call) and `step` (one token through the cache or state).
+That way a new config gets the same checks without new measurement code.
+
+**Density.** Density is the computed consequence of a weight change, not
+a parameter. At content c, a change Δ moves the candidates
+{v : Σ_a Δ_a φ_a(c, v) ≠ 0}. Density is their share of the vocabulary,
+and the exact work of deciding the step is |moved| + rank of the first
+unmoved candidate + 1 (`Sparse.best_split`). A search over weight changes
+treats that work as one objective among the behavioural ones. The front
+comes from `prlm front` (AlgoSearch.arch), recomputed after every
+appended point.

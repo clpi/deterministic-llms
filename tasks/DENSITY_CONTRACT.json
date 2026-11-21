@@ -1,0 +1,21 @@
+{
+  "written": "2026-11-21T02:34Z, replacing an unrun 02:30Z draft (pruning sweep) after Chris's correction; before any density code ran; logged once multi.py stops writing",
+  "ask": [
+    "Chris 2026-11-21T02:24Z: 'The sparsity and density should be incrementally parametric and deterministically/quantifiably solvable across Pareto optimum'",
+    "Chris 2026-11-21T02:25Z: 'Density actually should be just the consequent calculation of what weights are being in the fly reweighted at any time right?'"
+  ],
+  "definition": "density is not a knob. For a step with content c and a weight change delta, the moved set is {v : sum_a delta_a * phi_a(c, v) != 0}; density = |moved| / V, and the exact work of the step is |moved| + rank of the first unmoved candidate in the old order + 1 (Prlm/Sparse.lean best_split). Both are computed from the change, at the step.",
+  "steps": "the 60 T3 prompts (20 ban, 20 topic, 20 end), 24 steps each along the prlm-0 trajectory of GPT-2 small fp32 (the pinned model), with features of all five vocabulary axes recorded at every step: rep, noloop, ban, topic, end",
+  "search_space": "weight changes delta with each of rep, noloop, ban, topic, end in {0, 2, 8} logits (positive = the axis's declared direction, ban with the corrected sign): 243 points, appended in a fixed lexicographic order",
+  "objectives_minimized": {
+    "work": "mean exact work per step (from the computed moved set)",
+    "ban_hits": "steps on ban prompts whose new pick is a banned token",
+    "topic_misses": "steps on topic prompts whose new pick does not start a topic word",
+    "end_misses": "steps on end prompts whose new pick does not end a sentence",
+    "loops": "steps whose new pick would repeat a 3-gram already in the content",
+    "drift": "sum over steps of base-score loss of the new pick vs the base pick, in 1/256 logit, divided by 256"
+  },
+  "solver": "every (point, step) pick is computed by the sparse rule and checked against a full dense recompute (must agree on all); the Pareto front over the integer objective vectors comes from Lean `prlm front` (AlgoSearch.arch, mem_arch) with front-derived Chebyshev weights (cheb_target), recomputed after every append; each new front must be a subset of the previous front plus the new point (checked). For the final front points, a Lean replay (theta 0, change = the point) must give agree = sparseEq = steps.",
+  "teacher_forced": "objectives are per step along the fixed prlm-0 trajectory (the rule's decision at that content), not regenerated outputs; regenerating with a chosen point is a follow-up",
+  "verdict_rule": "the front is whatever the vectors give; nothing is dropped or tuned after seeing it"
+}

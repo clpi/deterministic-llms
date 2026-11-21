@@ -171,3 +171,99 @@ GitHub is reported on the PR, not claimed here.
 UNMEASURED: a KV-cached runtime; any model other than GPT-2 small;
 drafting from equivalence classes other than literal suffixes; the cost
 of keeping the old order when no replay is cached.
+
+## More models and architecture as a parameter (2026-11-21)
+
+Asks: Chris 02:01Z ("test a variety of models and architectures"), 02:12Z
+(cover other model types generally and parametrically), 02:24Z and 02:25Z
+(density must be solvable on the Pareto front, and is the computed
+consequence of what is being reweighted). Contracts, each written before
+its code: tasks/MULTI_CONTRACT.json (record 4410),
+tasks/ARCH_CONTRACT.json (4418), tasks/DENSITY_CONTRACT.json (4419); the
+last two were logged after multi.py stopped writing, and their sha256s at
+write time are in the project ledger. Full tables: out/REPORT-multi.md
+(harness/multireport.py rebuilds it from the log). This section measures
+two items the previous section listed as UNMEASURED: a KV-cached runtime
+and models other than GPT-2 small.
+
+What could be reached: huggingface.co, GitHub release pages, Ollama,
+Kaggle and ModelScope are not reachable from this session, and no mirror
+was used. The onnx/models zoo files and Google's t5-data bucket were.
+
+### Six models (records 4411 to 4417)
+
+gpt2-fp32-ort (baseline), gpt2-int8-ort (the same file through
+onnxruntime's dynamic int8 quantization), gpt2-numpy-kv (the same weights
+in a numpy forward with a KV cache), t5-base-ort (encoder-decoder, own
+vocabulary of 32,128), llama-style-random and mamba-style-random (random
+weights, mechanics only).
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| M1 | The proved rule decides exactly on every model's recorded scores | VERIFIED | Lean replay agree = sparseEq = steps on all 6 (840 each; T5 206, it stops at its end token); a tampered first record exits 1 on all 6 |
+| M2 | Same content gives the same logits on repeat | VERIFIED, one exception | bitwise on all 6 in process and in fresh processes, except llama-style-random in a fresh process at 1 BLAS thread: 0/192 rows bitwise, 192/192 picks equal |
+| M3 | One call over a longer sequence gives the same logits as per-step calls (the premise of verified drafting) | holds only for 2 of 6 bitwise | bitwise: gpt2-fp32-ort 840/840, mamba-style-random 840/840, T5 171/206, gpt2-numpy-kv and llama 70/840. Picks: equal everywhere except int8, 633/840 |
+| M4 | A KV cache gives the same logits as recomputing | REFUTED bitwise, VERIFIED for picks | 35/840 rows bitwise (the first row of each history) on all three KV models; 840/840 picks equal |
+| M5 | Verified drafting is exact on every model | REFUTED for int8 | replies equal on 5 of 6 models. gpt2-int8-ort: 28/35 replies differ. Its dynamic quantization takes the scale from the whole call, so a position's logits depend on later tokens in the same call. gpt2-numpy-kv: replies equal, certificate margins differ in 2/35 histories |
+| M6 | Calls saved by drafting | measured | fp32 and numpy 840 to 577 calls; T5 and the random models save nothing |
+| M7 | Quantization keeps the model | REFUTED for this quantization | int8 vs fp32 teacher-forced: 377/840 picks equal, 0/35 sequences equal; greedy text collapses (' the the the'). The axes still steer it (T3 on int8, out/REPORT-int8-t3.md: ban fixed 1.00, end 1.00, topic 0.25; its own end baseline 0.50 vs fp32 0.85) |
+| M8 | Another runtime for the same weights keeps the picks | VERIFIED | gpt2-numpy-kv vs fp32: 840/840 picks, 35/35 sequences, but 0/840 integer-score rows equal |
+
+### Architecture as a parameter (records 4420 to 4450)
+
+harness/arch.py: one implementation over an array module, JAX for
+training and numpy float32 for every measurement. The config picks the
+layer kinds, positions, KV heads, feed-forward and norm. Ten configs: A1
+learned-position MHA GELU LN (GPT-2-like), A2 RoPE GQA SwiGLU RMS
+(Llama-like), A3 RoPE MQA, A4 ALiBi (BLOOM-like), A5 RoPE GQA MoE 4
+experts top-2 (Mixtral-like), S1 selective SSM (Mamba-like), R1 RWKV-4-like,
+R2 GRU, R3 LSTM, H1 attention/SSM hybrid (Jamba-like). Each config ran with
+random weights and with weights trained for 600 Adam steps on the
+15,685-token TRAIN corpus: 20 models, about 1.1 to 2.7M parameters each.
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| X1 | Repeatable in process and across BLAS thread counts | VERIFIED | 192/192 rows bitwise for all 20 models, in process and in fresh processes at 1 and 4 threads |
+| X2 | The proved rule decides exactly | VERIFIED | Lean agree = sparseEq = 840/840 for all 20; tamper exits 1 for all 20 |
+| X3 | Full call vs per step | depends on family | bitwise 840/840 for every recurrent family (S1, R1, R2, R3), random and trained; about 70/840 for attention families and the hybrid. Picks 840/840 everywhere |
+| X4 | Incremental path (KV cache or recurrent state) vs per step | REFUTED bitwise, VERIFIED for picks | 0/840 rows bitwise for every one of the 20 models; 840/840 picks |
+| X5 | Verified drafting is exact on every family | VERIFIED for replies | 0 reply mismatches on all 20; one certificate-margin mismatch (A1 trained). Calls: random 456 to 574 of 840 (they loop), trained 788 to 827 |
+| X6 | Tiny trained models beat the baselines on T1 | REFUTED | ref_f1 0.098 to 0.127 vs the trigram automaton 0.133 trained on the same corpus; best ref_match 0.49 (H1), equal to the trigram; GPT-2 small 1.11 and 0.202. Quality here is about models trained on 15,685 tokens, not the families at scale |
+
+So the decision rule, sparse reweighting and Lean replay are exact on
+every architecture tried, because they act on the recorded integer
+scores. What depends on the architecture and the runtime is whether those
+scores are the same along different computation paths. In float32 they
+are not bitwise the same, but every pick matched. Under dynamic int8
+quantization they differ enough to change picks, and verified drafting
+breaks. A PRLM therefore has to fix one computation path as the definition
+of base(c, v). This repo uses a full per-step recompute. Any other path
+has to be checked against it, as done here.
+
+### Density as the computed consequence of the weight change (records 4451 to 4454)
+
+Density is not a setting. For a weight change, the moved set at a step
+is every candidate whose score the change alters. Density is its share of
+the vocabulary, and the exact work of the step is moved + rank of the
+first unmoved candidate + 1 (best_split). Steps: the 60 T3 prompts × 24
+along GPT-2's prlm-0 trajectory, with all five vocabulary axes recorded.
+Search space: rep, noloop, ban, topic and end each at 0, 2 or 8 logits
+(243 weight changes). Six objectives, all minimized: work, ban hits,
+held-out topic misses, end misses, loops and drift from the base pick.
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| P1 | Every (change, step) decision is solvable exactly from the moved set | VERIFIED | 349,920 decisions, sparse rule vs dense recompute: 0 disagreements |
+| P2 | Density is small and computed, not chosen | measured | mean density 0 to 0.21% of the vocabulary; work 1 to 107 per step vs 50,257 for a dense rescore |
+| P3 | The front is solved incrementally and deterministically | VERIFIED | Lean `prlm front` recomputed after each of 243 appends, exit 0 every time; every new front lay inside the previous front plus the new point; final front 62 of 243 points, each the Chebyshev minimizer for weights aimed at it (3 pairs tie) |
+| P4 | Front points replay exactly in Lean | VERIFIED | all 62 front points: agree = agreeRe = reEqRec = sparseEq = 1,440/1,440, exit 0; Lean's work count equals the harness's for every point (record 4454) |
+| P5 | Topic weights reach held-out topic words | REFUTED again | 480/480 topic steps miss at every topic weight up to 8; the front's topic points come from side effects on loops and drift |
+
+These objectives are teacher-forced: each one is the rule's decision at
+a step of the fixed prlm-0 trajectory, not a regenerated output.
+Regenerating with the chosen points is a follow-up.
+
+UNMEASURED: any pretrained Llama, Qwen, Mistral, Mixtral, Mamba, RWKV or
+other model above 220M parameters; GPU kernels; a KV-cached ONNX export;
+batched serving with requests sharing one call; quantization other than
+onnxruntime dynamic int8.

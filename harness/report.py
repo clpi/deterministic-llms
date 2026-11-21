@@ -4,6 +4,7 @@ import json, os, re, subprocess, sys
 from collections import defaultdict
 import numpy as np
 from common import ROOT, LOG, verify_log, decode
+OUT = os.environ.get("PRLM_OUT", os.path.join(ROOT, "out"))
 import axes as AX
 
 n_rec, head = verify_log()
@@ -319,7 +320,7 @@ try:
         ms = np.median([x["wall"] * 1000 / 24 for (i, r), x in out[s].items() if i.startswith("t1") and r == 0])
         calls = np.mean([x["forwards"] / 24 for (i, r), x in out[s].items() if i.startswith("t1") and r == 0])
         vec_lines.append(f"{s} {int(round((24-rm)*100))} {int(round(r3*1000))} {int(round(dist*100))} {int(round(ms*10))} {int(round(calls*100))}")
-    fp = os.path.join(ROOT, "out", "front-t1.txt")
+    fp = os.path.join(OUT, "front-t1.txt")
     open(fp, "w").write("\n".join(vec_lines) + "\n")
     for l in vec_lines:
         P(f"    {l}")
@@ -332,7 +333,7 @@ try:
         ms = int(f[4]) / 10
         f[4] = str(int(math.log(ms) / math.log(1.1)) if ms > 0 else 0)
         vb.append(" ".join(f))
-    fb = os.path.join(ROOT, "out", "front-t1-ties.txt")
+    fb = os.path.join(OUT, "front-t1-ties.txt")
     open(fb, "w").write("\n".join(vb) + "\n")
     if os.path.exists(LEAN):
         rb = subprocess.run([LEAN, "front", fb], capture_output=True, text=True)
@@ -344,7 +345,7 @@ try:
         P("\nFront members and the rows that minimize Chebyshev weights solved from each:\n")
         for l in r.stdout.strip().splitlines():
             P(f"    {l}")
-    open(os.path.join(ROOT, "out", "REPORT.md"), "w").write("\n".join(lines) + "\n")
+    open(os.path.join(OUT, "REPORT.md"), "w").write("\n".join(lines) + "\n")
     print("\n".join(lines))
 
 except Exception as e:
