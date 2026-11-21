@@ -1,0 +1,22 @@
+{
+  "written": "2026-11-21T05:15Z, before harness/loop.py existed (lean/Prlm/Loop.lean was written first; it proves properties of the archive and of scope, not results)",
+  "ask": "Chris 2026-11-21T05:00Z: 'Improve and prove and make self improving self scope solving and algorithm parametrically optimizing at Pareto optimum'",
+  "steps": "the same 60 T3 prompts x 24 prlm-0 steps of GPT-2 small fp32 as tasks/DENSITY_CONTRACT.json, all five vocabulary axes recorded. DEV = prompts 0-9 of each kind (720 steps), TEST = prompts 10-19 of each kind (720 steps). The loop reads DEV only.",
+  "parameters": "integer weight levels per axis (rep, noloop, ban, topic, end) in quarter-logit units, 0 to 64 (0 to 16 logits)",
+  "objectives_minimized": "work (mean exact work per step from the computed moved set), ban_hits, topic_misses (held-out words), end_misses, loops, drift: the definitions of tasks/DENSITY_CONTRACT.json",
+  "loop": {
+    "start": "every axis at level 0 or 32 (8 logits): 32 candidates",
+    "scope": "structural: an axis whose features are zero on every candidate of every DEV step is removed (Prlm/Loop.lean scope_sound proves this loses nothing). Measured: an axis whose weight changed no DEV decision among the candidates so far is frozen at 0 for the round and re-checked every round (not proved; reported).",
+    "propose": "for every archive point and every in-scope axis: the midpoint toward each neighbouring evaluated level on that axis, and double the level when it is the largest evaluated (capped at 64); evaluated points are skipped",
+    "admit": "each candidate goes through the archive insertion rule (admit if no archive point dominates it; drop what it dominates); the front after each round is recomputed by Lean `prlm front` and must equal the archive",
+    "stop": "a round that adds no new front point (fixed point), or 10 rounds, or 600 evaluations"
+  },
+  "certification_on_TEST": "the initial DEV front (round 0) and the final DEV front are scored on TEST. Reported: the share of initial points dominated on TEST by some final point and the reverse (coverage, C-metric), and how many final points no initial point dominates on TEST (no regression)",
+  "controls": {
+    "do_nothing": "zero rounds: final = initial, coverage 0 both ways",
+    "random": "the same number of DEV evaluations at uniform random levels (seed 0), its DEV front scored on TEST and compared with the loop's both ways",
+    "GAMED": "the same loop selecting on TEST instead of DEV (reads the test), reported as a ceiling only"
+  },
+  "exactness": "every evaluated (point, step) decision by the sparse rule is checked against a dense recompute; every final front point gets a Lean replay on all 1,440 steps",
+  "verdict_rule": "self-improvement counts only if the final front covers part of the initial front on TEST and the initial front covers less of the final; every regression is reported; nothing is tuned on TEST except the labelled GAMED control"
+}

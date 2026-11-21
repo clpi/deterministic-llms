@@ -1,5 +1,5 @@
-✔ [11/12] Built Main:c.o
-✔ [12/12] Built prlm
+✔ [12/13] Built Main:c.o
+✔ [13/13] Built prlm
 Build completed successfully.
 'Prlm.best_perm' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Prlm.max_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -18,4 +18,9 @@ Build completed successfully.
 'Prlm.accept_gen' depends on axioms: [propext]
 'Prlm.accept_batch' depends on axioms: [propext, Quot.sound]
 'Prlm.best_split' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Loop.arch_cons_sub' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Loop.arch_covers' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Loop.admit_sound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Loop.reject_sound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Loop.scope_sound' depends on axioms: [propext, Quot.sound]
 check: pass
