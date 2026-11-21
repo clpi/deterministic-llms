@@ -1,0 +1,25 @@
+{
+  "written": "2026-11-20T11:22Z, before any axis or decoder code existed",
+  "model": {"file": "gpt2-lm-head-10.onnx (onnx/models, GPT-2 small 124M, opset 10)", "runtime": "onnxruntime 1.29.0 CPU, intra_op_num_threads 4", "tokenizer": "GPT-2 BPE, encoder.json + vocab.bpe pinned by sha256"},
+  "machine": "one 4-vCPU container, 15 GB RAM, no GPU",
+  "same_for_every_system": ["model and tokenizer", "prompts", "number of new tokens (T1 24, T2 1 word scored from 4 tokens, T3 24)", "no stop token: fixed length", "context = prompt + generated tokens", "same machine, same process family, same metric code"],
+  "systems": {
+    "samp-t1.0": "softmax sampling at temperature 1.0, seeds 0..4",
+    "samp-t0.7": "softmax sampling at temperature 0.7, seeds 0..4",
+    "samp-p0.9": "nucleus sampling p=0.9 at temperature 1.0, seeds 0..4 (typical serving default)",
+    "greedy-f32": "argmax over float32 logits (numpy first index on ties)",
+    "prlm-0": "certified best-first rule over integer scores round(256*logit), all axis weights 0; tie broken by lowest token id and marked accepted, not certified",
+    "prlm-theta": "same rule with named axes; one weight setting per task kind, declared in the run script before the run",
+    "alternatives": "beam with certificate, best-first search with certificate, n-gram automaton, distilled rule table; each is scored with the same metrics"
+  },
+  "metrics": {
+    "T1": ["ref_match: tokens equal to the reference at the same position, out of 24", "ref_f1: bag-of-tokens F1 against the reference", "rep3: fraction of generated 3-grams that repeat an earlier 3-gram of the generated text", "distinct2: distinct bigrams / bigrams in the generated text"],
+    "T2": ["acc: first generated word (stripped of spaces and punctuation at its ends) equals the answer, case-sensitive"],
+    "T3": ["ban: violation = any generated word, lowercased, in the ban list; success = 0 violations", "topic: hit_train = a TRAIN-lexicon word appears; hit_test = a TEST-lexicon word appears", "end: success = a token whose text contains '.', '!' or '?' within the first 12 generated tokens", "fluency cost for every T3 output: mean negative log-likelihood per token under the unmodified model (lower is better)"],
+    "reproducibility": "distinct outputs over 5 runs per prompt (seeds 0..4 for samplers, 5 identical invocations for deterministic systems); plus logits bitwise equal across 1 and 4 threads",
+    "latency": "wall ms per generated token, median over the run, model forward included; forward passes counted",
+    "cost": "model forward passes per output"
+  },
+  "verdict_rules": ["a quality difference counts only if it exceeds the paired bootstrap 95% interval over prompts (2000 resamples, seed 0)", "latency medians within 10% are ties", "losses are reported in the same table as wins", "every axis is run with a do-nothing control (feature identically 0) and a gamed control (feature that reads the reference or answer); gamed results are labelled GAMED and never counted"],
+  "verdict_words": ["VERIFIED", "CORRECTED", "REFUTED", "UNMEASURED"]
+}
