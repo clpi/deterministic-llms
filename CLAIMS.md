@@ -114,3 +114,60 @@ UNMEASURED: Qwen or any other model; equivalence classes other than the
 last k tokens (for example classes keyed on hidden state); probability
 mass pooled across histories (each witness's mass is recorded, nothing
 pools it); a KV-cached runtime.
+
+## End-to-end improvements (2026-11-21, after PR 1 merged)
+
+Ask: Chris 2026-11-21T01:17Z, "Improve end to end". Targets were the
+three weakest measured points: the box test decided 73 of 2,280 steps
+without recompute (E8), verified skipping saved 4% to 13% of calls with
+almost no cross-history reuse (S3, S4), and the repository had no CI.
+Contract tasks/IMPROVE_CONTRACT.json, logged as record 4179 before
+harness/reweight.py and harness/skip2.py existed. lean/Prlm/Sparse.lean
+was written before that record; the record says so.
+
+### Exact sparse reweighting
+
+New rule (`Prlm/Sparse.lean`, `best_split`, proved): after a weight
+change, the new pick is the best of the candidates whose score moved plus
+the single best unmoved candidate, which is the first unmoved one in the
+old order. No margin and no box: it is exact whenever the moved set is
+known. The Lean executable checks it against a full recompute at every
+recorded step (log records 4180 to 4183).
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| R1 | The sparse rule equals a full recompute on real steps | VERIFIED | 2,280/2,280 steps (T1 840, T3 topic 480, end 480, ban 480), Lean exe exit 0 on every file |
+| R2 | It decides every step without rescoring the vocabulary | VERIFIED | mean work per step (moved candidates + rank of first unmoved + 1) vs 50,257 for a rescore: T1 33.8 (max 53), topic 13.0 (max 13), end 179.1 (max 182), ban 47.3 (max 51). The old box test decided 73/2,280 on the same steps (17, 28, 28, 0) |
+| R3 | The steps tested include ones where the pick changes | VERIFIED | picks changed by the weight change: T1 406/840, end 87/480, ban 88/480, topic 0/480. Topic 4 moved no pick on these prompts, so the topic row only shows the rule agrees when nothing changes |
+| R4 | Cost scales with the moved set, not the vocabulary | VERIFIED here, with a limit | the `end` axis colors about 178 tokens per step, so it costs about 179; an axis that colors most of the vocabulary would cost about a rescore. The rule needs the old full order (one sort per step, cached in the replay), which is not counted in the work above |
+
+### Drafting from prompt and history n-grams
+
+Same 55 histories, reply rule and clean replay as S1 to S8; verified mode
+only, so every drafted token is checked by the model and the output is
+the rule's own generation (`accept_gen`). Index: every suffix of length
+1 to 8 points to its most recent occurrence; the draft is the next 8
+tokens after the longest match. Records 4184 to 4408.
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| D1 | Exact | VERIFIED | every source: 0/55 reply mismatches, 0/55 stop-certificate mismatches |
+| D2 | Fewer model calls than the first pass | VERIFIED | vs clean 479 (first-pass best was 418): gen 400 (16% saved), ctx 329 (31%), all 324 (32%), all+corpus 310 (35%). Gamed ceiling from S3 is unchanged at 81 to 83 |
+| D3 | Work shared across histories | CORRECTED (S4 was REFUTED) | accepted drafted tokens from outside the current history: all 16 of 170, all+corpus 39 of 184 (29 from TRAIN-corpus documents, 10 from earlier histories). It is real but a minority; most of the gain is the history copying its own prompt (81 to 92 tokens) |
+| D4 | Wall time | measured once, small | gen 16.3 s, ctx 16.7 s, all 13.9 s, all+corpus 13.2 s vs 17.2 s for the empty-store control; same machine, one run each, no KV cache, so these do not carry over to a KV-cached server |
+| D5 | Adding sources is not free | REPORTED | with the corpus added, same-prompt acceptances fell from 91 to 81 and earlier-history ones from 16 to 10, because a longer match from another source now wins the lookup. Total calls still fell |
+
+### CI
+
+`.github/workflows/check.yml`: installs Lean 4.19.0 from the GitHub
+release, runs `lean/check.sh` cold, replays `tests/fixture.bin` (the
+first 3 recorded GPT-2 steps of the T1 replay, 50,257 scores each)
+through the proved functions (must exit 0), requires
+`tests/fixture-tampered.bin` (one harness pick changed by 1) to exit 1,
+and verifies the log hash chain. Gate record 4409 (`lean-gate:3`) logs
+the local cold run with `best_split`. Whether the workflow passes on
+GitHub is reported on the PR, not claimed here.
+
+UNMEASURED: a KV-cached runtime; any model other than GPT-2 small;
+drafting from equivalence classes other than literal suffixes; the cost
+of keeping the old order when no replay is cached.

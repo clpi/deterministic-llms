@@ -11,6 +11,7 @@ certified best-first rule and rewritable incrementally.
 - `lean/`: Lean 4.19.0 package. `Prlm/Core.lean` holds the definitions and
   proofs; `Main.lean` is the executable that replays recorded decoding
   steps through those same definitions; `Prlm/Skip.lean` proves draft acceptance for forward skipping;
+  `Prlm/Sparse.lean` proves exact sparse reweighting (`best_split`);
   `Prlm/AlgoSearch.lean` is copied
   unchanged from software-redundant-compute-expands PR 7 (Pareto archive,
   Chebyshev weights). `check.sh` is the cold gate.
@@ -18,8 +19,13 @@ certified best-first rule and rewritable incrementally.
   contract, both logged before any axis or decoder code existed.
 - `harness/`: model wrapper, axes, decoders, the contract run (`run.py`),
   the post-hoc adaptive-weight study (`adapt.py`), the forward-skipping
-  test (`skip.py`, contract `tasks/SKIP_CONTRACT.json`), and `report.py`, which
+  test (`skip.py`, contract `tasks/SKIP_CONTRACT.json`), sparse reweighting
+  (`reweight.py`) and n-gram drafting (`skip2.py`), both under
+  `tasks/IMPROVE_CONTRACT.json`, and `report.py`, which
   rebuilds every number from the log.
+- `tests/`: a 3-step fixture of recorded GPT-2 steps and a tampered copy;
+  CI (`.github/workflows/check.yml`) runs the cold gate, replays the
+  fixture (must pass), the tampered copy (must fail) and checks the log chain.
 - `out/log.jsonl`: the hash-chained, append-only log of every input,
   output and measurement. `out/REPORT.md` is generated from it.
 
@@ -36,6 +42,7 @@ cd harness
 PRLM_LOG=../out/rerun.jsonl python3 run.py declare t1 t2 t3 repro alt sweep replay
 python3 adapt.py
 python3 skip.py && python3 skip.py origin
+python3 reweight.py && python3 skip2.py
 python3 report.py
 ```
 

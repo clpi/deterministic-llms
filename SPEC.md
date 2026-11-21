@@ -1,7 +1,7 @@
 # PRLM: parametric deterministic language models
 
 Spec, version 1, 2026-11-20. Status of every claim is in CLAIMS.md. Proofs
-are in `lean/Prlm/Core.lean`; the executable that runs them on real model
+are in `lean/Prlm/` (`Core`, `Skip`, `Sparse`); the executable that runs them on real model
 scores is `lean/Main.lean`; the harness is `harness/`.
 
 ## 1. Objects
@@ -88,6 +88,7 @@ prev}`, the shape of `Canon.Rec`):
 | Caching is invisible | `gen_cache` | A cache of base scores that is correct on its keys gives the same generation. |
 | Prefix | `gen_prefix` | Outputs extend their content. |
 | Draft acceptance (forward skipping) | `accept_gen`, `accept_batch` | Tokens accepted from a drafted continuation are exactly the rule's next tokens; equal scores give equal acceptance (the batched-forward equality is a PREMISE, measured). |
+| Exact sparse reweighting | `Sparse.best_split` | After a weight change, the pick equals the best of the moved candidates plus the best unmoved one (the first unmoved in the old order); exact, no margin needed. |
 | Pareto tools (reused, srce PR 7) | `AlgoSearch.mem_arch`, `cheb_target` | The archive is exactly the Pareto front, order independent; Chebyshev weights solved from a front point make it a minimizer. |
 
 The link to behavior: `lean/Main.lean` is compiled from these definitions.
