@@ -267,3 +267,43 @@ UNMEASURED: any pretrained Llama, Qwen, Mistral, Mixtral, Mamba, RWKV or
 other model above 220M parameters; GPU kernels; a KV-cached ONNX export;
 batched serving with requests sharing one call; quantization other than
 onnxruntime dynamic int8.
+
+## Self-improving, scope-solving Pareto search (2026-11-21)
+
+Ask: Chris 05:00Z, "improve and prove and make self improving self scope
+solving and algorithm parametrically optimizing at Pareto optimum".
+Contract tasks/LOOP_CONTRACT.json (record 4456), logged before
+harness/loop.py existed. Proofs: lean/Prlm/Loop.lean (cold gate passes,
+record 4467). Run records 4457 to 4466.
+
+The loop searches weight levels for rep, noloop, ban, topic and end, in
+quarter logits from 0 to 16, against the six density objectives. It
+selects on DEV prompts only (ten per T3 kind, 720 steps) and is scored
+on TEST prompts (the other ten per kind). Each round runs four parts.
+Scope removes axes that cannot matter and freezes axes that did not
+matter. Proposals are refined around the front (midpoints toward
+neighbouring levels, or doubling at the edge). Admission uses the
+archive rule. Lean recomputes the front, which must equal the archive.
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| L1 | One append changes the front only by the new point | PROVED | `arch_cons_sub` |
+| L2 | Appending any batch of candidates never loses ground: every old front point stays on the front or is dominated by a new one | PROVED | `arch_covers` (this is what lets the loop run unattended: a round can only keep or improve the front it inherits) |
+| L3 | Admission and rejection need only the archive, not every past candidate | PROVED | `admit_sound`, `reject_sound` |
+| L4 | An axis that is zero on every candidate of every step changes no decision and so no objective, at any weight | PROVED | `scope_sound`; all five axes were structurally in scope on DEV, so it removed none here |
+| L5 | Measured scope (freeze an axis whose weight never changed a DEV decision) | measured, not proved | no axis was frozen in any round |
+| L6 | The loop's archive equals Lean's front every round | VERIFIED | 4/4 rounds (loop) and 4/4 (GAMED control); Lean exit 0 |
+| L7 | Every decision exact | VERIFIED | sparse rule vs dense recompute: 0 disagreements over 600 points x 720 DEV steps |
+| L8 | The loop improves on its own starting front on held-out TEST prompts | VERIFIED | final front (260 points, after 3 rounds and 600 evaluations) strictly dominates 50% of the initial front's points on TEST and weakly covers 95%; the initial front strictly dominates 1 of 260 final points (0.4%), so 259/260 show no regression |
+| L9 | It beats random search at the same budget | VERIFIED | 600 random DEV evaluations give a 36-point front; on TEST the loop's front strictly dominates 67% of it, random dominates 1.9% of the loop's |
+| L10 | Selecting on DEV leaves little on the table | measured | GAMED control (the same loop selecting on TEST) strictly dominates 5.4% of the loop's TEST front; the loop dominates 1.2% of it |
+| L11 | It reaches a fixed point | NO | it stopped at the 600-evaluation budget with the front still growing (20, 54, 111, 260); with six integer objectives the front is large |
+| L12 | The final front replays exactly in Lean | VERIFIED | all 260 final front points: agree = agreeRe = reEqRec = sparseEq = 1,440/1,440, exit 0 (record 4466) |
+
+The improvement is to the trade-offs between objectives, measured
+teacher-forced at each step of fixed trajectories. It is not a gain in
+text quality, and the topic axis still misses every held-out topic word.
+
+UNMEASURED: a loop that also proposes new axes or new objectives (scope
+here covers removing and freezing, not inventing); regenerated outputs
+under the chosen points; the same loop on the 20 architecture models.

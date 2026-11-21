@@ -14,6 +14,7 @@ import Prlm.Core
 import Prlm.AlgoSearch
 import Prlm.Skip
 import Prlm.Sparse
+import Prlm.Loop
 open Prlm
 #print axioms best_perm
 #print axioms max_unique
@@ -34,6 +35,11 @@ open Prlm
 #print axioms best_split
 #print axioms AlgoSearch.mem_arch
 #print axioms AlgoSearch.cheb_target
+#print axioms Prlm.Loop.arch_cons_sub
+#print axioms Prlm.Loop.arch_covers
+#print axioms Prlm.Loop.admit_sound
+#print axioms Prlm.Loop.reject_sound
+#print axioms Prlm.Loop.scope_sound
 X
 ax=$(lake env lean /tmp/prlm_axioms.lean 2>&1) || { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
 echo "$ax" | grep -q "error" && { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }

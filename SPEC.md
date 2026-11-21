@@ -172,3 +172,18 @@ unmoved candidate + 1 (`Sparse.best_split`). A search over weight changes
 treats that work as one objective among the behavioural ones. The front
 comes from `prlm front` (AlgoSearch.arch), recomputed after every
 appended point.
+
+## 8. The self-improving loop (2026-11-21)
+
+`harness/loop.py` runs the search that the previous sections define,
+with nobody supervising it. Each round does four things. It solves
+scope: an axis whose features are zero on every candidate is removed,
+and `Loop.scope_sound` proves that loses nothing. An axis whose weight
+never changed a decision is frozen and checked again every round. It
+proposes points around the current front. It admits each one by the
+archive rule. And it checks the archive against Lean's `prlm front`.
+`Loop.arch_covers` is the safety property: appending any batch of
+candidates leaves every inherited front point on the front or
+dominated by a new one, so no round can lose ground. `admit_sound` and
+`reject_sound` show the archive alone decides admission. Selection uses
+DEV prompts, and improvement is claimed only on TEST.

@@ -12,6 +12,7 @@ certified best-first rule and rewritable incrementally.
   proofs; `Main.lean` is the executable that replays recorded decoding
   steps through those same definitions; `Prlm/Skip.lean` proves draft acceptance for forward skipping;
   `Prlm/Sparse.lean` proves exact sparse reweighting (`best_split`);
+  `Prlm/Loop.lean` proves the search loop's archive and scope rules;
   `Prlm/AlgoSearch.lean` is copied
   unchanged from software-redundant-compute-expands PR 7 (Pareto archive,
   Chebyshev weights). `check.sh` is the cold gate.
@@ -31,6 +32,8 @@ certified best-first rule and rewritable incrementally.
   (`tasks/DENSITY_CONTRACT.json`). `harness/multireport.py` writes
   `out/REPORT-multi.md` from the log; `out/multi-int8-t3.jsonl` is the int8
   task run's own hash-chained log (`out/REPORT-int8-t3.md`).
+- `harness/loop.py`: the self-improving, scope-solving Pareto search
+  (`tasks/LOOP_CONTRACT.json`, proofs in `lean/Prlm/Loop.lean`).
 - `tests/`: a 3-step fixture of recorded GPT-2 steps and a tampered copy;
   CI (`.github/workflows/check.yml`) runs the cold gate, replays the
   fixture (must pass), the tampered copy (must fail) and checks the log chain.
@@ -57,6 +60,7 @@ python3 multi.py run
 python3 archrun.py run <arch contract record id>
 python3 density.py <density contract record id>
 python3 multireport.py
+python3 loop.py <loop contract record id>
 python3 report.py
 ```
 

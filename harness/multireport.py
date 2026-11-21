@@ -63,5 +63,21 @@ if pts and frs:
         d = ", ".join(f"{a}{v}" for a, v in r["delta"].items() if v) or "none"
         P(f"| {d} | {r['density_mean']:.5f} | {r['work_mean']} | {r['ban_hits']} | {r['topic_misses']} | {r['end_misses']} | {r['loops']} | {r['drift']} | {', '.join(fp['chebmin'])} | {lean} |")
 
+lr = next((r["receipt"] for r in recs if r["head"] == "loop:result"), None)
+if lr:
+    rnd = [r["receipt"] for r in recs if r["head"].startswith("loop:round:")]
+    rc = next(r["receipt"] for r in recs if r["head"] == "loop:control:random")
+    gc = next(r["receipt"] for r in recs if r["head"] == "loop:control:GAMED")
+    lv = next(r["receipt"] for r in recs if r["head"] == "loop:lean")
+    P("\n## Self-improving loop (tasks/LOOP_CONTRACT.json)\n")
+    P("| round | evaluated | admitted | new on front | front size | Lean front = archive | frozen axes |")
+    P("| --- | --- | --- | --- | --- | --- | --- |")
+    for r in rnd:
+        P(f"| {r['round']} | {r['evaluated']} | {r['admitted']} | {r['new_front']} | {r['front']} | {r['lean_equals_archive']} | {', '.join(r['frozen']) or 'none'} |")
+    P(f"\nOn TEST (strict, weak coverage): final covers initial {lr['test_final_covers_initial']}, initial covers final {lr['test_initial_covers_final']}; final points not dominated by the initial front {lr['test_final_not_dominated_by_initial']}. Sparse vs dense disagreements: {lr['sparse_vs_dense_disagreements']}.")
+    P(f"Random search, same {rc['evaluations']} evaluations: front {rc['dev_front']}; loop covers random {rc['test_loop_covers_random']}, random covers loop {rc['test_random_covers_loop']}.")
+    P(f"GAMED (selected on TEST): front {gc['test_front']}; GAMED covers loop {gc['test_gamed_covers_loop']}, loop covers GAMED {gc['test_loop_covers_gamed']}.")
+    P(f"Lean replay of the {len(lv['points'])} final front points on 1,440 steps: all exact = {lv['all_exact']}.")
+
 open(os.path.join(ROOT, "out", "REPORT-multi.md"), "w").write("\n".join(lines) + "\n")
 print("\n".join(lines))

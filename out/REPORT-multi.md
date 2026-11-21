@@ -1,6 +1,6 @@
 # Multi-model, architecture and density report (rebuilt from the log)
 
-Log: 4456 records, chain head 81471bc5437e41b8.
+Log: 4468 records, chain head 1fe6dd7b1beef60d.
 
 ## Six models (tasks/MULTI_CONTRACT.json)
 
@@ -135,3 +135,17 @@ Final front (minimize work, ban hits, topic misses on held-out words, end misses
 | end8, noloop8, rep8 | 0.00180 | 92.34 | 79 | 480 | 66 | 0 | 4668 | d_rep8_noloop2_ban0_topic0_end8, d_rep8_noloop8_ban0_topic0_end8 | 1440, 1440 of 1440 |
 | ban2, end8, noloop8, rep8 | 0.00207 | 106.38 | 16 | 480 | 66 | 0 | 4708 | d_rep8_noloop2_ban2_topic0_end8, d_rep8_noloop8_ban2_topic0_end8 | 1440, 1440 of 1440 |
 | ban8, end8, noloop8, rep8 | 0.00207 | 106.38 | 1 | 480 | 66 | 0 | 4757 | d_rep8_noloop2_ban8_topic0_end8, d_rep8_noloop8_ban8_topic0_end8 | 1440, 1440 of 1440 |
+
+## Self-improving loop (tasks/LOOP_CONTRACT.json)
+
+| round | evaluated | admitted | new on front | front size | Lean front = archive | frozen axes |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0 | 32 | 20 | 20 | 20 | True | none |
+| 1 | 132 | 58 | 44 | 54 | True | none |
+| 2 | 350 | 95 | 73 | 111 | True | none |
+| 3 | 600 | 155 | 154 | 260 | True | none |
+
+On TEST (strict, weak coverage): final covers initial [0.5, 0.95], initial covers final [0.0038, 0.15]; final points not dominated by the initial front 259/260. Sparse vs dense disagreements: 0.
+Random search, same 600 evaluations: front 36; loop covers random [0.6667, 0.6667], random covers loop [0.0192, 0.0192].
+GAMED (selected on TEST): front 253; GAMED covers loop [0.0538, 0.9808], loop covers GAMED [0.0119, 0.8893].
+Lean replay of the 260 final front points on 1,440 steps: all exact = True.
