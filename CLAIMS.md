@@ -307,3 +307,78 @@ text quality, and the topic axis still misses every held-out topic word.
 UNMEASURED: a loop that also proposes new axes or new objectives (scope
 here covers removing and freezing, not inventing); regenerated outputs
 under the chosen points; the same loop on the 20 architecture models.
+
+## Stopping at a certified fixed point (2026-11-21)
+
+Contract tasks/FIXPOINT_CONTRACT.json (record 4468) and amendment
+tasks/FIXPOINT_AMEND_1.json (record 4491), each logged before its code;
+proofs in lean/Prlm/Fix.lean (cold gate record 4671). The same DEV/TEST
+steps and objectives as the loop above.
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| F1 | A round that proposes nothing is exactly the closed condition, and then no unit neighbour of a front point dominates it | PROVED | `closed_iff_no_proposals`, `closed_local_opt`, `point_local_opt`, `fix_stable` |
+| F2 | A fixed point at exact resolution is within reach | REFUTED | with no budget the front doubled every round: 20, 54, 111, 277, 671, 1,615, 3,465, 6,768, 12,618 after rounds 0-8 (39,106 evaluations, records 4471-4489). Stopped by hand before the 200,000 cap (record 4490); Lean's front equalled the archive every round |
+| F3 | At resolution r, anything that exactly dominates a front point does so by less than r_i in every objective | PROVED | `coarse_le`, `coarse_front_within` |
+| F4 | The loop reaches certified fixed points one resolution at a time | VERIFIED to level 5 | levels 0-5 each ended with nothing left to evaluate. Cells on the front and evaluations so far: level 0: 7 (164), 1: 17 (288), 2: 101 (2,795), 3: 487 (11,797), 4: 2,299 (48,104), 5: 6,858 (82,519). Level 5 reads ban, topic, end and loop counts exactly, work in steps of 2 and drift in steps of 32 logits (records 4505-4651). Lean's front equalled the archive's cells in every round; 0 sparse-vs-dense disagreements |
+| F5 | Level 6 (everything exact but drift, in steps of 16 logits), TEST scoring of the finest front, random and GAMED controls, Lean replay | RUNNING | still running when this was written; results are appended to the log as ladder:* records |
+
+One bug was found and fixed during the run: the first ladder run kept every
+point of an occupied cell, so phase A could not stop. It was stopped after
+three rounds and restarted with one representative per cell (record 4497).
+
+## Output structure as a parametric decision (2026-11-21)
+
+Contract tasks/STRUCT_CONTRACT.json (record 4469), logged before
+harness/structure.py existed; proofs in lean/Prlm/Struct.lean. GPT-2
+small picks a reply's structure (essay, song, steps, demo, table) by the
+certified rule over five candidate tokens, plus a cue-word axis and
+per-structure biases. Requests, topics and users are synthetic and
+labelled by construction; DEV and TEST share no topic and no template.
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| S1 | A bias shift makes structure p the pick exactly when p beats every rival outright | PROVED | `picked_iff`, `wins_iff` |
+| S2 | The revealed-preference update is minimal: the shift `dstar` wins every observed event and no smaller non-negative shift does | PROVED, and VERIFIED on DEV | `minshift_wins`, `minshift_minimal`, `minshiftAll_*`; at Delta every user wins 80/80 DEV events, at Delta-1 79/80 (all three users) |
+| S3 | Weight updates compose in any order; replacing one segment's inputs changes only that segment's decision | PROVED | `rescore_comm`, `replan_local` |
+| S4 | Rendering is reversible and re-rendering one segment rewrites only its slice | PROVED, and VERIFIED | `parse_render`, `render_set`; 40/40 GPT-2 replies parse back to the same structure and segments at the token level in both modes |
+| S5 | The model's own scores pick the named structure | WEAK | model alone: 42.3% on TEST explicit requests (40.3% DEV); with the cue-word axis fitted on DEV (8.25 logits) 81.3% on TEST, 100% on DEV. The misses are the templates with no cue word ("a long-form piece on X" 0/20, "a playground for X" 0/20, "X side by side" 6/20) |
+| S6 | Revealed preference generalizes to new ambiguous requests | VERIFIED | TEST ambiguous requests answered in the user's structure: essay user 100%, demo user 97.5%, song user 95% (do-nothing: 0%, 0%, 1.25%; random 19-25%) |
+| S7 | The update is neither over- nor under-tuned | REFUTED for the contracted global bias | TEST explicit accuracy fell from 81.3% to 73.3% / 68.7% / 68.0%; a 16-logit over-shift drops it to 20% |
+| S8 | Gating the bias to requests with no cue word removes the over-tuning (amendment 1, record 4483, declared before its code) | PARTLY | DEV explicit decisions unchanged 300/300; TEST explicit requests that contain a cue word unchanged (199/200 before and after); the 100 TEST explicit requests with no cue word are still overridden, as stated in advance (overall TEST explicit 73.0% for every user). Under gating the shift's size stops mattering on TEST: Delta-1, Delta and Delta+16 logits give the same TEST numbers |
+| S9 | Few preference events suffice | VERIFIED | one DEV event already gives 96% (essay), 95% (demo) and 81% (song) on TEST ambiguous requests; 8 events give 99%, 95%, 95% |
+| S10 | The margin certificate lets most decisions skip recompute after an update | REFUTED here | 0, 1 and 0 of 380 TEST decisions had margin above twice the shift (shifts are 6-10 logits, margins smaller); the one skipped decision was unchanged on recompute |
+| S11 | Decomposed generation makes edits cheaper | VERIFIED | after replacing segment 0, decomposed mode rebuilt with 776 model calls against 2,214 for chained mode (65% fewer); every untouched segment bitwise identical (40/40) and the result equal to a full decomposed rebuild (40/40); chained mode changed 91 later segments |
+| S12 | Decomposition costs coherence | small here | repeated segments: 72 of 159 decomposed, 65 of 159 chained; distinct bigrams 0.352 vs 0.358 (amendment 2, record 4487). Both are high because GPT-2 small repeats itself |
+| S13 | Text-level reversibility | 39/40 | one reply's text re-tokenizes differently ("a guide to quasars"); reversibility holds at the token level, not always through text |
+
+Not claimed: the quality of GPT-2 small's songs, essays or demos (they are
+repetitive and often off-topic), real users, other models.
+
+## Use cases: what determinism unlocks, and what pinning the seed already does (2026-11-21)
+
+Contract tasks/USECASE_CONTRACT.json (record 4660) and 40 hand-written
+prompts sealed before any code (tasks/usecase_prompts.json). GPT-2 small,
+24 tokens per prompt. Five methods: prlm-0, greedy, sampling at
+temperature 0.7 and 1.0 with the seed pinned per prompt, and sampling with
+a fresh seed (as usually served). Backend B is the same weights in numpy
+with a KV cache, which does not reproduce backend A's logits bitwise.
+
+| # | Use case | Verdict | Numbers |
+| --- | --- | --- | --- |
+| U1 | Check an output without regenerating it | unlocked by pinning randomness, not by the rule | one batched forward checks all 24 steps (1 call instead of 24) for prlm-0, greedy and both seeded samplers alike: 40/40 honest outputs accepted, 40/40 tampered copies rejected. Fresh-seed sampling cannot be checked. GAMED verifier (accepts all): 40/40 accepted, 0/40 tampering caught |
+| U2 | Replay on a different backend | UNLOCKED by determinism | identical outputs on backend B: prlm-0 40/40, greedy 40/40, seeded t0.7 37/40, seeded t1.0 34/40. Scores differ between backends by at most 4 units (1/64 logit), and prlm-0's certified margin exceeds twice that on 935 of 960 steps, so those steps are proved stable without comparing tokens. Greedy makes the same choices but carries no certificate |
+| U3 | Cache whole answers | unlocked by pinning randomness | on a 2,000-request Zipf workload over the 40 prompts, any deterministic or seeded method needs 960 model calls instead of 48,000 (98% fewer) and returns exactly what it would recompute; caching fresh-seed sampling would change its output distribution |
+| U4 | Tests that do not flake | unlocked by pinning randomness | two fresh processes give identical outputs on 40/40 prompts for prlm-0, greedy and both seeded samplers, 0/40 for fresh-seed sampling |
+| U5 | Cost of determinism | LOSS | repeated trigrams: prlm-0 0.081 against 0.011 (t0.7) and 0.003 (t1.0); distinct bigrams 0.88 against 0.97 and 0.99. On T1 (report.py) sampling at t1.0 also had lower reference overlap than prlm-0 (ref_f1 0.156 vs 0.202) |
+| U6 | Cheap edits, verified skipping, sparse behaviour diffs | cited, not re-run | CLAIMS S11 (decomposed edits, 65% fewer calls), PR 2 (verified drafting, 479 to 310 calls, 0 mismatches), P1-P5 and L7 (sparse rule equals dense recompute on every decision) |
+| U7 | Pareto front over the five methods (eight objectives) | every method is on it | Lean's front equals Python's: all five methods, because each wins on something. Deterministic methods win on backend replay; sampling wins on diversity |
+
+The plain reading: most of what is usually credited to determinism
+(checking without regenerating, caching, flake-free tests) comes from
+pinning the randomness, and seeded sampling gets it too. What the
+deterministic rule adds on these numbers is replay that survives a change of
+backend, with a certificate saying which steps are safe. The integer scores
+are also what make exact sparse reweighting and Lean replay possible (earlier
+sections). It pays for this with more repetition. prlm-0 and greedy made the
+same choices on every step here.

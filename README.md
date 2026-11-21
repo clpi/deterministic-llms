@@ -13,6 +13,8 @@ certified best-first rule and rewritable incrementally.
   steps through those same definitions; `Prlm/Skip.lean` proves draft acceptance for forward skipping;
   `Prlm/Sparse.lean` proves exact sparse reweighting (`best_split`);
   `Prlm/Loop.lean` proves the search loop's archive and scope rules;
+  `Prlm/Fix.lean` proves what a certified stop means; `Prlm/Struct.lean`
+  proves minimal preference updates, composition and reversible rendering;
   `Prlm/AlgoSearch.lean` is copied
   unchanged from software-redundant-compute-expands PR 7 (Pareto archive,
   Chebyshev weights). `check.sh` is the cold gate.
@@ -34,6 +36,14 @@ certified best-first rule and rewritable incrementally.
   task run's own hash-chained log (`out/REPORT-int8-t3.md`).
 - `harness/loop.py`: the self-improving, scope-solving Pareto search
   (`tasks/LOOP_CONTRACT.json`, proofs in `lean/Prlm/Loop.lean`).
+- `harness/fixpoint.py` and `harness/fixladder.py`: the same loop run to a
+  certified fixed point, at exact resolution (refuted) and then one
+  resolution at a time (`tasks/FIXPOINT_CONTRACT.json`,
+  `tasks/FIXPOINT_AMEND_1.json`, proofs in `lean/Prlm/Fix.lean`).
+- `harness/structure.py`: output structure (essay, song, steps, demo,
+  table) as a certified pick on GPT-2, with revealed-preference updates,
+  reversible rendering and decomposed editing (`tasks/STRUCT_CONTRACT.json`
+  and its two amendments, proofs in `lean/Prlm/Struct.lean`).
 - `tests/`: a 3-step fixture of recorded GPT-2 steps and a tampered copy;
   CI (`.github/workflows/check.yml`) runs the cold gate, replays the
   fixture (must pass), the tampered copy (must fail) and checks the log chain.
@@ -61,6 +71,12 @@ python3 archrun.py run <arch contract record id>
 python3 density.py <density contract record id>
 python3 multireport.py
 python3 loop.py <loop contract record id>
+python3 -c "import pickle,density as D;from common import Model;pickle.dump(D.record_steps(Model(4)),open('/tmp/claude-0/steps_t3.pkl','wb'))"
+python3 fixpoint.py <fixpoint contract record id>      # exact resolution
+python3 fixladder.py <fixpoint amendment record id>    # resolution ladder
+python3 structure.py <struct contract record id>
+python3 structure.py gated <amendment 1 record id>
+python3 structure.py dup <amendment 2 record id>
 python3 report.py
 ```
 

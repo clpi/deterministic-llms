@@ -15,6 +15,8 @@ import Prlm.AlgoSearch
 import Prlm.Skip
 import Prlm.Sparse
 import Prlm.Loop
+import Prlm.Fix
+import Prlm.Struct
 open Prlm
 #print axioms best_perm
 #print axioms max_unique
@@ -40,6 +42,22 @@ open Prlm
 #print axioms Prlm.Loop.admit_sound
 #print axioms Prlm.Loop.reject_sound
 #print axioms Prlm.Loop.scope_sound
+#print axioms Prlm.Fix.closed_iff_no_proposals
+#print axioms Prlm.Fix.closed_local_opt
+#print axioms Prlm.Fix.fix_stable
+#print axioms Prlm.Fix.point_local_opt
+#print axioms Prlm.Fix.coarse_le
+#print axioms Prlm.Fix.coarse_front_within
+#print axioms Prlm.Struct.wins_iff
+#print axioms Prlm.Struct.minshift_wins
+#print axioms Prlm.Struct.minshift_minimal
+#print axioms Prlm.Struct.picked_iff
+#print axioms Prlm.Struct.minshiftAll_wins
+#print axioms Prlm.Struct.minshiftAll_minimal
+#print axioms Prlm.Struct.rescore_comm
+#print axioms Prlm.Struct.replan_local
+#print axioms Prlm.Struct.parse_render
+#print axioms Prlm.Struct.render_set
 X
 ax=$(lake env lean /tmp/prlm_axioms.lean 2>&1) || { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
 echo "$ax" | grep -q "error" && { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }

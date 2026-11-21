@@ -1,5 +1,5 @@
-✔ [12/13] Built Main:c.o
-✔ [13/13] Built prlm
+✔ [14/15] Built Main:c.o
+✔ [15/15] Built prlm
 Build completed successfully.
 'Prlm.best_perm' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Prlm.max_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -23,4 +23,20 @@ Build completed successfully.
 'Prlm.Loop.admit_sound' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Prlm.Loop.reject_sound' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Prlm.Loop.scope_sound' depends on axioms: [propext, Quot.sound]
+'Prlm.Fix.closed_iff_no_proposals' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Fix.closed_local_opt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Fix.fix_stable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Fix.point_local_opt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Fix.coarse_le' depends on axioms: [propext]
+'Prlm.Fix.coarse_front_within' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Struct.wins_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Struct.minshift_wins' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Struct.minshift_minimal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Struct.picked_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Struct.minshiftAll_wins' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Struct.minshiftAll_minimal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.Struct.rescore_comm' depends on axioms: [propext, Quot.sound]
+'Prlm.Struct.replan_local' depends on axioms: [propext]
+'Prlm.Struct.parse_render' depends on axioms: [propext]
+'Prlm.Struct.render_set' depends on axioms: [propext, Quot.sound]
 check: pass

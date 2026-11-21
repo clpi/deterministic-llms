@@ -79,5 +79,62 @@ if lr:
     P(f"GAMED (selected on TEST): front {gc['test_front']}; GAMED covers loop {gc['test_gamed_covers_loop']}, loop covers GAMED {gc['test_loop_covers_gamed']}.")
     P(f"Lean replay of the {len(lv['points'])} final front points on 1,440 steps: all exact = {lv['all_exact']}.")
 
+fx = [r["receipt"] for r in recs if r["head"].startswith("fixpoint:dev:")]
+stop = next((r["receipt"] for r in recs if r["head"] == "fixpoint:stopped"), None)
+if fx:
+    P("\n## Fixed point at exact resolution (tasks/FIXPOINT_CONTRACT.json)\n")
+    P("| round | evaluated | front | Lean front = archive |")
+    P("| --- | --- | --- | --- |")
+    for r in fx:
+        P(f"| {r['phase']}{r['round']} | {r['evaluated']} | {r['front']} | {r['lean_equals_archive']} |")
+    if stop:
+        P(f"\n{stop['result']}: {stop['stopped_by']}. {stop['why']}.")
+cl = [r["receipt"] for r in recs if r["head"].startswith("ladder:dev:certified:")]
+lr = next((r["receipt"] for r in recs if r["head"] == "ladder:result"), None)
+if cl:
+    P("\n## Fixed point one resolution at a time (tasks/FIXPOINT_AMEND_1.json)\n")
+    P("| level | resolution (work, ban, topic, end, loops, drift) | cells on the front | evaluated so far |")
+    P("| --- | --- | --- | --- |")
+    for c in cl:
+        P(f"| {c['level']} | {c['resolution']} | {c['cells']} | {c['evaluated']} |")
+    if lr:
+        keys = ["evaluations", "lean_equals_archive_every_round", "sparse_vs_dense_disagreements", "exact_fixed_point",
+                "test_fix_covers_round0", "test_round0_covers_fix", "test_fix_covers_pr4", "test_pr4_covers_fix",
+                "test_fix_not_dominated_by_round0", "test_fix_not_dominated_by_pr4"]
+        P("\n" + "; ".join(f"{k}: {lr.get(k)}" for k in keys if k in lr) + ".")
+    for h in ("ladder:control:random", "ladder:control:GAMED", "ladder:lean"):
+        x = next((r["receipt"] for r in recs if r["head"] == h), None)
+        if x:
+            P(f"\n{h}: " + "; ".join(f"{k}: {v}" for k, v in x.items() if k != "points") + ".")
+fit = next((r["receipt"] for r in recs if r["head"] == "struct:fit"), None)
+if fit:
+    P("\n## Output structure (tasks/STRUCT_CONTRACT.json)\n")
+    P(f"Cue-word weight fitted on DEV: level {fit['w_kw_level']}; TEST explicit accuracy model alone {fit['test_explicit_model_only'][0]}, fitted {fit['test_explicit_fitted'][0]}.\n")
+    P("| user | update | TEST explicit | TEST ambiguous (user's structure) |")
+    P("| --- | --- | --- | --- |")
+    g = next((r["receipt"] for r in recs if r["head"] == "struct:gated"), None)
+    for u in ("E", "D", "S"):
+        R = next(r["receipt"] for r in recs if r["head"] == f"struct:user:{u}")
+        for k in ("none", "update", "under", "over", "GAMED"):
+            P(f"| {u} ({R['structure']}) | global {k} ({R[k]['delta']}) | {R[k]['test_explicit'][0]} | {R[k]['test_ambiguous'][0]} |")
+        if g:
+            G = g["users"][u]
+            P(f"| {u} ({R['structure']}) | gated update ({G['update']['delta']}) | {G['update']['test_explicit'][0]} | {G['update']['test_ambiguous'][0]} |")
+    rd = next((r["receipt"] for r in recs if r["head"] == "struct:render"), None)
+    if rd:
+        P("\nRendering: " + "; ".join(f"{k}: {v}" for k, v in rd["summary"].items()) + ".")
+    dp = next((r["receipt"] for r in recs if r["head"] == "struct:dup"), None)
+    if dp:
+        P("Repeated segments: " + "; ".join(f"{m}: {v['duplicates']}/{v['segments']}, distinct bigrams {v['bigram_distinct']}" for m, v in dp.items()) + ".")
+uc = next((r["receipt"] for r in recs if r["head"] == "usecase:result"), None)
+if uc:
+    P("\n## Use cases (tasks/USECASE_CONTRACT.json, 40 sealed prompts)\n")
+    P("| method | verify calls | honest accepted | tamper caught | backend B identical | rerun identical | cache calls (2,000 requests) | rep3 | distinct2 |")
+    P("| --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    for m, R in uc["methods"].items():
+        u1 = R["U1"]
+        P(f"| {m} | {u1['verify_calls'] if u1['verifiable'] else 'cannot'} | {u1['honest_accepted']} | {u1['tamper_detected']} | {R['U2_backend_B_identical']} | {R['U4_rerun_identical']} | {R['U3']['calls_with_cache'] or 'no cache'} | {R['U5']['rep3']} | {R['U5']['distinct2']} |")
+    P(f"\nprlm-0 margin certificate across backends: {uc['methods']['prlm-0']['U2_margin_cert']}. Pareto front (Lean = Python: {uc['front_lean'] == uc['front_python']}): {', '.join(uc['front_lean'])}.")
+
 open(os.path.join(ROOT, "out", "REPORT-multi.md"), "w").write("\n".join(lines) + "\n")
 print("\n".join(lines))
