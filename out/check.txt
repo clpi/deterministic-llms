@@ -1,0 +1,18 @@
+✔ [7/8] Built Main:c.o
+✔ [8/8] Built prlm
+Build completed successfully.
+'Prlm.best_perm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.max_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.certify_sound' depends on axioms: [propext, Quot.sound]
+'Prlm.certify_complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.rescore_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.stable_of_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.scores_local' depends on axioms: [propext, Quot.sound]
+'Prlm.dot_set_zero' depends on axioms: [propext]
+'Prlm.gen_prefix' depends on axioms: [propext]
+'Prlm.gen_perm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.gen_local' depends on axioms: [propext, Quot.sound]
+'Prlm.gen_cache' depends on axioms: [propext, Quot.sound]
+'Prlm.stepRe_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Prlm.gen_reweight' depends on axioms: [propext, Classical.choice, Quot.sound]
+check: pass
