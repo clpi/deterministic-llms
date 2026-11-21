@@ -1,6 +1,6 @@
 # Multi-model, architecture and density report (rebuilt from the log)
 
-Log: 4672 records, chain head bdb9e3cb59edc393.
+Log: 4698 records, chain head 1f5763247eff08fc.
 
 ## Six models (tasks/MULTI_CONTRACT.json)
 
@@ -176,6 +176,7 @@ REFUTED at exact resolution: no fixed point in reach: stopped by hand at 39,106 
 | 3 | [8, 4, 4, 4, 4, 128] | 487 | 11797 |
 | 4 | [4, 2, 2, 2, 2, 64] | 2299 | 48104 |
 | 5 | [2, 1, 1, 1, 1, 32] | 6858 | 82519 |
+| 6 | [1, 1, 1, 1, 1, 16] | 13744 | 103875 |
 
 ## Output structure (tasks/STRUCT_CONTRACT.json)
 
