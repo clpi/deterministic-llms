@@ -1,0 +1,26 @@
+{
+  "written": "2026-11-21T02:10Z, before harness/models.py and harness/multi.py existed",
+  "ask": "Chris 2026-11-21T02:01Z: 'Test ina. Variety if models and architectures', in reply to 'still only tested on GPT-2 small, with no KV cache'.",
+  "reachable": "huggingface.co, GitHub release pages, Ollama, Kaggle and ModelScope are not reachable from this session; the Hugging Face connector reads text files only. Reachable model sources: the onnx/models zoo's LFS files (GPT-2 small LM head, T5-base encoder and decoder with LM head) and Google's own t5-data bucket (the T5 SentencePiece vocabulary). No mirror of Hugging Face is used.",
+  "models": {
+    "gpt2-fp32-ort": "GPT-2 small LM head ONNX, onnxruntime CPU, the pinned file of log record 0 (baseline, rerun on this contract)",
+    "gpt2-int8-ort": "the same file dynamically quantized to int8 weights here with onnxruntime.quantization.quantize_dynamic (QInt8); sha256 logged",
+    "gpt2-numpy-kv": "the same GPT-2 weights read from the ONNX initializers, run by a numpy float32 forward with a KV cache (a different runtime and a cached decode path)",
+    "t5-base-ort": "T5-base encoder and decoder-with-LM-head ONNX from the zoo (encoder-decoder, relative position bias, SentencePiece vocabulary 32,128); prompt = the T1 prompt text plus the sentinel <extra_id_0>, decoder starts from pad id 0",
+    "llama-style-random": "MECHANICS ONLY: numpy decoder with RoPE, grouped-query attention (8 query heads, 2 KV heads), RMSNorm, SwiGLU, KV cache; d 256, 4 layers, random weights from seed 0, GPT-2 vocabulary size",
+    "mamba-style-random": "MECHANICS ONLY: numpy selective state-space model (input-dependent step, B, C; diagonal A; depthwise causal conv 4; state 16; expansion 2), recurrent constant-size state as its cache; d 256, 4 layers, random weights from seed 0, GPT-2 vocabulary size"
+  },
+  "mechanics_only_means": "random weights test that the rule, the replay, the cache and the skipping machinery are exact on that architecture; they say nothing about quality, so no task win or loss is claimed for them",
+  "histories": "the 35 T1 TEST prompts in order (GPT-2 token ids; for T5 their decoded text re-encoded with SentencePiece); 24 generated tokens or the model's own end token",
+  "rule": "prlm-0 (certified best-first over round(256*logit), weights 0); replay change = rep 1.5, noloop 4 (the declared prlm-theta weights), both vocabulary-independent axes",
+  "measures": {
+    "E1_repeat": "first 8 histories: per-step logits computed twice in one process (cache off) and in a fresh process with 1 thread vs 4 threads; count bitwise-equal rows, equal integer-score rows, equal picks",
+    "E2_lean": "Lean executable on each model's replay: agree, agreeRe, reEqRec, sparseEq must equal steps; also certified count and sparse work",
+    "E3_batch_or_cache": "per-step logits vs logits from one forward over the final sequence (all positions), and for KV models cached decode vs full recompute: bitwise rows, integer-score rows, picks",
+    "E4_skip": "verified drafting from the current history's own prompt and generated tokens (skip2 'ctx' index) vs the clean replay: reply mismatches, picks and margins mismatches, model calls",
+    "E5_drift": "gpt2-int8-ort and gpt2-numpy-kv vs gpt2-fp32-ort, teacher-forced on the fp32 trajectories: pick agreement, integer-score agreement, certified-flag agreement; and generated-sequence equality",
+    "E6_tasks": "run.py's T3 (ban, topic, end) on gpt2-int8-ort with the model swapped; other models UNMEASURED for tasks (different tokenizer or no meaningful weights)"
+  },
+  "controls": {"do-nothing": "empty draft index must equal the clean replay with the same calls", "gamed": "draft = the clean replay's own continuation (reads the answer), labelled GAMED, ceiling only", "self": "fp32 vs fp32 drift must be 100%", "tamper": "a replay file with one pick changed must make the Lean executable exit 1"},
+  "verdict_rule": "a property holds for a model only with 0 mismatches on every history; every mismatch is listed; architectures not run (Llama, Qwen or Mistral weights, Mamba or RWKV weights, any model above 220M parameters, GPU kernels, a KV-cached ONNX export) are UNMEASURED"
+}

@@ -23,6 +23,14 @@ certified best-first rule and rewritable incrementally.
   (`reweight.py`) and n-gram drafting (`skip2.py`), both under
   `tasks/IMPROVE_CONTRACT.json`, and `report.py`, which
   rebuilds every number from the log.
+- `harness/models.py`, `harness/multi.py`: six models through one adapter surface
+  (contract `tasks/MULTI_CONTRACT.json`). `harness/arch.py`, `harness/archrun.py`:
+  architecture as a parameter, ten families, random and trained weights
+  (`tasks/ARCH_CONTRACT.json`). `harness/density.py`: density computed from
+  each weight change and the Pareto front over 243 changes
+  (`tasks/DENSITY_CONTRACT.json`). `harness/multireport.py` writes
+  `out/REPORT-multi.md` from the log; `out/multi-int8-t3.jsonl` is the int8
+  task run's own hash-chained log (`out/REPORT-int8-t3.md`).
 - `tests/`: a 3-step fixture of recorded GPT-2 steps and a tampered copy;
   CI (`.github/workflows/check.yml`) runs the cold gate, replays the
   fixture (must pass), the tampered copy (must fail) and checks the log chain.
@@ -43,6 +51,12 @@ PRLM_LOG=../out/rerun.jsonl python3 run.py declare t1 t2 t3 repro alt sweep repl
 python3 adapt.py
 python3 skip.py && python3 skip.py origin
 python3 reweight.py && python3 skip2.py
+# more models and architectures (T5 files from the onnx/models zoo and
+# Google's t5-data bucket; int8 made with onnxruntime.quantization; jax for training)
+python3 multi.py run
+python3 archrun.py run <arch contract record id>
+python3 density.py <density contract record id>
+python3 multireport.py
 python3 report.py
 ```
 

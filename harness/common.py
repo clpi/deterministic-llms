@@ -11,7 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS = os.environ.get("PRLM_MODELS", "/tmp/claude-0/models")
 LOG = os.environ.get("PRLM_LOG", os.path.join(ROOT, "out", "log.jsonl"))
 
-MODEL_FILE = "gpt2-lm-head-10.onnx"
+MODEL_FILE = os.environ.get("PRLM_MODEL_FILE", "gpt2-lm-head-10.onnx")
 PINS = {  # sha256 of every input the model path depends on
     "encoder.json": "196139668be63f3b5d6574427317ae82f612a97c5d1cdaf36ed2256dbf636783",
     "vocab.bpe": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",

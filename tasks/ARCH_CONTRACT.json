@@ -1,0 +1,33 @@
+{
+  "written": "2026-11-21T02:20Z, before harness/arch.py and harness/archrun.py existed; its log record waits until multi.py stops writing (one log writer at a time), and its sha256 is in ledger/prlm.md at write time",
+  "ask": "Chris 2026-11-21T02:12Z: 'What do you mean if also other types generalizable and parametrically', after I said I would add a non-transformer model only if one could be downloaded.",
+  "idea": "architecture is a parameter. One generic model builder (one implementation over an array module: JAX for training, numpy float32 for every measurement) takes a config and gives two entry points: full(ids) -> logits for every position in one call, and step(cache, token) -> logits, cache (the incremental path: KV cache for attention, recurrent state for SSM and RNN layers). Every property below is checked through those two entry points only, so it applies to any config the builder accepts.",
+  "configs": {
+    "A1 attn-learned-mha-gelu-ln": "GPT-2-like: learned positions, 4 heads, GELU MLP, LayerNorm",
+    "A2 attn-rope-gqa-swiglu-rms": "Llama-like: RoPE, 4 query heads / 2 KV heads, SwiGLU, RMSNorm",
+    "A3 attn-rope-mqa-swiglu-rms": "multi-query: 1 KV head",
+    "A4 attn-alibi-mha-gelu-ln": "BLOOM-like: ALiBi position bias",
+    "A5 attn-rope-gqa-moe-rms": "Mixtral-like: mixture of 4 SwiGLU experts, top-2 routing",
+    "S1 ssm-selective": "Mamba-like selective state space (input-dependent step, B, C; diagonal A; causal conv 4; state 16)",
+    "R1 rnn-rwkv": "RWKV-4-like time mixing (WKV linear recurrence with learned decay and bonus) plus channel mixing",
+    "R2 rnn-gru": "GRU layers",
+    "R3 rnn-lstm": "LSTM layers",
+    "H1 hybrid-attn-ssm": "Jamba-like: attention and selective SSM layers alternating"
+  },
+  "shared": "d 128, 4 layers (hybrid: 2 attention + 2 SSM), vocabulary = the 2,923 token types of the TRAIN corpus plus one unknown token (prompt tokens outside it map to unknown), tied input and output embeddings",
+  "weights": {
+    "random": "seed 0 initialisation: exactness properties only",
+    "trained": "the same seed, then the same fixed budget for every config: 600 Adam steps, learning rate 3e-3, batch 16 windows of 128 tokens from the TRAIN corpus only (no test prompt or reference is seen). Test loss is not used to pick anything."
+  },
+  "histories": "the 35 T1 TEST prompts mapped to the compact vocabulary; 24 generated tokens",
+  "measures": {
+    "X1_repeat": "first 8 histories: logits recomputed in process, and in fresh processes with BLAS at 1 vs 4 threads: bitwise, integer-score and pick agreement",
+    "X2_lean": "Lean executable replay (rep 1.5, noloop 4 as the change): agree, agreeRe, reEqRec, sparseEq must equal steps; tampered first record must exit 1",
+    "X3_paths": "per-step logits (full recompute of the prefix) vs one full call over the final sequence, and vs the incremental step path: bitwise, integer-score and pick agreement",
+    "X4_skip": "verified drafting from the history's own prompt and output vs the clean replay, with the do-nothing and GAMED controls: reply and certificate mismatches, model calls",
+    "Q_quality": "trained weights only: T1 ref_match, ref_f1, rep3, distinct2 with report.py's definitions, beside the trigram automaton trained on the same TRAIN corpus and GPT-2 small (both already in the log)"
+  },
+  "split": "exactness (X1-X4) is checked on every config with random and trained weights; quality (Q) is reported only for the trained tiny models and is about models trained on 15,685 tokens, not about the architecture at scale. Pretrained large models of these families stay UNMEASURED.",
+  "verdict_rule": "a property holds for a config only with 0 mismatches over all histories; every mismatch is listed; nothing is tuned after seeing test results",
+  "amended": "2026-11-21T02:24Z, before any arch code existed: training runs in JAX; inference and every measured property run the SAME model functions in numpy float32 (one implementation written over an array module, so JAX and numpy share the code). X1's fresh processes therefore vary BLAS threads (1 vs 4), as multi.py does, instead of XLA threads. The incremental path runs from the first token (no prefill)."
+}
