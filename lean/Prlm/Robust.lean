@@ -144,3 +144,30 @@ theorem trace_eq_of_on_reference_prefix {Token : Type}
     exact agree (k + 1) (by omega)
 
 end Prlm.Robust
+
+namespace Prlm.Robust
+
+def checkedOrFallback {Token : Type} (checked : List Token → Option Token)
+    (cold : List Token → Token) (pre : List Token) : Token :=
+  match checked pre with
+  | some t => t
+  | none => cold pre
+
+/-- A miss uses the exact cold step. It does not invalidate later hits on
+the same reference trajectory. Evidence is needed only at prefixes the
+reference actually reaches, and the selected value may carry a receipt. -/
+theorem checked_or_fallback_trace {Token : Type}
+    (checked : List Token → Option Token) (cold : List Token → Token)
+    (n : Nat) (pre : List Token)
+    (sound : ∀ k < n, ∀ t, checked (trace cold k pre) = some t →
+      t = cold (trace cold k pre)) :
+    trace (checkedOrFallback checked cold) n pre = trace cold n pre := by
+  apply trace_eq_of_on_reference_prefix
+  intro k hk
+  simp only [checkedOrFallback]
+  split
+  · rename_i token h
+    exact sound k hk token h
+  · rfl
+
+end Prlm.Robust

@@ -66,6 +66,7 @@ open Prlm
 #print axioms Prlm.Robust.relative_iff
 #print axioms Prlm.Robust.uniform_drift_preserves
 #print axioms Prlm.Robust.trace_eq_of_on_reference_prefix
+#print axioms Prlm.Robust.checked_or_fallback_trace
 X
 ax=$(lake env lean /tmp/prlm_axioms.lean 2>&1) || { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
 echo "$ax" | grep -q "error" && { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
