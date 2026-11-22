@@ -36,3 +36,8 @@ jobs:
               prev, n = hashlib.sha256(line).hexdigest(), n + 1
           print("log records", n, "head", prev[:16])
           PY
+      - name: Verify recorded live GPT-2 comparison
+        run: |
+          (cd out/relative-gpt2; sha256sum -c SHA256SUMS)
+          gzip -dc out/relative-gpt2/gpt2-relative-real.json.gz > "$RUNNER_TEMP/gpt2-relative.json"
+          python3 harness/verify_relative_report.py "$RUNNER_TEMP/gpt2-relative.json" out/relative-gpt2/historical-asset-sha256.json

@@ -1,0 +1,12 @@
+Repository: clpi/deterministic-llms
+Parent: fcac284840313551d47fdd28a44a531cca6b9a61
+Inputs verified as exact Git blobs against parent; replay runner is the follow-up.
+harness/common.py f26bcc1670d947070f24f2ce5d6f5e911402af9f
+harness/models.py 6d1db0cdf06431a1bc7619673d719d49778981c4
+harness/usecases.py d266e455cc83afaa0c654dcd807bd65f54c93ba3
+harness/decoders.py f82537a2200309d0df58b3157328341b6bddd792
+tasks/usecase_prompts.json 48c7d93951c4205737c2c3e64b6cd8fb5b42e2fe
+tasks/USECASE_CONTRACT.json ab9fe51bc65be6fce5eef0ed2a97fb68a019eb8b
+harness/axes.py 5e3f69cd3b23c65b1968e1233ca8de0992fe2ae8
+3.12.14 x86_64 6.18.57
+OpenBLAS config: 0.3.30
