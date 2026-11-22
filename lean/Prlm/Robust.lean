@@ -171,3 +171,20 @@ theorem checked_or_fallback_trace {Token : Type}
   · rfl
 
 end Prlm.Robust
+
+namespace Prlm.Robust
+
+def projectLast {Hidden Score : Type} (head : Hidden → Score) (rows : List Hidden) :
+    Option Score :=
+  match rows.getLast? with
+  | none => none
+  | some row => some (head row)
+
+/-- The requested head output can be formed directly from its input row.
+This is a row-local mathematical model, not a claim about floating kernels. -/
+theorem head_project_last {Hidden Score : Type} (head : Hidden → Score) (rows : List Hidden) :
+    (rows.map head).getLast? = projectLast head rows := by
+  simp only [List.getLast?_map, projectLast]
+  cases rows.getLast? <;> rfl
+
+end Prlm.Robust

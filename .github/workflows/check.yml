@@ -46,3 +46,8 @@ jobs:
           (cd out/verified-draft; sha256sum -c SHA256SUMS)
           gzip -dc out/verified-draft/live-verified-draft.json.gz > "$RUNNER_TEMP/gpt2-draft.json"
           python3 harness/verify_live_draft.py "$RUNNER_TEMP/gpt2-draft.json" | cmp - out/verified-draft/VERIFIED-DRAFT.json
+      - name: Verify GPT-2 projection and comparator records
+        run: |
+          (cd out/head-projection; sha256sum -c SHA256SUMS)
+          gzip -dc out/head-projection/gpt2-head-qualification.json.gz > "$RUNNER_TEMP/gpt2-head.json"
+          python3 harness/verify_head.py "$RUNNER_TEMP/gpt2-head.json" | cmp - out/head-projection/HEAD-SUMMARY.json
