@@ -1,0 +1,7 @@
+{
+  "written": "2026-11-21T11:40Z, after the contracted update (struct:user:E/D/S) and before this variant's code existed",
+  "why": "The contracted per-structure bias update won every DEV ambiguous event at the proved minimal shift and generalized to TEST ambiguous requests (95-100%), but it lowered TEST explicit accuracy from 81.3% to 68-73%. By the contract's verdict rule the update is OVER-TUNED. The shift was minimal; the parameter was wrong: a global bias for structure p also moves requests that name another structure.",
+  "variant": "the same minimal-shift update (Struct.minshiftAll) on a gated axis g_p = [candidate is p] * [the request has no lexicon word]. Nothing else changes: the same base scores, w_kw, events, TEST set, controls (none, under = Delta-1, over = Delta+4096, GAMED from TEST ambiguous events, random) and verdict rule.",
+  "expected_limit_stated_in_advance": "TEST explicit templates that contain no lexicon word (one per structure) are still exposed to the gated shift, because by construction nothing in the request distinguishes them from ambiguous requests except the model's own scores",
+  "also_reported": "a DEV-only check that the gated update leaves every DEV explicit decision unchanged"
+}

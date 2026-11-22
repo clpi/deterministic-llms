@@ -1,0 +1,17 @@
+{
+  "written": "2026-11-21T11:05Z, before harness/fixpoint.py existed; lean/Prlm/Fix.lean was written first and proves what a stop means, not results",
+  "ask": "Chris 2026-11-21T10:43Z: 'Fire it stop stopping and prove and to end'. PR 4's loop stopped on its 600-evaluation budget while the front was still growing.",
+  "steps": "identical to tasks/LOOP_CONTRACT.json: the same 60 T3 prompts x 24 prlm-0 steps of GPT-2 small fp32, DEV = prompts 0-9 of each kind (720 steps), TEST = prompts 10-19 (720 steps); same five axes, integer levels 0-64 in quarter-logit units, same six minimized objectives and the same sparse evaluation with a dense check of every decision",
+  "phase_A": "PR 4's proposal rule (midpoints toward evaluated neighbours, doubling at the top, start level 32 from 0) with no round cap and no evaluation cap, until a round adds no new front point",
+  "phase_B": "unit-neighbourhood closure: N(p) = every point that differs from p by one level on one in-scope axis, within 0-64. Each round evaluates N(p) minus the evaluated set for every archive point p and inserts the results. Stop when a round has nothing to evaluate. By Fix.closed_iff_no_proposals that stop is exactly the Closed condition, and by Fix.closed_local_opt no unit neighbour of any final front point dominates it on DEV.",
+  "safety_cap": "200,000 DEV evaluations in total. If it is reached the run is reported as a budget stop and the fixed-point claim is REFUTED for this run.",
+  "termination_argument": "the grid has 65^5 points and every round that does not stop evaluates at least one new grid point, so the procedure terminates; this counting argument is not formalized",
+  "lean_checks": "after every round, Lean `prlm front` over all evaluated points must equal the archive; at the end every final front point gets a Lean replay on all 1,440 steps",
+  "certification_on_TEST": "the round-0 front, PR 4's final front (re-evaluated, same points) and the new fixed-point front are scored on TEST, with the C-metric both ways between each pair and a count of final points that no earlier point dominates",
+  "controls": {
+    "do_nothing": "zero rounds",
+    "random": "the same number of DEV evaluations at uniform random levels (seed 1), its DEV front scored on TEST against the fixed-point front both ways",
+    "GAMED": "the same two phases selecting on TEST, reported only as a ceiling"
+  },
+  "verdict_rule": "a fixed point is claimed only if phase B ends with nothing to evaluate below the cap and Lean's front equals the archive in every round. Improvement over PR 4 counts only on TEST. Every regression is reported."
+}

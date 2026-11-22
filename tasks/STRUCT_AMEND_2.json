@@ -1,0 +1,6 @@
+{
+  "written": "2026-11-21T12:05Z, after struct:render, before this measurement's code existed",
+  "why": "Reading the rendered replies showed that decomposed mode often repeats the same segment (each segment is generated from the same request and header with only its index changed). The contract measured edit cost and exactness but not this cost of decomposition.",
+  "measure": "regenerate the same 40 replies in both modes (deterministic, so identical to struct:render) and report, per mode, the share of segments that duplicate an earlier segment of the same reply and the distinct-bigram ratio over each reply. No method change; this only adds the missing measurement.",
+  "verdict": "if decomposed mode duplicates more segments than chained mode, the edit-cost saving is reported together with that coherence cost"
+}

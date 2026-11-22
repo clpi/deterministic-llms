@@ -1,0 +1,22 @@
+{
+  "written": "2026-11-21T16:05Z, before harness/usecases.py existed",
+  "ask": "Chris 2026-11-21T15:44Z: develop the use cases for deterministic LLMs, novel methods and real unlocks, end to end, at the Pareto optimum",
+  "model": "GPT-2 small fp32. Backend A: ONNX Runtime, full recompute per step (the reference). Backend B: the same weights in numpy float32 with a KV cache (harness/models.GPT2Numpy), which does not reproduce A's logits bitwise.",
+  "prompts": "tasks/usecase_prompts.json, 40 continuation prompts written by hand before this contract and sealed: no step of any method is tuned on them. 24 new tokens each.",
+  "methods": {
+    "prlm-0": "the certified best-first rule on round(256*logit) (ties to the lower id)",
+    "greedy-f32": "argmax of the float logits",
+    "samp-seeded-t0.7 / samp-seeded-t1.0": "temperature sampling with the seed pinned per prompt (seed = prompt index); the strongest sampled baseline for replay",
+    "samp-unseeded-t1.0": "temperature 1.0 with a fresh seed per run, as sampling is usually served"
+  },
+  "use_cases": {
+    "U1_verify_without_regenerating": "a verifier holds the model, the prompt and the claimed output and runs ONE batched forward over prompt+output on backend A, then checks every step's token against the method's rule (prlm-0: certified best; greedy: argmax; seeded sampling: replay of the pinned RNG on those logits). Reported: model calls to verify vs to regenerate (24), acceptance of honest outputs, and detection of a tampered copy (token 12 replaced by the base score's best other token). Unseeded sampling cannot be checked this way and is reported as such. Controls: GAMED verifier that accepts everything; do-nothing (no check).",
+    "U2_replay_across_backends": "each method regenerates every prompt on backend B; reported: outputs identical to backend A's, and for prlm-0 the share of steps whose certified margin exceeds the largest |score difference| observed between A and B on these prompts (steps proved stable without comparing tokens)",
+    "U3_cache_whole_answers": "a Zipf(1.1) workload of 2,000 requests over the 40 prompts (seed 3). A deterministic method answers repeats from a cache keyed by (prompt, weights, rule) with the same answer it would recompute; reported: model calls with and without the cache, and for unseeded sampling the fact that a cached answer changes its output distribution (it would repeat one sample)",
+    "U4_tests_that_do_not_flake": "each method runs twice in two fresh processes; reported: prompts whose two outputs are identical",
+    "U5_cost_of_determinism": "rep3 (repeated trigrams) and distinct2 on the 40 outputs of each method, the same definitions as report.py",
+    "U6_cited": "incremental edits (CLAIMS S11), verified forward skipping (PR 2) and sparse behaviour diffs (CLAIMS P1-P5, L7) are cited from their own contracts, not re-run"
+  },
+  "pareto": "each method is a point with objectives (all minimized): verify calls per output, 100 - honest-acceptance %, 100 - tamper-detection %, 100 - cross-backend identical %, 100 - rerun-identical %, cache model calls on the workload, rep3 x 1000, (1 - distinct2) x 1000. The front is computed by Lean `prlm front` and must equal Python's.",
+  "verdict_rule": "a use case counts as unlocked by determinism only if prlm-0 beats every sampled method on it by these numbers; every objective on which a sampled method beats prlm-0 is reported as a loss"
+}

@@ -187,3 +187,51 @@ candidates leaves every inherited front point on the front or
 dominated by a new one, so no round can lose ground. `admit_sound` and
 `reject_sound` show the archive alone decides admission. Selection uses
 DEV prompts, and improvement is claimed only on TEST.
+
+## 9. Stopping at a certified fixed point (2026-11-21)
+
+PR 4's loop stopped on a budget. `harness/fixpoint.py` removed the budget
+and found that at exact resolution there is no fixed point in reach: the
+front doubled every round (12,618 points after 39,106 evaluations). With
+six objectives, two of them nearly continuous, almost every refinement is
+incomparable with the rest.
+
+So the stop is certified one resolution at a time (`harness/fixladder.py`).
+Objective i is read in steps of r_i, starting coarse and halving. At each
+level the archive keeps one representative per cell, and the level ends
+when no neighbour of any representative is left unevaluated.
+`Fix.point_local_opt` and `Fix.closed_local_opt` say that stop is a
+certificate: no unit neighbour of a front point dominates it. By
+`Fix.coarse_front_within`, anything that exactly dominates a front point
+does so by less than one resolution step in every objective. Every
+evaluation carries over to the next, finer level. The result is the finest
+level certified within the evaluation cap.
+
+## 10. Output structure (2026-11-21)
+
+A reply's structure is one more certified pick: candidates are structures,
+base scores come from the model, and named axes (cue words, per-structure
+bias) add to them, so Core's theorems apply unchanged. `Struct.lean` adds
+what this layer needs. `minshift_wins` and `minshift_minimal` give the
+smallest bias shift that makes a revealed choice win: enough, and no more,
+on the events observed. `rescore_comm` lets updates compose in any order.
+`replan_local` makes replacing one segment's inputs change only that
+segment's decision. `parse_render` and `render_set` make a structured reply
+reversible, and editable one segment at a time.
+
+Minimal on the observed events is not the same as harmless elsewhere. The
+GPT-2 run shows where the parameter, not the shift, goes wrong: a global
+bias also moves requests that name another structure (CLAIMS S7, S8).
+
+## 11. What determinism is for (2026-11-21)
+
+Measured on sealed prompts against greedy and seeded and unseeded sampling
+(CLAIMS U1-U7). Checking an output in one batched forward, caching whole
+answers and flake-free tests need only that the output be a function of
+its inputs. Pinning the sampler's seed gives that too, so these are not
+unlocks of the certified rule. What the rule adds is integer scores with a
+margin. With them the same output replays on a backend whose logits differ
+in the last bits, and the margin says in advance which steps are safe.
+Integer scores also make exact sparse reweighting, incremental edits and a
+Lean replay possible. The price is diversity: the rule repeats itself more
+than sampling.

@@ -120,12 +120,22 @@ class Log:
                     self.next_id += 1
 
     def add(self, head, colors=(), premises=(), receipt=None, level=0):
-        rec = {"id": self.next_id, "level": level, "colors": list(colors),
-               "premises": list(premises), "head": head,
-               "receipt": receipt or {}, "prev": self.prev}
-        line = json.dumps(rec, sort_keys=True, separators=(",", ":")).encode()
-        with open(self.path, "ab") as f:
+        import fcntl
+        with open(self.path, "a+b") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)   # several writers: re-read the chain head under the lock
+            f.seek(0)
+            self.prev, self.next_id = "0" * 64, 0
+            for line in f:
+                self.prev = sha256_bytes(line.rstrip(b"\n"))
+                self.next_id += 1
+            rec = {"id": self.next_id, "level": level, "colors": list(colors),
+                   "premises": list(premises), "head": head,
+                   "receipt": receipt or {}, "prev": self.prev}
+            line = json.dumps(rec, sort_keys=True, separators=(",", ":")).encode()
+            f.seek(0, 2)
             f.write(line + b"\n")
+            f.flush()
+            fcntl.flock(f, fcntl.LOCK_UN)
         self.prev = sha256_bytes(line)
         self.next_id += 1
         return rec["id"]

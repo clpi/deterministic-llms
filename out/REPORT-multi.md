@@ -1,6 +1,6 @@
 # Multi-model, architecture and density report (rebuilt from the log)
 
-Log: 4468 records, chain head 1fe6dd7b1beef60d.
+Log: 4698 records, chain head 1f5763247eff08fc.
 
 ## Six models (tasks/MULTI_CONTRACT.json)
 
@@ -149,3 +149,71 @@ On TEST (strict, weak coverage): final covers initial [0.5, 0.95], initial cover
 Random search, same 600 evaluations: front 36; loop covers random [0.6667, 0.6667], random covers loop [0.0192, 0.0192].
 GAMED (selected on TEST): front 253; GAMED covers loop [0.0538, 0.9808], loop covers GAMED [0.0119, 0.8893].
 Lean replay of the 260 final front points on 1,440 steps: all exact = True.
+
+## Fixed point at exact resolution (tasks/FIXPOINT_CONTRACT.json)
+
+| round | evaluated | front | Lean front = archive |
+| --- | --- | --- | --- |
+| A0 | 32 | 20 | True |
+| A1 | 132 | 54 | True |
+| A2 | 350 | 111 | True |
+| A3 | 770 | 277 | True |
+| A4 | 1767 | 671 | True |
+| A5 | 4121 | 1615 | True |
+| A6 | 9266 | 3465 | True |
+| A7 | 19574 | 6768 | True |
+| A8 | 39106 | 12618 | True |
+
+REFUTED at exact resolution: no fixed point in reach: stopped by hand at 39,106 DEV evaluations, before the 200,000 cap, during phase A round 9. the front doubled every round (20, 54, 111, 277, 671, 1,615, 3,465, 6,768, 12,618 after rounds 0-8) and phase A had not stopped; at that rate phase A alone passes the cap in about two rounds, and the contracted Lean replay of the final front (one 290 MB record file per point) would not finish for a front of tens of thousands of points.
+
+## Fixed point one resolution at a time (tasks/FIXPOINT_AMEND_1.json)
+
+| level | resolution (work, ban, topic, end, loops, drift) | cells on the front | evaluated so far |
+| --- | --- | --- | --- |
+| 0 | [64, 32, 32, 32, 32, 1024] | 7 | 164 |
+| 1 | [32, 16, 16, 16, 16, 512] | 17 | 288 |
+| 2 | [16, 8, 8, 8, 8, 256] | 101 | 2795 |
+| 3 | [8, 4, 4, 4, 4, 128] | 487 | 11797 |
+| 4 | [4, 2, 2, 2, 2, 64] | 2299 | 48104 |
+| 5 | [2, 1, 1, 1, 1, 32] | 6858 | 82519 |
+| 6 | [1, 1, 1, 1, 1, 16] | 13744 | 103875 |
+
+## Output structure (tasks/STRUCT_CONTRACT.json)
+
+Cue-word weight fitted on DEV: level 33; TEST explicit accuracy model alone 0.4233, fitted 0.8133.
+
+| user | update | TEST explicit | TEST ambiguous (user's structure) |
+| --- | --- | --- | --- |
+| E (essay) | global none (0) | 0.8133 | 0.0 |
+| E (essay) | global update (2591) | 0.7333 | 1.0 |
+| E (essay) | global under (2590) | 0.7333 | 1.0 |
+| E (essay) | global over (6687) | 0.2 | 1.0 |
+| E (essay) | global GAMED (2337) | 0.7333 | 1.0 |
+| E (essay) | gated update (2591) | 0.73 | 1.0 |
+| D (demo) | global none (0) | 0.8133 | 0.0 |
+| D (demo) | global update (1635) | 0.6867 | 0.975 |
+| D (demo) | global under (1634) | 0.6867 | 0.975 |
+| D (demo) | global over (5731) | 0.2 | 1.0 |
+| D (demo) | global GAMED (1741) | 0.65 | 1.0 |
+| D (demo) | gated update (1635) | 0.73 | 0.975 |
+| S (song) | global none (0) | 0.8133 | 0.0125 |
+| S (song) | global update (1862) | 0.68 | 0.95 |
+| S (song) | global under (1861) | 0.68 | 0.95 |
+| S (song) | global over (5958) | 0.2 | 1.0 |
+| S (song) | global GAMED (2039) | 0.6233 | 1.0 |
+| S (song) | gated update (1862) | 0.73 | 0.95 |
+
+Rendering: chained_edit_calls: 2214; chained_later_segments_changed: 91; decomposed_edit_calls: 776; decomposed_edit_equals_full_rebuild: 40; decomposed_untouched_bitwise: 40; replies: 40; round_trip: 40; structures: {'demo': 8, 'essay': 17, 'song': 7, 'steps': 4, 'table': 4}; text_retokenizes_decomposed: 39.
+Repeated segments: chained: 65/159, distinct bigrams 0.3575; decomposed: 72/159, distinct bigrams 0.3518.
+
+## Use cases (tasks/USECASE_CONTRACT.json, 40 sealed prompts)
+
+| method | verify calls | honest accepted | tamper caught | backend B identical | rerun identical | cache calls (2,000 requests) | rep3 | distinct2 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| greedy-f32 | 1.0 | 40 | 40 | 40 | 40 | 960 | 0.0807 | 0.8815 |
+| prlm-0 | 1.0 | 40 | 40 | 40 | 40 | 960 | 0.0807 | 0.8815 |
+| samp-seeded-t0.7 | 1.0 | 40 | 40 | 37 | 40 | 960 | 0.0114 | 0.9674 |
+| samp-seeded-t1.0 | 1.0 | 40 | 40 | 34 | 40 | 960 | 0.0034 | 0.9891 |
+| samp-unseeded-t1.0 | cannot | 0 | 0 | None | 0 | no cache | 0.0011 | 0.9957 |
+
+prlm-0 margin certificate across backends: {'max_abs_score_diff_A_vs_B': 4, 'steps': 960, 'steps_margin_above_2x_diff': 935}. Pareto front (Lean = Python: True): greedy-f32, prlm-0, samp-seeded-t0.7, samp-seeded-t1.0, samp-unseeded-t1.0.
