@@ -53,3 +53,38 @@ Run from the repo root after building the recorded Lean target:
     lean/.lake/build/bin/prlm decide tests/fixture.bin --expect 3
     lean/.lake/build/bin/prlm decide tests/fixture.bin --robust
     python3 tests/robust_replay_controls.py lean/.lake/build/bin/prlm tests/fixture.bin
+
+### Asymmetric drift and whole replies
+
+An exact per-token box certificate compares each rival's upper drift minus
+the winner's lower drift against its tie-adjusted allowance. A single common
+interval uses its width, not twice the largest absolute drift; adding the
+same integer to all scores leaves the choice exactly unchanged. The exact
+pointwise test uses the actual rival-minus-winner drift. This last test audits
+scores already computed; it does not save any model calls. A reusable bound
+must be established independently before omitting a forward.
+
+For deterministic fixed-length generation, agreement at each exact reference
+prefix implies agreement of the entire generated sequence. The converse for
+same-input observations holds directly; a mismatch is not a prediction of
+later generated tokens. This theorem does not certify stopping or other
+output constraints.
+
+`python3 harness/relative_controls.py tests/fixture.bin` cross-checks 15,625
+three-token score/drift pairs against an independent total ordering. The
+symmetric test accepts 925, the interval test 3,445, and the exact pointwise
+test 10,210; 5,415 changed winners are all refused. On the three sealed GPT-2
+prefixes at two recorded weight settings, artificial common shifts pass the
+interval test, and the first adverse relative drift flips the winner.
+These are simulated perturbations on recorded scores, not cross-runtime runs.
+
+`PRLM_MODELS=/path/to/assets python3 harness/relative_replay.py NEW_REPORT.json
+--asset-manifest exact-asset-sha256.json` exercises the original sealed 40×24
+GPT-2 prompts with the FP32 NumPy KV and INT8 ORT comparison arms. Supply the
+four SHA-256 entries for `gpt2-lm-head-10.onnx`,
+`gpt2-lm-head-10-int8.onnx`, `encoder.json`, and `vocab.bpe`. Output records
+per-reply coverage alongside independent free-generation equality; no
+divergent reply is removed from teacher-forced measurements. Row and corpus
+drift bounds in this report are post hoc observations only. The published
+935/960 token aggregate alone allows 15–38 fully covered replies under the
+old strict margin rule. Fresh live GPT-2 measurements remain unmeasured.

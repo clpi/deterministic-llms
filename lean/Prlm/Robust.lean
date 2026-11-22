@@ -89,3 +89,58 @@ theorem radius_iff (chosen : Cand) (all : List Cand) (r : Int) :
     omega
 
 end Prlm.Robust
+
+namespace Prlm.Robust
+
+theorem interval_box_iff {Token : Type} [DecidableEq Token]
+    (scores lower upper : Token → Int) (chosen : Token) (earlier : Token → Bool)
+    (valid : ∀ t, lower t ≤ upper t) :
+    (∀ delta : Token → Int,
+        (∀ t, lower t ≤ delta t ∧ delta t ≤ upper t) →
+        ∀ j, j ≠ chosen →
+          keeps (earlier j) (scores chosen + delta chosen) (scores j + delta j)) ↔
+    ∀ j, j ≠ chosen →
+      upper j - lower chosen ≤ allowance (earlier j) (scores chosen) (scores j) := by
+  constructor
+  · intro h j hj
+    let corner : Token → Int := fun t => if t = chosen then lower t else upper t
+    have hbox : ∀ t, lower t ≤ corner t ∧ corner t ≤ upper t := by
+      intro t
+      by_cases ht : t = chosen <;> simp [corner, ht, valid]
+    have hw := h corner hbox j hj
+    simp [corner, hj] at hw
+    cases e : earlier j <;> simp [e, keeps, allowance] at hw ⊢ <;> omega
+  · intro h delta hbox j hj
+    have hgap := h j hj
+    have hjhi := (hbox j).2
+    have hwlo := (hbox chosen).1
+    cases e : earlier j <;> simp [e, keeps, allowance] at hgap ⊢ <;> omega
+
+theorem relative_iff (earlier : Bool) (win rival dw dj : Int) :
+    keeps earlier (win + dw) (rival + dj) ↔
+      dj - dw ≤ allowance earlier win rival := by
+  cases earlier <;> simp [keeps, allowance] <;> omega
+
+theorem uniform_drift_preserves (earlier : Bool) (win rival d : Int) :
+    keeps earlier (win + d) (rival + d) ↔ keeps earlier win rival := by
+  cases earlier <;> simp [keeps] <;> omega
+
+def trace {Token : Type} (step : List Token → Token) : Nat → List Token → List Token
+  | 0, pre => pre
+  | n + 1, pre => trace step n (pre ++ [step pre])
+
+theorem trace_eq_of_on_reference_prefix {Token : Type}
+    (ref candidate : List Token → Token) (n : Nat) (pre : List Token)
+    (agree : ∀ k < n, candidate (trace ref k pre) = ref (trace ref k pre)) :
+    trace candidate n pre = trace ref n pre := by
+  induction n generalizing pre with
+  | zero => rfl
+  | succ n ih =>
+    have first := agree 0 (by omega)
+    change candidate pre = ref pre at first
+    simp only [trace, first]
+    apply ih
+    intro k hk
+    exact agree (k + 1) (by omega)
+
+end Prlm.Robust

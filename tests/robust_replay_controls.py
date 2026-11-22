@@ -1,4 +1,5 @@
 """Test the actual old/new Lean executable behavior, not just Python parsing."""
+import sys
 import argparse,hashlib,json,struct,subprocess,tempfile
 from pathlib import Path
 from robust_replay import PIN,verify
@@ -52,3 +53,5 @@ assert found == expected, (found, expected)
 if a.output:
     a.output.write_text(json.dumps(result,indent=2)+"\n")
 print(json.dumps(result,indent=2))
+subprocess.run([sys.executable, str(Path(__file__).resolve().parents[1] / "harness" / "relative_controls.py"),
+                str(a.fixture.resolve())], check=True, timeout=30, stdout=sys.stderr)
