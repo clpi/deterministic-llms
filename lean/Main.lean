@@ -16,6 +16,8 @@
 import Prlm.Core
 import Prlm.AlgoSearch
 import Prlm.Sparse
+import Prlm.Robust
+set_option warningAsError true
 
 open Prlm
 
@@ -36,7 +38,7 @@ def buildFeat (n k : Nat) (entries : List (Nat × Nat × Int)) : Array (List Int
     let (t, a, v) := e
     let cur := arr.getD t []
     let cur := if cur.isEmpty then List.replicate k 0 else cur
-    arr.set! t (setAt cur a (cur.getD a 0 + v))) (Array.mkArray n [])
+    arr.set! t (setAt cur a (cur.getD a 0 + v))) (Array.replicate n [])
 
 structure Tally where
   steps : Nat := 0
@@ -56,30 +58,45 @@ def showOpt : Option Int → String
   | none => "none"
   | some m => toString m
 
-partial def loop (b : ByteArray) (o : Nat) (t : Tally) (verbose : Bool) : IO Tally := do
-  if o + 8 > b.size then return t
+partial def loop (b : ByteArray) (o : Nat) (t : Tally) (verbose reportRadius : Bool) : IO Tally := do
+  if o == b.size then
+    if t.steps == 0 then
+      throw (IO.userError "empty replay")
+    return t
+  if o + 8 > b.size then
+    throw (IO.userError s!"truncated replay header at byte {o}")
   let n := u32 b o
   let k := u32 b (o + 4)
   let o1 := o + 8
+  let o2 := o1 + 4 * n
+  let o3 := o2 + 8 * k
+  if n == 0 || o3 + 4 > b.size then
+    throw (IO.userError s!"invalid replay dimensions at byte {o}")
+  let nf := u32 b o3
+  let o4 := o3 + 4 + 12 * nf
+  if o4 + 8 > b.size then
+    throw (IO.userError s!"truncated replay features or picks at byte {o}")
   let baseS := readI32s b o1 n
   let base : List Cand := (List.range n).zip baseS
-  let o2 := o1 + 4 * n
   let θ := readI32s b o2 k
   let Δ := readI32s b (o2 + 4 * k) k
-  let o3 := o2 + 8 * k
-  let nf := u32 b o3
-  let ents : List (Nat × Nat × Int) := (List.range nf).map fun j =>
+  let entries : List (Int × Int × Int) := (List.range nf).map fun j =>
     let p := o3 + 4 + 12 * j
-    ((i32 b p).toNat, (i32 b (p + 4)).toNat, i32 b (p + 8))
-  let o4 := o3 + 4 + 12 * nf
+    (i32 b p, i32 b (p + 4), i32 b (p + 8))
+  if entries.any (fun e => decide (e.1 < 0 ∨ (n : Int) ≤ e.1 ∨ e.2.1 < 0 ∨ (k : Int) ≤ e.2.1)) then
+    throw (IO.userError s!"out of range feature at byte {o}")
+  let ents := entries.map (fun e => (e.1.toNat, e.2.1.toNat, e.2.2))
   let hp := i32 b o4
   let hpRe := i32 b (o4 + 4)
+  if decide (hp < 0 ∨ (n : Int) ≤ hp ∨ hpRe < 0 ∨ (n : Int) ≤ hpRe) then
+    throw (IO.userError s!"out of range pick at byte {o}")
   let farr := buildFeat n k ents
   let feat : Nat → List Int := fun tk => farr.getD tk []
   let l := scores base feat θ
   let c := certify l
   let re := best (rescore Δ feat l)
-  let rcm := best (scores base feat (vadd θ Δ))
+  let retuned := scores base feat (vadd θ Δ)
+  let rcm := best retuned
   let pick : Int := match c with | some c => (c.tok : Int) | none => -1
   let pRe : Int := match re with | some r => (r.1 : Int) | none => -1
   let pRec : Int := match rcm with | some r => (r.1 : Int) | none => -1
@@ -115,7 +132,11 @@ partial def loop (b : ByteArray) (o : Nat) (t : Tally) (verbose : Bool) : IO Tal
   if verbose then
     let m := match c with | some c => showOpt c.margin | none => "none"
     IO.println s!"step {t.steps} pick {pick} harness {hp} margin {m} certified {cert} re {pRe} rec {pRec} harnessRe {hpRe} bound {bound}"
-  loop b (o4 + 8) t verbose
+  if reportRadius then
+    let rob := (best l).bind (fun w => Robust.radius w l)
+    let robRe := (best retuned).bind (fun w => Robust.radius w retuned)
+    IO.println s!"radius {t.steps} {showOpt rob} {showOpt robRe}"
+  loop b (o4 + 8) t verbose reportRadius
 
 def parseVecs (s : String) : List (String × List Nat) :=
   (s.splitOn "\n").filterMap fun line =>
@@ -125,9 +146,18 @@ def parseVecs (s : String) : List (String × List Nat) :=
 
 def main (args : List String) : IO UInt32 := do
   match args with
-  | ["decide", f] | ["decide", f, "-v"] =>
+  | ["decide", f] | ["decide", f, "-v"] | ["decide", f, "--robust"] | ["decide", f, "--expect", _] =>
     let b ← IO.FS.readBinFile f
-    let t ← loop b 0 {} (args.length == 3)
+    let t ← loop b 0 {} (args.contains "-v") (args.contains "--robust")
+    if let ["decide", _, "--expect", expected] := args then
+      match expected.toNat? with
+      | none =>
+        IO.eprintln "invalid expected replay step count"
+        return 2
+      | some count =>
+        if count != t.steps then
+          IO.eprintln s!"expected {count} replay steps but found {t.steps}"
+          return 1
     IO.println s!"steps {t.steps} agree {t.agree} agreeRe {t.agreeRe} reEqRec {t.reEqRec} certified {t.certified} boundStable {t.boundStable} boundStableRight {t.boundStableRight} changed {t.changed} sparseEq {t.sparseEq} support {t.support} work {t.work} workMax {t.workMax}"
     return (if t.agree == t.steps && t.agreeRe == t.steps && t.reEqRec == t.steps && t.sparseEq == t.steps then 0 else 1)
   | ["front", f] =>
@@ -148,5 +178,5 @@ def main (args : List String) : IO UInt32 := do
       IO.println s!"front {nm} {f0} chebmin {winners}"
     return 0
   | _ =>
-    IO.println "usage: prlm decide FILE [-v] | prlm front FILE"
+    IO.println "usage: prlm decide FILE [-v | --robust | --expect COUNT] | prlm front FILE"
     return 2

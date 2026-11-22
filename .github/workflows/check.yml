@@ -16,7 +16,9 @@ jobs:
       - name: Cold gate (warnings as errors, no sorry, no custom axiom, escape scan)
         run: bash lean/check.sh
       - name: Replay recorded GPT-2 steps through the proved functions
-        run: lean/.lake/build/bin/prlm decide tests/fixture.bin
+        run: lean/.lake/build/bin/prlm decide tests/fixture.bin --expect 3
+      - name: Check fixture identity, exact score radii, and replay boundaries
+        run: python3 tests/robust_replay_controls.py lean/.lake/build/bin/prlm tests/fixture.bin
       - name: Standing control, a tampered pick must fail
         run: |
           if lean/.lake/build/bin/prlm decide tests/fixture-tampered.bin; then
