@@ -1,0 +1,24 @@
+{
+  "reply_equal": 40,
+  "certificate_equal": 40,
+  "fallback": 0,
+  "target_serial": {
+    "calls": 960,
+    "positions": 21528,
+    "draft_calls": 0,
+    "draft_positions": 0
+  },
+  "target_verified": {
+    "calls": 40,
+    "positions": 1357,
+    "draft_calls": 960,
+    "draft_positions": 1357
+  },
+  "serial_wall_s": 58.243456351,
+  "verified_wall_s": 48.221583677,
+  "serial_median_ms": 1382.540793,
+  "verified_median_ms": 1155.8071255,
+  "paired_verified_faster": 35,
+  "draft_ns_total": 44476918608,
+  "controls": 1
+}

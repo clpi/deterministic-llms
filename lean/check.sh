@@ -17,6 +17,7 @@ import Prlm.Sparse
 import Prlm.Loop
 import Prlm.Fix
 import Prlm.Struct
+import Prlm.Robust
 open Prlm
 #print axioms best_perm
 #print axioms max_unique
@@ -58,6 +59,15 @@ open Prlm
 #print axioms Prlm.Struct.replan_local
 #print axioms Prlm.Struct.parse_render
 #print axioms Prlm.Struct.render_set
+#print axioms Prlm.Robust.pair_iff
+#print axioms Prlm.Robust.vocabulary_iff
+#print axioms Prlm.Robust.radius_iff
+#print axioms Prlm.Robust.interval_box_iff
+#print axioms Prlm.Robust.relative_iff
+#print axioms Prlm.Robust.uniform_drift_preserves
+#print axioms Prlm.Robust.trace_eq_of_on_reference_prefix
+#print axioms Prlm.Robust.checked_or_fallback_trace
+#print axioms Prlm.Robust.head_project_last
 X
 ax=$(lake env lean /tmp/prlm_axioms.lean 2>&1) || { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
 echo "$ax" | grep -q "error" && { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }

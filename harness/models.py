@@ -88,7 +88,7 @@ class GPT2Numpy:
     def start(self, prompt):
         return list(prompt)
 
-    def _fwd(self, ids, past):
+    def _fwd(self, ids, past, last_only=False):
         w, H = self.w, self.H
         p0 = 0 if past is None else past[0][0].shape[1]
         x = w["transformer.wte.weight"][ids] + w["transformer.wpe.weight"][p0:p0 + len(ids)]
@@ -116,6 +116,8 @@ class GPT2Numpy:
             h = _gelu(h @ w[P + "mlp.c_fc.weight"] + w[P + "mlp.c_fc.bias"])
             x = x + (h @ w[P + "mlp.c_proj.weight"] + w[P + "mlp.c_proj.bias"])
         x = _ln(x, w["transformer.ln_f.weight"], w["transformer.ln_f.bias"])
+        if last_only:
+            x = x[-1:]
         return (x @ w["transformer.wte.weight"].T).astype(np.float32), new
 
     def all_logits(self, c):

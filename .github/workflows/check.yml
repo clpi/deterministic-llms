@@ -16,7 +16,9 @@ jobs:
       - name: Cold gate (warnings as errors, no sorry, no custom axiom, escape scan)
         run: bash lean/check.sh
       - name: Replay recorded GPT-2 steps through the proved functions
-        run: lean/.lake/build/bin/prlm decide tests/fixture.bin
+        run: lean/.lake/build/bin/prlm decide tests/fixture.bin --expect 3
+      - name: Check fixture identity, exact score radii, and replay boundaries
+        run: python3 tests/robust_replay_controls.py lean/.lake/build/bin/prlm tests/fixture.bin
       - name: Standing control, a tampered pick must fail
         run: |
           if lean/.lake/build/bin/prlm decide tests/fixture-tampered.bin; then
@@ -34,3 +36,18 @@ jobs:
               prev, n = hashlib.sha256(line).hexdigest(), n + 1
           print("log records", n, "head", prev[:16])
           PY
+      - name: Verify recorded live GPT-2 comparison
+        run: |
+          (cd out/relative-gpt2; sha256sum -c SHA256SUMS)
+          gzip -dc out/relative-gpt2/gpt2-relative-real.json.gz > "$RUNNER_TEMP/gpt2-relative.json"
+          python3 harness/verify_relative_report.py "$RUNNER_TEMP/gpt2-relative.json" out/relative-gpt2/historical-asset-sha256.json
+      - name: Verify live draft comparison evidence
+        run: |
+          (cd out/verified-draft; sha256sum -c SHA256SUMS)
+          gzip -dc out/verified-draft/live-verified-draft.json.gz > "$RUNNER_TEMP/gpt2-draft.json"
+          python3 harness/verify_live_draft.py "$RUNNER_TEMP/gpt2-draft.json" | cmp - out/verified-draft/VERIFIED-DRAFT.json
+      - name: Verify GPT-2 projection and comparator records
+        run: |
+          (cd out/head-projection; sha256sum -c SHA256SUMS)
+          gzip -dc out/head-projection/gpt2-head-qualification.json.gz > "$RUNNER_TEMP/gpt2-head.json"
+          python3 harness/verify_head.py "$RUNNER_TEMP/gpt2-head.json" | cmp - out/head-projection/HEAD-SUMMARY.json
