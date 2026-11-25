@@ -1,0 +1,7 @@
+{
+  "written": "2026-11-22T11:10Z, after the machine restarted at about 00:38Z and killed the ladder run in level 7 round 18 (last record 4704), and before any change to harness/fixladder.py for resuming",
+  "what_stands": "records 4497-4704 stand as logged: levels 0-6 certified under FIXPOINT_AMEND_1, every one of their rounds with lean_exit 0 and lean_equals_archive true. Level 7 is unfinished and nothing is claimed about it from the first run.",
+  "change": "1) a level is certified only if Lean agreed with the archive in every round of that level (the reviewer's point on PR 5; all 198 logged rounds of the first run already met it). 2) the search state is written to a checkpoint after phase A and after every round, so a restart resumes at the next round instead of starting over. Nothing else in the procedure, resolution schedule, stop rule, test scoring or controls changes.",
+  "rerun": "the run starts again from nothing under tag 'rerun', because the first run kept its state only in memory. Each round's receipt is compared field by field with the first run's record of the same phase and round, and the receipt carries matches_first_run. The search is deterministic, so every comparable round must match; any mismatch is reported and the rerun's own numbers are used from then on.",
+  "verdict_rule": "unchanged from FIXPOINT_AMEND_1: the result is the finest certified level, stated with its resolution"
+}

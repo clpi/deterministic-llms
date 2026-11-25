@@ -310,18 +310,24 @@ under the chosen points; the same loop on the 20 architecture models.
 
 ## Stopping at a certified fixed point (2026-11-21)
 
-Contract tasks/FIXPOINT_CONTRACT.json (record 4468) and amendment
-tasks/FIXPOINT_AMEND_1.json (record 4491), each logged before its code;
+Contract tasks/FIXPOINT_CONTRACT.json (record 4468) and amendments
+tasks/FIXPOINT_AMEND_1.json (record 4491), tasks/FIXPOINT_AMEND_2.json
+(record 4705) and tasks/FIXPOINT_AMEND_3.json (record 4976), each logged
+before its code;
 proofs in lean/Prlm/Fix.lean (cold gate record 4671). The same DEV/TEST
 steps and objectives as the loop above.
 
 | # | Claim | Verdict | Numbers |
 | --- | --- | --- | --- |
 | F1 | A round that proposes nothing is exactly the closed condition, and then no unit neighbour of a front point dominates it | PROVED | `closed_iff_no_proposals`, `closed_local_opt`, `point_local_opt`, `fix_stable` |
-| F2 | A fixed point at exact resolution is within reach | REFUTED | with no budget the front doubled every round: 20, 54, 111, 277, 671, 1,615, 3,465, 6,768, 12,618 after rounds 0-8 (39,106 evaluations, records 4471-4489). Stopped by hand before the 200,000 cap (record 4490); Lean's front equalled the archive every round |
+| F2 | A fixed point at exact resolution is within reach | CORRECTED | with no budget the front doubled every round: 20, 54, 111, 277, 671, 1,615, 3,465, 6,768, 12,618 after rounds 0-8 (39,106 evaluations, records 4471-4489). Stopped by hand before the 200,000 cap (record 4490); Lean's front equalled the archive every round | Searching at exact resolution from the start: REFUTED as above. Climbing the resolution ladder (F4) reached it: level 10 reads every objective exactly and closed at 38,458 cells after 142,391 evaluations. The ladder differs in coarse-to-fine order and in keeping one point per cell; which of the two made the difference is UNMEASURED |
 | F3 | At resolution r, anything that exactly dominates a front point does so by less than r_i in every objective | PROVED | `coarse_le`, `coarse_front_within` |
-| F4 | The loop reaches certified fixed points one resolution at a time | VERIFIED to level 6 | levels 0-5 each ended with nothing left to evaluate. Cells on the front and evaluations so far: level 0: 7 (164), 1: 17 (288), 2: 101 (2,795), 3: 487 (11,797), 4: 2,299 (48,104), 5: 6,858 (82,519), 6: 13,744 (103,875). Level 6 reads every objective exactly except drift, in steps of 16 logits (records 4505-4685). Lean's front equalled the archive's cells in every round; 0 sparse-vs-dense disagreements |
-| F5 | Levels 7-10 (drift in steps of 8, 4, 2, 1 logits), TEST scoring of the finest front, random and GAMED controls, Lean replay | RUNNING | still running when this was written; results are appended to the log as ladder:* records |
+| F4 | The loop reaches certified fixed points one resolution at a time | VERIFIED to level 10 (exact) | levels 0-10 each ended with nothing left to evaluate. Cells on the front (evaluations so far): level 0: 7 (164), 1: 17 (288), 2: 101 (2,795), 3: 487 (11,797), 4: 2,299 (48,104), 5: 6,858 (82,519), 6: 13,744 (103,875), 7: 24,077 (122,845), 8: 33,339 (136,068), 9: 37,491 (141,009), 10: 38,458 (142,391), under the 200,000 cap. Lean's front equalled the archive's cells in every round; 0 sparse-vs-dense disagreements (rerun records 4706-4972) |
+| F5 | A rerun from scratch repeats the first run | VERIFIED | a machine restart killed the first run in level 7. Under tasks/FIXPOINT_AMEND_2.json (record 4705) the ladder checkpoints every round and was rerun from scratch: all 194 rounds that both runs reached match exactly. The rerun itself survived further restarts by resuming from its checkpoints (records 4956, 4975, 4977) |
+| F6 | On TEST the finest front improves on round 0 and on PR 4's loop | VERIFIED | share of the other front strictly dominated, weakly covered: fix covers round 0 (0.5, 0.9), round 0 covers fix (0.0, 0.001); fix covers PR 4's final front (0.1115, 0.9538), PR 4 covers fix (0.0034, 0.0144). All 38,458 fix points are undominated by round 0 and 38,329 by PR 4 (record 4972). The gap between strict and weak shares is wide: against PR 4, most of the cover is by points that tie in some objectives |
+| F7 | Random search and do-nothing controls | VERIFIED | random search with the same 142,391 evaluations reached a DEV front of 1,292; fix covers random (0.8142, 0.8336), random covers fix (0.0144, 0.0183) (record 4973). Doing nothing leaves the initial front unchanged (record 4974) |
+| F8 | GAMED control (the same ladder tuned on TEST) | TRUNCATED, lower bound | its level 9 ran 46 rounds without settling, admitting 14-15 points every round, with the cap about 1,200 rounds away. Under tasks/FIXPOINT_AMEND_3.json (record 4976, logged before the code change) it was stopped between rounds and scored at its finest certified level, 8: TEST front 25,904; gamed covers fix (0.1195, 0.8186), fix covers gamed (0.0004, 0.71) (record 4978). Tuning on TEST strictly beats 12% of fix; no claim that fix matches GAMED is drawn. Gamed level 9's fixed point is UNMEASURED; its state is checkpointed, so it can be resumed |
+| F9 | Lean replays the finest certified front of at most 600 points exactly | VERIFIED | level 3, all 487 front points: agree = agreeRe = reEqRec = sparseEq = 1,440/1,440, exit 0 (record 4979). Finer fronts (2,299 points and up) exceed the 600-point replay limit and are not replayed point by point |
 
 One bug was found and fixed during the run: the first ladder run kept every
 point of an occupied cell, so phase A could not stop. It was stopped after

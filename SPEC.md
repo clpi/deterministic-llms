@@ -207,6 +207,16 @@ does so by less than one resolution step in every objective. Every
 evaluation carries over to the next, finer level. The result is the finest
 level certified within the evaluation cap.
 
+The ladder closed at every level down to exact resolution: level 10, 38,458
+cells, 142,391 evaluations (CLAIMS F4). A level counts as certified only if
+Lean's front equalled the archive in every one of its rounds, and the state
+is checkpointed every round so a restart resumes rather than starts over
+(`tasks/FIXPOINT_AMEND_2.json`). The gamed control, the same ladder tuned on
+TEST, did not settle at level 9 in reach of the cap and was stopped by a
+logged amendment (`tasks/FIXPOINT_AMEND_3.json`); its result is its finest
+certified level, 8, and reads only as a lower bound on what tuning on TEST
+gets (CLAIMS F8).
+
 ## 10. Output structure (2026-11-21)
 
 A reply's structure is one more certified pick: candidates are structures,

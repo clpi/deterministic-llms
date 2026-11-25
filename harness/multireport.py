@@ -89,10 +89,18 @@ if fx:
         P(f"| {r['phase']}{r['round']} | {r['evaluated']} | {r['front']} | {r['lean_equals_archive']} |")
     if stop:
         P(f"\n{stop['result']}: {stop['stopped_by']}. {stop['why']}.")
-cl = [r["receipt"] for r in recs if r["head"].startswith("ladder:dev:certified:")]
-lr = next((r["receipt"] for r in recs if r["head"] == "ladder:result"), None)
+cl = [r["receipt"] for r in recs if r["head"].startswith("ladder:rerun:certified:")]
+lr = next((r["receipt"] for r in recs if r["head"] == "ladder:rerun:result"), None)
+rerun = bool(cl)
+if not rerun:
+    cl = [r["receipt"] for r in recs if r["head"].startswith("ladder:dev:certified:")]
+    lr = next((r["receipt"] for r in recs if r["head"] == "ladder:result"), None)
 if cl:
     P("\n## Fixed point one resolution at a time (tasks/FIXPOINT_AMEND_1.json)\n")
+    if rerun:
+        m = [r["receipt"]["matches_first_run"] for r in recs if "matches_first_run" in r.get("receipt", {})]
+        P(f"Rerun from scratch under tasks/FIXPOINT_AMEND_2.json: {sum(m)} of {len(m)} rounds compared with the first run match exactly. "
+          "The gamed control was stopped under tasks/FIXPOINT_AMEND_3.json, so its result is a lower bound.\n")
     P("| level | resolution (work, ban, topic, end, loops, drift) | cells on the front | evaluated so far |")
     P("| --- | --- | --- | --- |")
     for c in cl:
