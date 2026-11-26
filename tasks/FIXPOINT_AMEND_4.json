@@ -1,0 +1,8 @@
+{
+ "written": "2026-11-26T20:40Z, before harness/fixsample.py existed",
+ "ask": "Chris 2026-11-26T20:07Z: 'not good enough' about the ladder results, whose Lean replay covered only level 3 (487 points, record 4979)",
+ "why": "the declared replay (FIXPOINT_AMEND_1) replays the finest certified front of at most 600 points, which was level 3. One point takes about 70 seconds in Lean on this container (1,440 steps over the full vocabulary), so the whole level 10 front (38,458 points) would take about a week on 4 cores.",
+ "change": "add a replay of a uniform random sample of 600 points of the level 10 front (record 4972, finest_front_points). The sample is drawn with numpy default_rng(4972).choice over the point names sorted as strings, without replacement, before any of them is replayed. Each point is replayed exactly as in record 4979 (loop.lean_replay, the same 1,440 steps and the same Lean executable).",
+ "claim": "every sampled point replays exactly: exit 0 and agree = agreeRe = reEqRec = sparseEq = steps. One failure refutes exactness of the level 10 front. All 600 passing bounds the share of failing points: with 95% confidence, fewer than 0.5% of the 38,458 points fail (rule of three, 3/600).",
+ "what_stands": "every earlier record, including 4979, stands. The sample does not replace a full replay, which stays UNMEASURED."
+}
