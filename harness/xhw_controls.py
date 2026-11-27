@@ -68,6 +68,10 @@ def main(outfile, dirs):
                 fi = {k: sum(x == y for x, y in zip(first["free"][k], ref["free"][k])) for k in METHODS}
                 row["free_identical_ref_config"] = fi
                 row["prlm0_beaten_by"] = [k for k in METHODS[1:] if fi[k] > fi["prlm-0"]]
+                # every teacher-forced step whose certified pick differs from the reference:
+                # step, reference pick and margin, this machine's pick and margin, and score diff
+                row["pick_flips"] = [[k, b["pick"], b["margin"], a["pick"], a["margin"], a.get("maxdiff")]
+                                     for k, (a, b) in enumerate(zip(first["teacher"], ref["teacher"])) if a["pick"] != b["pick"]][:40]
             per[m] = row
         measured = [m for m in machines if per[m].get("status") != "UNMEASURED"]
         out[model] = {"reference": f"{rm} {rc}", "reference_found": ref is not None,
