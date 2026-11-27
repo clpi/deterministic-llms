@@ -1,0 +1,51 @@
+name: value-eos
+# Value amendment 5 (tasks/VALUE_AMEND_5.json, record 4994): every completion ends at its
+# first end-of-document token. Rescores the stored paths of the runs named in
+# out/value/eos-runs.json, then prints the corrected summaries, the 3-point bar,
+# the portfolio and the ratchet. No model is run.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/value-eos.yml
+      - harness/value_eos.py
+      - out/value/eos-runs.json
+permissions:
+  contents: read
+  actions: read
+jobs:
+  score:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 transformers==5.24.1 huggingface_hub pyarrow
+      - id: ids
+        run: |
+          for k in value value2 value3; do
+            echo "$k=$(python -c "import json;print(json.load(open('out/value/eos-runs.json'))['$k'])")" >> "$GITHUB_OUTPUT"
+          done
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value-*", path: r1, run-id: "${{ steps.ids.outputs.value }}", github-token: "${{ github.token }}"}
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value2-*", path: r2, run-id: "${{ steps.ids.outputs.value2 }}", github-token: "${{ github.token }}"}
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value3-*", path: r3, run-id: "${{ steps.ids.outputs.value3 }}", github-token: "${{ github.token }}"}
+        continue-on-error: true
+      - name: Summaries, bar and portfolio (printed in full to the log)
+        run: |
+          mkdir -p r1 r2 r3
+          cd harness
+          python value_eos.py ../C ../r1 ../r2 ../r3
+          cp ../C/EOS.json ../EOS.json
+          python value.py summary ../S1.json ../C/r1 || true
+          python value_code.py summary ../S2.json ../C/r2 ../C/r3 || true
+          python value_llama.py bar ../BAR.json ../C/r1 ../C/r2 ../C/r3 || true
+          python value_portfolio.py ../PORTFOLIO.json ../C/r1 ../C/r2 ../C/r3 || true
+          for f in EOS S1 S2 BAR PORTFOLIO; do [ -f ../$f.json ] && python -c "import json,sys;print('=== $f', json.dumps(json.load(open(sys.argv[1]))))" ../$f.json; done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: value-eos, path: "*.json"}

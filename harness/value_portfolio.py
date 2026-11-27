@@ -45,6 +45,8 @@ def tokenizer(repo):
 
 def equations_ok(text):
     """Every '<arithmetic> = <number>' in the completion evaluates to the number."""
+    for e in ("<|endoftext|>", "<|im_end|>"):     # VALUE_AMEND_5: the completion ends at its end of document
+        text = text.split(e)[0]
     t = V.truncate(text)
     for m in EQ.finditer(t):
         lhs, rhs = m.group(1).strip(), m.group(2)
