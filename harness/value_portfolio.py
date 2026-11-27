@@ -129,13 +129,19 @@ def ratchet(R, idx, task, tests, dec, base):
     return {"steps": out, "Q3_checker_violations": viol, "accuracy_non_monotone_problems": nonmono}
 
 
+_VIS = {}
+
+
 def mbpp_visible(r, tests, m, k):
     v = r["methods"][m].get("visible")
     if v is not None:
         return v[k]
-    import value_code as C
-    t = tests[r["index"]]
-    return C.runs(r["methods"][m]["programs"][k], t["test_imports"], t["test_list"][:1])
+    key = (r["inputs"]["repo"], r["index"], m, k)   # each program is executed once
+    if key not in _VIS:
+        import value_code as C
+        t = tests[r["index"]]
+        _VIS[key] = C.runs(r["methods"][m]["programs"][k], t["test_imports"], t["test_list"][:1])
+    return _VIS[key]
 
 
 def select(r, task, which, tests, dec):
