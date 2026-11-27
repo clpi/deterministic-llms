@@ -1,0 +1,97 @@
+name: value2
+# Value amendment 1 (tasks/VALUE_AMEND_1.json, record 4990): MBPP with execution tests
+# for Qwen3-1.7B and 0.6B, and GSM8K for Qwen3-4B (bf16) on 100 problems.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/value2.yml
+      - harness/value_code.py
+env:
+  PINS: torch==2.15.0 transformers==5.24.1 numpy==2.5.3 huggingface_hub safetensors pyarrow
+jobs:
+  mbpp17:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS
+      - name: Run the shard (resumable; retried once if the download fails)
+        run: |
+          cd harness
+          python value_code.py mbpp Qwen/Qwen3-1.7B-Base ../value2-out --shard ${{ matrix.shard }} --nshards 33 \
+            || (sleep 60 && python value_code.py mbpp Qwen/Qwen3-1.7B-Base ../value2-out --shard ${{ matrix.shard }} --nshards 33)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "value2-mbpp17-${{ matrix.shard }}"
+          path: value2-out/*.jsonl
+  mbpp06:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS
+      - name: Run the shard (resumable; retried once if the download fails)
+        run: |
+          cd harness
+          python value_code.py mbpp Qwen/Qwen3-0.6B-Base ../value2-out --shard ${{ matrix.shard }} --nshards 17 \
+            || (sleep 60 && python value_code.py mbpp Qwen/Qwen3-0.6B-Base ../value2-out --shard ${{ matrix.shard }} --nshards 17)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "value2-mbpp06-${{ matrix.shard }}"
+          path: value2-out/*.jsonl
+  gsm4b:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS
+      - name: Run the shard (resumable; retried once if the download fails)
+        run: |
+          cd harness
+          python value_code.py gsm4b ../value2-out --shard ${{ matrix.shard }} --nshards 50 \
+            || (sleep 60 && python value_code.py gsm4b ../value2-out --shard ${{ matrix.shard }} --nshards 50)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "value2-gsm4b-${{ matrix.shard }}"
+          path: value2-out/*.jsonl
+  summary:
+    needs: [mbpp17, mbpp06, gsm4b]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value2-*", path: res}
+      - name: Summary (printed in full to the log)
+        run: |
+          cd harness
+          python value_code.py summary ../VALUE2-SUMMARY.json ../res
+          python -c "import json;print('=== VALUE2-SUMMARY', json.dumps(json.load(open('../VALUE2-SUMMARY.json'))))"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: value2-summary, path: VALUE2-SUMMARY.json}
