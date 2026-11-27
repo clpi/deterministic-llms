@@ -448,3 +448,34 @@ bits per weight shows the limit: llama.cpp's x86 and Arm kernels quantize
 and accumulate differently, scores move by up to 1524 units (6 logits), and
 a fixed bound cannot certify anything. The certificate is only as good as
 the declared bound, and the bound has to be measured per engine.
+
+## Gamed control at like resolution (2026-11-27)
+
+Contract tasks/GAP_CONTRACT.json (record 4983), logged before harness/gap.py.
+Record 4978 had the gamed ladder (tuned on TEST, stopped at level 8) strictly
+dominating 11.95% of the main level 10 front on TEST. This scores both
+fronts on both splits at every level 0-8 (records 4987, 4988).
+
+| # | Measure (level 8; strict, weak) | Verdict | Numbers |
+| --- | --- | --- | --- |
+| G1 | Gamed advantage on its own split (TEST) | measured | gamed dominates 11.47% of main (weak 83.19%); main dominates 0.04% of gamed (weak 62.95%) |
+| G2 | Main advantage on its own split (DEV) | measured | main dominates 16.65% of gamed (weak 88.61%); gamed dominates 0.46% of main (weak 49.57%) |
+| G3 | Gap at like resolution, G1 minus G2 | main ahead by 0.0518 | about 0 at levels 0-2, then -0.016, -0.026, -0.044, -0.062, -0.064, -0.052 at levels 3-8 |
+
+Reading rule: a gap within 0.05 would have meant a symmetric
+generalization gap; a gamed lead above 0.05 an open gap. The result is
+neither: main leads by 0.0518, a case the rule did not name, and just
+outside the symmetric band. Tuning on DEV wins on DEV by more than tuning on
+TEST wins on TEST, so the 11.95% is not evidence that the ladder is a weaker
+optimizer than tuning on the scored data. Resolution accounts for little of
+it: 11.95% at gamed level 8 against main level 10, 11.47% at level 8 against
+level 8.
+
+Controls. The contracted do-nothing (each front against itself on its own
+split) gives strict share 0 at every level (record 4988, harness/gap_control.py).
+gap.py had logged a different self-comparison under the same name, each front
+against itself on the other split; it was added to record 4988 after the
+data, so it is reported as exploratory: on the split it was not selected on, a
+front's own points dominate each other at 11.09% (main on TEST) and 15.63%
+(gamed on DEV), close to G1 and G2. Most of either side's advantage is the
+spread any front shows on the split it was not selected on.
