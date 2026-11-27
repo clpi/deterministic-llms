@@ -80,6 +80,55 @@ def candidates(r, task, which):
     return out
 
 
+def ratchet_steps(task):
+    n = names(task)
+    add = [[("prlm-0", 0)], [(n["BRANCH"], k) for k in range(1, 8)], [(n["SAMPLES"], k) for k in range(8)],
+           [("greedy", 0), ("sample", 0)], [(n["RANDOM"], k) for k in range(1, 8)]]
+    steps, cur = [], []
+    for a in add:
+        cur = cur + a
+        steps.append(list(cur))
+    return steps
+
+
+def ratchet(R, idx, task, tests, dec, base):
+    is_code = task == "mbpp"
+    n = names(task)
+    steps = ratchet_steps(task)
+    out, vis_by_step, P_by_step = [], [], []
+    for s_i, cands in enumerate(steps):
+        P, V_ = [], []
+        for i in idx:
+            r = R[i]
+            if is_code:
+                vis = [mbpp_visible(r, tests, m, k) for m, k in cands]
+                sel = next((j for j, v in enumerate(vis) if v), None)
+                m, k = cands[sel] if sel is not None else ("prlm-0", 0)
+                P.append(r["methods"][m]["full"][k]); V_.append(sel is not None)
+            else:
+                ans = [r["methods"][m]["answers"][k] for m, k in cands]
+                ok = [a is not None and equations_ok(dec(r["methods"][m]["paths"][k])) for (m, k), a in zip(cands, ans)]
+                pool = [a for a, o in zip(ans, ok) if o]
+                pred = V.vote(pool) if pool else r["methods"]["prlm-0"]["answers"][0]
+                P.append(V.same(pred, r["gold"])); V_.append(bool(pool))
+        P_by_step.append(P); vis_by_step.append(V_)
+        meths = {}
+        for m, k in cands:
+            meths.setdefault(m, 0)
+        tok = sum(sum(R[i]["methods"][m]["gen_tokens"] for m in meths) for i in idx) / len(idx)
+        row = {"step": f"R{s_i}", "paths": len(cands), "new_paths": len(cands) - (len(steps[s_i - 1]) if s_i else 0),
+               "accuracy": round(sum(P) / len(idx), 4), "checker_pass": round(sum(V_) / len(idx), 4),
+               "mean_gen_tokens_upper": round(tok, 1),
+               "vs": {m: V.verdict(P, base[m]) for m in base}}
+        for m in base:
+            row["vs"][m]["bar_3pt"] = row["vs"][m]["verdict"] == "WIN" and row["vs"][m]["diff"] >= 0.03
+        out.append(row)
+    viol = sum(1 for j in range(len(idx)) for a in range(len(steps)) for b in range(a + 1, len(steps))
+               if vis_by_step[a][j] and not vis_by_step[b][j]) if is_code else None
+    nonmono = sum(1 for j in range(len(idx)) if any(P_by_step[a][j] and not P_by_step[a + 1][j] for a in range(len(steps) - 1)))
+    return {"steps": out, "Q3_checker_violations": viol, "accuracy_non_monotone_problems": nonmono}
+
+
 def mbpp_visible(r, tests, m, k):
     v = r["methods"][m].get("visible")
     if v is not None:
@@ -149,6 +198,7 @@ def main(outfile, dirs):
             row["mean_gen_tokens_upper"] = round(sum(sum(R[i]["methods"][m]["gen_tokens"] for m in meths) for i in idx) / len(idx), 1)
             res[which] = row
         res["baselines_accuracy"] = {m: round(sum(v) / len(idx), 4) for m, v in base.items()}
+        res["ratchet"] = ratchet(R, idx, "mbpp" if is_code else task, tests, dec, base)
         out[f"{task}:{repo}"] = res
     json.dump(out, open(outfile, "w"), indent=1)
     print(json.dumps(out))

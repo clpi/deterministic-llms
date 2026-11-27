@@ -58,4 +58,43 @@ theorem portfolio_dominates_all {α : Type} (c : α → Bool) (Bs : List (List �
   obtain ⟨B, hB, hx⟩ := h
   exact portfolio_dominates c B U (hsub B hB) hx
 
+/-- Q1 (VALUE_AMEND_4): along nested candidate lists, once a step's selection
+passes the checker, every later step's selection passes too. `steps n` is the
+candidate list of step n; `hnest` says each step keeps the previous one. -/
+theorem ratchet_monotone {α : Type} (c : α → Bool) (steps : Nat → List α)
+    (hnest : ∀ n x, x ∈ steps n → x ∈ steps (n + 1)) :
+    ∀ n k y, firstPass c (steps n) = some y → c y = true →
+      ∃ z, firstPass c (steps (n + k)) = some z ∧ c z = true := by
+  intro n k
+  induction k with
+  | zero => intro y hy hc; exact ⟨y, by simpa using hy, hc⟩
+  | succ k ih =>
+    intro y hy hc
+    obtain ⟨z, hz, hcz⟩ := ih y hy hc
+    have hzmem := (firstPass_spec c (steps (n + k)) z hz).2
+    exact portfolio_dominates c (steps (n + k)) (steps (n + k + 1))
+      (hnest (n + k)) ⟨z, hzmem, hcz⟩
+
+/-- Candidates of `L` that a cache holding `prev` must still evaluate. -/
+def fresh {α : Type} [DecidableEq α] (prev L : List α) : List α :=
+  L.filter (fun x => !(prev.contains x))
+
+/-- Q2 (VALUE_AMEND_4): a step's new evaluations are exactly its candidates
+not in the previous step, and never more than the step's own size. -/
+theorem fresh_spec {α : Type} [DecidableEq α] (prev L : List α) (x : α) :
+    x ∈ fresh prev L ↔ x ∈ L ∧ x ∉ prev := by
+  simp [fresh, List.mem_filter]
+
+theorem fresh_le {α : Type} [DecidableEq α] (prev L : List α) :
+    (fresh prev L).length ≤ L.length := by
+  unfold fresh
+  exact List.length_filter_le _ _
+
+/-- Re-evaluating the previous step costs nothing. -/
+theorem fresh_self {α : Type} [DecidableEq α] (L : List α) : fresh L L = [] := by
+  unfold fresh
+  rw [List.filter_eq_nil_iff]
+  intro x hx
+  simp [List.contains_iff_mem, hx]
+
 end Prlm.Portfolio

@@ -72,6 +72,10 @@ open Prlm
 #print axioms Prlm.Portfolio.firstPass_spec
 #print axioms Prlm.Portfolio.portfolio_dominates
 #print axioms Prlm.Portfolio.portfolio_dominates_all
+#print axioms Prlm.Portfolio.ratchet_monotone
+#print axioms Prlm.Portfolio.fresh_spec
+#print axioms Prlm.Portfolio.fresh_le
+#print axioms Prlm.Portfolio.fresh_self
 X
 ax=$(lake env lean /tmp/prlm_axioms.lean 2>&1) || { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
 echo "$ax" | grep -q "error" && { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
