@@ -1,0 +1,82 @@
+name: value3
+# Value amendment 2 (tasks/VALUE_AMEND_2.json, record 4991): Qwen3-14B-Base Q4_K_M through
+# llama.cpp on the first 100 GSM8K TEST problems; the summary also applies the 3-point bar.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/value3.yml
+      - harness/value_llama.py
+      - harness/value_llama.cpp
+env:
+  LLAMA_TAG: b12699
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 huggingface_hub pyarrow
+      - name: Build llama.cpp and the driver
+        run: |
+          git clone -q --depth 1 --branch "$LLAMA_TAG" https://github.com/ggml-org/llama.cpp "$RUNNER_TEMP/llama.cpp"
+          cmake -S "$RUNNER_TEMP/llama.cpp" -B "$RUNNER_TEMP/lb" -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=OFF -DLLAMA_CURL=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TOOLS=OFF -DLLAMA_BUILD_SERVER=OFF
+          cmake --build "$RUNNER_TEMP/lb" --target llama -j4
+          g++ -O2 -std=c++17 harness/value_llama.cpp -I"$RUNNER_TEMP/llama.cpp/include" -I"$RUNNER_TEMP/llama.cpp/ggml/include" -L"$RUNNER_TEMP/lb/bin" -lllama -Wl,-rpath,"$RUNNER_TEMP/lb/bin" -o "$RUNNER_TEMP/value_llama"
+          echo "VALUE_LLAMA=$RUNNER_TEMP/value_llama" >> "$GITHUB_ENV"
+      - name: Driver self-test on a 15M model (state restore and detokenize)
+        run: |
+          cd harness
+          p=$(python -c "from huggingface_hub import hf_hub_download as h;print(h('ggml-org/models','tinyllamas/stories15M-q8_0.gguf'))")
+          python value_llama.py selftest "$p"
+
+  gsm14b:
+    needs: smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 huggingface_hub pyarrow
+      - name: Build llama.cpp and the driver
+        run: |
+          git clone -q --depth 1 --branch "$LLAMA_TAG" https://github.com/ggml-org/llama.cpp "$RUNNER_TEMP/llama.cpp"
+          cmake -S "$RUNNER_TEMP/llama.cpp" -B "$RUNNER_TEMP/lb" -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=OFF -DLLAMA_CURL=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TOOLS=OFF -DLLAMA_BUILD_SERVER=OFF
+          cmake --build "$RUNNER_TEMP/lb" --target llama -j4
+          g++ -O2 -std=c++17 harness/value_llama.cpp -I"$RUNNER_TEMP/llama.cpp/include" -I"$RUNNER_TEMP/llama.cpp/ggml/include" -L"$RUNNER_TEMP/lb/bin" -lllama -Wl,-rpath,"$RUNNER_TEMP/lb/bin" -o "$RUNNER_TEMP/value_llama"
+          echo "VALUE_LLAMA=$RUNNER_TEMP/value_llama" >> "$GITHUB_ENV"
+      - name: Run the shard (resumable; retried once if the download fails)
+        run: |
+          cd harness
+          python value_llama.py run ../value3-out --shard ${{ matrix.shard }} --nshards 50 \
+            || (sleep 60 && python value_llama.py run ../value3-out --shard ${{ matrix.shard }} --nshards 50)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "value3-${{ matrix.shard }}"
+          path: value3-out/*.jsonl
+
+  summary:
+    needs: gsm14b
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value3-*", path: res}
+      - name: Summary and bar (printed in full to the log)
+        run: |
+          cd harness
+          python value_code.py summary ../VALUE3-SUMMARY.json ../res
+          python -c "import json;print('=== VALUE3-SUMMARY', json.dumps(json.load(open('../VALUE3-SUMMARY.json'))))"
+          python value_llama.py bar ../VALUE3-BAR.json ../res
