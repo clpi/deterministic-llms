@@ -1,0 +1,46 @@
+{
+ "Qwen/Qwen3-1.7B-Base": {
+  "problems": 88,
+  "correct": {
+   "greedy": 50,
+   "prlm-0": 50,
+   "sample": 41,
+   "sc-8": 59,
+   "margin-branch-8": 54,
+   "random-branch-8": 49
+  }
+ },
+ "mbpp06": {
+  "problems": 182,
+  "correct": {
+   "greedy": 100,
+   "prlm-0": 99,
+   "sample": 66,
+   "bo8-filter": 115,
+   "margin-branch-8-filter": 114,
+   "random-branch-8-filter": 107
+  }
+ },
+ "mbpp17": {
+  "problems": 93,
+  "correct": {
+   "greedy": 55,
+   "prlm-0": 55,
+   "sample": 47,
+   "bo8-filter": 63,
+   "margin-branch-8-filter": 62,
+   "random-branch-8-filter": 61
+  }
+ },
+ "gsm4b": {
+  "problems": 28,
+  "correct": {
+   "greedy": 23,
+   "prlm-0": 23,
+   "sample": 19,
+   "sc-8": 24,
+   "margin-branch-8": 23,
+   "random-branch-8": 24
+  }
+ }
+}
