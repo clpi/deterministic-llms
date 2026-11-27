@@ -328,6 +328,7 @@ steps and objectives as the loop above.
 | F7 | Random search and do-nothing controls | VERIFIED | random search with the same 142,391 evaluations reached a DEV front of 1,292; fix covers random (0.8142, 0.8336), random covers fix (0.0144, 0.0183) (record 4973). Doing nothing leaves the initial front unchanged (record 4974) |
 | F8 | GAMED control (the same ladder tuned on TEST) | TRUNCATED, lower bound | its level 9 ran 46 rounds without settling, admitting 14-15 points every round, with the cap about 1,200 rounds away. Under tasks/FIXPOINT_AMEND_3.json (record 4976, logged before the code change) it was stopped between rounds and scored at its finest certified level, 8: TEST front 25,904; gamed covers fix (0.1195, 0.8186), fix covers gamed (0.0004, 0.71) (record 4978). Tuning on TEST strictly beats 12% of fix; no claim that fix matches GAMED is drawn. Gamed level 9's fixed point is UNMEASURED; its state is checkpointed, so it can be resumed |
 | F9 | Lean replays the finest certified front of at most 600 points exactly | VERIFIED | level 3, all 487 front points: agree = agreeRe = reEqRec = sparseEq = 1,440/1,440, exit 0 (record 4979). Finer fronts (2,299 points and up) exceed the 600-point replay limit and are not replayed point by point |
+| F10 | Lean replays a random sample of the exact-resolution (level 10) front | VERIFIED | 600 of the 38,458 front points, drawn with default_rng(4972) before any replay (FIXPOINT_AMEND_4, records 4981-4982): agree = agreeRe = reEqRec = sparseEq = 1,440/1,440 and exit 0 on all 600 (864,000 steps, record 4986). A sample: with no failure in 600, the failing share of the whole front is below 0.5% at 95% confidence, not proved zero |
 
 One bug was found and fixed during the run: the first ladder run kept every
 point of an occupied cell, so phase A could not stop. It was stopped after
@@ -388,3 +389,62 @@ backend, with a certificate saying which steps are safe. The integer scores
 are also what make exact sparse reweighting and Lean replay possible (earlier
 sections). It pays for this with more repetition. prlm-0 and greedy made the
 same choices on every step here.
+
+## Cross-hardware audit (2026-11-26 to 27)
+
+Contract tasks/XHW_CONTRACT.json (record 4980), amendments XHW_AMEND_1
+(4984, five current models) and XHW_AMEND_2 (4985, Inkling 2 Mini), all
+logged before their code. The "written" times inside XHW_CONTRACT,
+FIXPOINT_AMEND_4 and GAP_CONTRACT were typed in, not read from a clock; the
+real write times were about 20:10-20:17Z. The log order (each record before
+the commit that adds its code) is the evidence of before-code, not those
+fields. Same 40 sealed prompts, 24 tokens each (960 teacher-forced steps
+per run), declared bound B = 4 score units (1/64 logit).
+
+Machines: this container (R, Intel Xeon), and GitHub's ubuntu-24.04 (x86:
+Intel Xeon 6975P-C or AMD EPYC 9V74, depending on the job), ubuntu-24.04-arm,
+macos-latest (Apple M1, virtual), windows-latest (x86: AMD Zen 3/Zen 5 or
+Intel, depending on the job) and windows-11-arm. Results were read from the
+compare jobs' logs (xhw-compare runs 45924158972 and 45924385434), because
+artifact downloads are blocked from this container; copies in
+out/xhw/ci/.
+
+| Model | Machines | Max score diff (X2) | Certified flips (X3) | Bound B=4 | Certified steps (margin > 2B) | prlm-0 / greedy identical (X4) | Lean (X5) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| GPT-2 small, ONNX Runtime, 4 configs | 6 of 6 | 3 | 0 | VERIFIED | 935/960 | 40/40 and 40/40 on every machine and config | exact (R, both Linux runners) |
+| Qwen3.5-0.8B-Base (DeltaNet hybrid) | 4 of 5 | 1 | 0 | VERIFIED | 928/960 | 40/40 and 40/40 | UNMEASURED (Lean exits -6, likely memory, 248k vocab) |
+| Qwen3-0.6B-Base (dense) | 5 of 5 | 1 | 0 | VERIFIED | 935/960 | 40/40 and 40/40 | exact |
+| LFM2-350M (conv + attention) | 5 of 5 | 1 | 0 | VERIFIED | 930/960 | 40/40 and 40/40 | exact |
+| Granite 4.0 H 350M (Mamba2 + attention) | 5 of 5 | 1 | 0 | VERIFIED | 927/960 | 40/40 and 40/40, except windows-latest: 39/40 and 40/40 | exact |
+| Granite 3.1 1B-A400M (MoE) | 5 of 5 | 1 | 0 | VERIFIED | 932/960 | 40/40 and 40/40 | exact |
+| Inkling 2 Mini, IQ1_S GGUF, llama.cpp | 2 of 2 (x86, Arm) | 1524 | 18 | REFUTED | 3/960 under the observed bound | 19/40 and 20/40 on Arm | exact on both |
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| X1 | Float logits bitwise equal across machines | no verdict (by contract) | GPT-2: windows-latest equals R on all 960 steps with graph optimization on; the ubuntu-24.04 x86 runner on 246; every Arm and Mac machine on 0. Current models: 0 steps on every machine other than the reference runner. Changing threads alone changes some floats on the same machine (912 or 792 of 960 for three models) |
+| X2 | Integer scores stay within the declared bound | VERIFIED for GPT-2 and the five current models; REFUTED for Inkling | largest difference 3 (GPT-2), 1 (current models), 1524 (Inkling) |
+| X3 | Every step with margin > 2B keeps its certified pick on every machine | VERIFIED for GPT-2 and the five current models; REFUTED for Inkling | 0 disagreements on certified steps over every measured machine and config; Inkling: 31 disagreements on 960 steps, 18 of them on steps certified under B = 4 |
+| X4 | Free generation identical to the reference | prlm-0 never beats greedy; it loses twice | prlm-0 and greedy 40/40 everywhere except Granite 4.0 H on windows-latest (prlm-0 39/40, greedy 40/40: one pick changed at a step whose margin was within 2B, which the certificate did not cover) and Inkling on Arm (19/40 against 20/40). Seeded sampling 34-40 (t0.7 and t1.0) on the current models, 36-40 on GPT-2, 4/40 and 1/40 on Inkling |
+| X5 | Lean replays each Linux machine's records exactly | VERIFIED where it ran | 960/960 agree on both Linux runners for GPT-2, four current models and Inkling; Qwen3.5 UNMEASURED (process abort, no verdict line) |
+
+Controls. Do-nothing: every machine's fresh-process repeat of its reference
+config is bitwise identical to its first run (every float hash and every
+free generation) wherever the repeat ran. Gamed: with the bound chosen after
+the data (B' = 1 for the current models, 3 for GPT-2) the certificate would
+cover 946-955 of 960 steps instead of 927-935; the declared B is the claim.
+
+UNMEASURED: Qwen3.5 on macos-latest (the job hit the 5-hour limit before its
+first config finished) and its fresh-process repeat on windows-11-arm (same
+limit); Qwen3.5's Lean replay; Inkling on Mac and Windows (left out by the
+amendment: memory, no Windows build).
+
+Verdict rule (contract): (a) X3 holds with the declared B for GPT-2 and the
+five current models, and fails for Inkling. (b) prlm-0's identical share is
+never above greedy's, and is below it twice, so the outputs themselves are
+not an unlock: greedy argmax replays just as well. (c) What prlm-0 adds is
+the certificate: it names in advance 927-935 of 960 steps (97%) that will
+not change on any of these machines, and none of them did. Inkling at 1.6
+bits per weight shows the limit: llama.cpp's x86 and Arm kernels quantize
+and accumulate differently, scores move by up to 1524 units (6 logits), and
+a fixed bound cannot certify anything. The certificate is only as good as
+the declared bound, and the bound has to be measured per engine.

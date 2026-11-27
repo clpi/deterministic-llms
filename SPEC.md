@@ -245,3 +245,20 @@ in the last bits, and the margin says in advance which steps are safe.
 Integer scores also make exact sparse reweighting, incremental edits and a
 Lean replay possible. The price is diversity: the rule repeats itself more
 than sampling.
+
+## 12. Across machines (2026-11-27)
+
+The margin certificate says a pick is stable when its margin exceeds twice
+a bound B on how far any score can move. Measured on six machines (x86 Intel
+and AMD, Arm Linux, Apple M1, x86 and Arm Windows), GPT-2 and five current
+open models of different architectures (dense, DeltaNet hybrid, gated
+convolution, Mamba2 hybrid, mixture of experts), the integer scores moved by
+at most 3 units for GPT-2 under ONNX Runtime and 1 unit for the current
+models under PyTorch, against a declared B = 4. No certified step changed
+its pick, so about 97% of steps are known in advance to replay on any of
+these machines (CLAIMS X1-X5). Greedy argmax replayed the outputs just as
+well, and once better, so the gain is the advance knowledge, not the outputs.
+The bound is a property of the engine: a 1.6-bit Inkling 2 Mini under
+llama.cpp moved scores by 1524 units between x86 and Arm, and B = 4 certified
+steps that then changed. A deployment has to measure B for its engine and
+quantization before trusting the certificate.
