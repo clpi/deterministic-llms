@@ -18,6 +18,7 @@ import Prlm.Loop
 import Prlm.Fix
 import Prlm.Struct
 import Prlm.Robust
+import Prlm.Portfolio
 open Prlm
 #print axioms best_perm
 #print axioms max_unique
@@ -68,6 +69,9 @@ open Prlm
 #print axioms Prlm.Robust.trace_eq_of_on_reference_prefix
 #print axioms Prlm.Robust.checked_or_fallback_trace
 #print axioms Prlm.Robust.head_project_last
+#print axioms Prlm.Portfolio.firstPass_spec
+#print axioms Prlm.Portfolio.portfolio_dominates
+#print axioms Prlm.Portfolio.portfolio_dominates_all
 X
 ax=$(lake env lean /tmp/prlm_axioms.lean 2>&1) || { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
 echo "$ax" | grep -q "error" && { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
