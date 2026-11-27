@@ -1,0 +1,21 @@
+{
+ "written": "2026-11-27T07:18Z (read from the clock), before harness/value_llama.py, harness/value_llama.cpp or their workflow existed",
+ "ask": "Chris 2026-11-27T07:16Z: 'All', answering whether speed of results, the bar for a win, or model scale falls short",
+ "seen_before_writing": "one finished shard of VALUE_CONTRACT for Qwen3-1.7B-Base (shard 12, 8 of 400 problems, job log of run 45945518879): on 7 problems every 8-path method agreed; on problem 529 sc-8 and random-branch-8 were right and margin-branch-8 wrong. Nothing else from either value run had been seen. The bar below is stricter than the one in VALUE_CONTRACT and VALUE_AMEND_1 and is applied to all of their claims as an added verdict; their own verdicts are still reported.",
+ "bar": {
+  "rule": "DECISIVE WIN for the certified decoder on a model and task only if all hold: (1) its accuracy exceeds the strongest same-budget sampling baseline (sc-8 on GSM8K, bo8-filter on MBPP) by at least 3.0 percentage points with exact McNemar p < 0.05; (2) it exceeds greedy by at least 3.0 points with p < 0.05; (3) it exceeds its random-branch control with p < 0.05. A significant win that misses a 3.0-point margin is SMALL WIN. A significant loss on (1) or (2) is LOSS. Anything else is TIE.",
+  "why": "p < 0.05 alone can be met by a gain too small to matter; 3 points on these sizes is the smallest gain worth deploying a different decoder for."
+ },
+ "speed": "interim tallies may be posted from finished shards' job logs while runs are in progress, always labelled interim, with the number of problems behind them; no verdict and no claim is drawn from an interim tally.",
+ "scale": {
+  "model": "Qwen3-14B-Base, GGUF Q4_K_M (mradermacher/Qwen3-14B-Base-GGUF, file Qwen3-14B-Base.Q4_K_M.gguf, 9.0 GB), the largest Qwen3 base model whose weights fit a 16 GB GitHub runner with room for the KV cache",
+  "engine": "mainline llama.cpp b12699, CPU, 4 threads, context 2048, through a driver (harness/value_llama.cpp) that returns full float32 logits and saves and restores the prompt's KV state so that every path starts from the same prompt state",
+  "task": "GSM8K with VALUE_CONTRACT's prompt, methods (greedy, prlm-0, sample, sc-8, margin-branch-8, random-branch-8), stop rule and claims V1-V3, on the first 100 of its 400 TEST indices in sorted order (the same 100 as Qwen3-4B in VALUE_AMEND_1)",
+  "caveat": "4-bit weights: this row measures a compressed 14B model, stated that way. The cross-hardware refutation for a quantized engine (CLAIMS X, Inkling) is about replay across machines; this row runs on one machine type and asks only about accuracy."
+ },
+ "claims": {
+  "D1": "the bar above, applied to every model and task of VALUE_CONTRACT and VALUE_AMEND_1",
+  "D2": "V1-V3 and the bar for Qwen3-14B-Base Q4_K_M on its 100 problems"
+ },
+ "what_stands": "VALUE_CONTRACT and VALUE_AMEND_1 stand as logged."
+}
