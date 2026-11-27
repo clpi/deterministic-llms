@@ -1,0 +1,40 @@
+{
+ "written": "2026-11-27T05:49Z (read from the clock), before harness/value_code.py or its workflow existed, while the VALUE_CONTRACT run (45945518879) was still decoding and before any of its results were seen",
+ "ask": "Chris 2026-11-27T05:48Z: 'Not good enough', about the value test as declared in VALUE_CONTRACT",
+ "change": "adds a second task where a checker is available, a larger model, and a decoder that uses the checker. Nothing in VALUE_CONTRACT changes and its run is not touched.",
+ "task_code": {
+  "data": "MBPP sanitized test split (google-research-datasets/mbpp, config sanitized, split test, 257 problems; all of them, no sampling)",
+  "prompt": "3-shot: the first 3 problems of the sanitized prompt split, each as 'You are an expert Python programmer, and here is your task: <prompt> Your code should pass this test:\\n\\n<first test>\\n[BEGIN]\\n<code>\\n[DONE]\\n\\n', then the target problem in the same form up to '[BEGIN]\\n'. Only the FIRST test of each problem is shown.",
+  "stop": "'[DONE]' or 512 new tokens; the program is the text before '[DONE]'",
+  "checker": "VISIBLE = the first test (the one in the prompt). Selection may use only VISIBLE. HIDDEN = the remaining tests. Execution: test_imports + program + test in a fresh python3 subprocess, 10 s timeout, on the CI runner",
+  "metric": "pass: the selected program passes ALL tests of the problem (visible and hidden). Fixed now."
+ },
+ "methods_code": {
+  "greedy": "float argmax",
+  "prlm-0": "certified pick",
+  "sample": "one sample, temperature 0.7, seed = problem index",
+  "bo8-filter": "8 samples at temperature 0.7 (seeds 1000*index + j); select the first sample that passes VISIBLE, else sample 0",
+  "margin-branch-8-filter": "the 8 paths of margin-branch-8 exactly as in VALUE_CONTRACT (eligible positions: every position before the stop); select the first path in creation order that passes VISIBLE, else path 1 (prlm-0)",
+  "random-branch-8-filter": "random-branch-8 as in VALUE_CONTRACT, same selection"
+ },
+ "models_code": "Qwen/Qwen3-1.7B-Base and Qwen/Qwen3-0.6B-Base, float32, as in VALUE_CONTRACT",
+ "larger_model": {
+  "model": "Qwen/Qwen3-4B-Base in bfloat16 (its float32 copy does not fit a 16 GB runner); logits cast to float32 before the certificate",
+  "task": "GSM8K with VALUE_CONTRACT's prompt, methods and claims V1-V3, on the first 100 of VALUE_CONTRACT's 400 TEST indices in sorted order (a fixed subset chosen now, not after any result)"
+ },
+ "claims": {
+  "C1": "margin-branch-8-filter pass rate > bo8-filter pass rate on MBPP for Qwen3-1.7B-Base. WIN / LOSS / TIE by the exact two-sided McNemar rule of VALUE_CONTRACT (p < 0.05)",
+  "C2": "margin-branch-8-filter > greedy, same rule",
+  "C3": "margin-branch-8-filter > random-branch-8-filter, same rule (whether the margin, not branching as such, helps)",
+  "C4": "C1-C3 for Qwen3-0.6B-Base, a replication",
+  "C5": "V1-V3 of VALUE_CONTRACT for Qwen3-4B-Base on its 100 problems"
+ },
+ "controls": {
+  "do_nothing": "greedy",
+  "gamed": "oracle: any of the 8 paths passes all tests (pass@8); an upper bound, never a claim",
+  "random": "random-branch-8-filter",
+  "leak_check": "selection never reads HIDDEN; the summary also reports how often the selected program passes VISIBLE but fails HIDDEN"
+ },
+ "budget": "mean generated tokens and forward passes per problem per method, reported beside every comparison",
+ "what_stands": "VALUE_CONTRACT and every earlier claim stand as logged."
+}
