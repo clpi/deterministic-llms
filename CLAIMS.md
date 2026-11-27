@@ -479,3 +479,16 @@ data, so it is reported as exploratory: on the split it was not selected on, a
 front's own points dominate each other at 11.09% (main on TEST) and 15.63%
 (gamed on DEV), close to G1 and G2. Most of either side's advantage is the
 spread any front shows on the split it was not selected on.
+
+## Value case: does certified decoding beat greedy and sampling on quality (2026-11-27, in progress)
+
+Contracts: tasks/VALUE_CONTRACT.json and amendments 1-5 (records 4989-4994), each logged before its code.
+
+| id | claim | status |
+|---|---|---|
+| D1 | Generation stopped at the end-of-document token | **CORRECTED** (amendment 5). It did not: answers were read from a made-up continuation. Rescoring run 45984809235: the do-nothing control holds on every row; 14B greedy 21% -> 69%, margin-branch 16% -> 76%, sc-8 72% -> 75%. Earlier 14B numbers are withdrawn. |
+| D2 | Branch points lie before the end of document | **REFUTED** for every row (14B margin 119 points in 61 of 100 rows; MBPP random-branch 61 and 23). Rows regenerated with the stop (workflow value5); rescored figures are provisional until then. |
+| V1-V3 | margin-branch-8 beats sc-8 / greedy / random-branch-8 (math) | provisional, rescored: 1.7B (280 of 400) vs greedy +5.4 (WIN), vs sc-8 -1.4 (TIE); 4B TIE; 14B TIE |
+| C1-C3 | the same on MBPP with a visible-test filter | margin rows not contaminated: 0.6B vs bo8 -0.4 (TIE), vs greedy +11.3 (WIN); 1.7B TIE / +9.3 (WIN) |
+| P2 | portfolio-27 clears the 3-point bar | provisional: MBPP 0.6B +5.4 over bo8-filter (p=0.007), +17.1 over greedy; MBPP 1.7B +3.5 (p=0.064, TIE); math rows TIE. It costs the sum of the baselines' compute. |
+| P1, Q3 | checker-monotone selection (Lean: portfolio_dominates_all, ratchet_monotone) | proved; measured violations 0 on both MBPP rows |
