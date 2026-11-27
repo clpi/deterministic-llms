@@ -1,0 +1,26 @@
+{
+ "written": "2026-11-27T09:39Z (read from the clock), before the ratchet code or its Lean file existed",
+ "ask": "Chris 2026-11-27T09:38Z: 'Not good enough it needs to be incrementally provably deterministically superior in all respects by design'",
+ "seen_before_writing": "as VALUE_AMEND_3, plus nothing new: the portfolio scoring job had not produced output.",
+ "impossibility_stated": "Superior in all respects at once is not attainable and is not claimed: on MBPP with Qwen3-0.6B, bo8-filter passes 20 problems margin-branch-8-filter fails and the reverse holds for 19, so at equal compute no decoder without an oracle can match both on every problem; and any decoder that contains the baselines' candidates costs at least what they cost. The ratchet below is what can hold by design.",
+ "ratchet": {
+  "steps": {
+   "R0": "the prlm-0 path",
+   "R1": "R0 + margin-branch paths 2-8",
+   "R2": "R1 + the 8 seeded samples",
+   "R3": "R2 + the greedy path and the single sample",
+   "R4": "R3 + random-branch paths 1-8"
+  },
+  "selection_code": "first candidate in step order passing VISIBLE; if none, the prlm-0 path",
+  "selection_math": "majority vote over the answers of candidates passing the equation checker of VALUE_AMEND_3 (ties earliest); if none passes, the prlm-0 answer. No guarantee for math.",
+  "paths_reused": "all paths come from the existing runs; nothing is regenerated"
+ },
+ "claims": {
+  "Q1": "theorem (Lean, lean/Prlm/Portfolio.lean): for nested candidate lists U0 \u2286 U1 \u2286 ... the first-pass selection's checker result is monotone in the step: if step n passes the checker, every later step does",
+  "Q2": "theorem (Lean): with a cache of evaluated candidates, the number of new evaluations a step needs after the previous step is the number of its candidates not in the previous step, never more",
+  "Q3_check": "measured, MBPP both models: problems where some step passes VISIBLE and a later step does not. Must be 0",
+  "Q4": "measured: per step, pass rate on ALL tests (not guaranteed monotone; non-monotone problems counted and reported), the number of new paths and the cumulative generated tokens; GSM8K the same with accuracy, no guarantee",
+  "Q5": "each step against greedy, sc-8 or bo8-filter, and margin-branch-8(-filter) by the exact McNemar rule and the 3-point bar, with its path count beside it"
+ },
+ "what_stands": "VALUE_CONTRACT and amendments 1-3 stand as logged."
+}
