@@ -2,3 +2,5 @@ lean/.lake/
 __pycache__/
 *.bin
 !tests/*.bin
+out/xhw/*.npy
+out/xhw/**/*.bin

@@ -1,0 +1,17 @@
+{
+ "written": "2026-11-27T10:45Z (read from the clock), before the rescoring code existed",
+ "kind": "correction of a harness defect, found after seeing results",
+ "seen_before_writing": "The 14B row of VALUE_AMEND_2 (greedy 21%, branch 16%, sample 55%, sc-8 72%), its diagnostic job (3 problems), the value2 summary, the interim value tallies, and nothing of any rescoring.",
+ "defect": "Generation stops only on the text stops of VALUE_CONTRACT ('\\nQ:' and a blank line). The models' end-of-document token (Qwen3 base: <|endoftext|>) is not a stop, and decoding keeps special tokens, so a path that ends its answer with <|endoftext|> instead of a blank line keeps generating a new document. Answer extraction then reads the last 'The answer is' in that continuation. Seen in the diagnostic: 14B greedy on problems 10 and 11 wrote the right answer (366, $694) followed by <|endoftext|>, then a copy of an exemplar question, and was scored 6. The same position also sets which tokens are eligible as branch points, so branches can sit after the end of the document.",
+ "correction_rule": "Every completion ends at its first end-of-document token: the first token whose id is the tokenizer's <|endoftext|> or <|im_end|> id. Everything from that token on is dropped before answer extraction (math), program extraction (MBPP), the equation checker and token counts. The rule is the same for every method and every row; nothing else changes (stops, vote, selection, tests, bar).",
+ "application": {
+  "rescore": "Applied post hoc to the stored token paths of every row of every value run (VALUE_CONTRACT, amendments 1 and 2): no model is rerun. MBPP programs whose text changes are executed again against VISIBLE and all tests; unchanged programs keep their stored results. Corrected rows are written beside the originals and the summary, the 3-point bar, the portfolio and the ratchet are recomputed from them.",
+  "regenerate": "A branch point placed after its parent's end of document cannot be corrected post hoc. Every row with one or more such branch points (margin or random) is reported as CONTAMINATED for the branch methods and is regenerated with <|endoftext|>/<|im_end|> added as a stop; the regenerated row replaces the rescored row as primary for that model. Rows with none keep the rescored result as primary."
+ },
+ "controls": {
+  "do_nothing": "Re-extracting every stored path with the old rule from the re-decoded tokens must reproduce every stored answer (math) and program (MBPP) exactly; any mismatch is reported and the row is marked UNMEASURED for the correction.",
+  "gamed": "Applying the cut only to the methods it helps would be gamed; the cut is applied to all methods. Also reported per method: paths changed, paths whose answer went from wrong to right and from right to wrong, so a correction that helps one method only is visible."
+ },
+ "reported": "Per row and method: accuracy before and after, paths with an end-of-document token, paths changed, generated tokens before and after the cut, branch points past the parent's end of document. Earlier numbers stay in the record and are labeled CORRECTED where they change.",
+ "what_stands": "VALUE_CONTRACT and amendments 1-4 stand as logged, except that their scores are now read with the rule above."
+}

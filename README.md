@@ -39,7 +39,8 @@ certified best-first rule and rewritable incrementally.
 - `harness/fixpoint.py` and `harness/fixladder.py`: the same loop run to a
   certified fixed point, at exact resolution (refuted) and then one
   resolution at a time (`tasks/FIXPOINT_CONTRACT.json`,
-  `tasks/FIXPOINT_AMEND_1.json`, proofs in `lean/Prlm/Fix.lean`).
+  `tasks/FIXPOINT_AMEND_1.json` to `tasks/FIXPOINT_AMEND_3.json`, proofs in
+  `lean/Prlm/Fix.lean`).
 - `harness/structure.py`: output structure (essay, song, steps, demo,
   table) as a certified pick on GPT-2, with revealed-preference updates,
   reversible rendering and decomposed editing (`tasks/STRUCT_CONTRACT.json`
@@ -73,7 +74,10 @@ python3 multireport.py
 python3 loop.py <loop contract record id>
 python3 -c "import pickle,density as D;from common import Model;pickle.dump(D.record_steps(Model(4)),open('/tmp/claude-0/steps_t3.pkl','wb'))"
 python3 fixpoint.py <fixpoint contract record id>      # exact resolution
-python3 fixladder.py <fixpoint amendment record id>    # resolution ladder
+python3 fixladder.py <amendment 2 record id> rerun    # resolution ladder; resumes from
+                                    # checkpoints after a restart (LADDER_CKPT_DIR, default
+                                    # prlm-ckpt next to the repo); LADDER_GAMED_STOP=1
+                                    # stops the gamed control as amendment 3 describes
 python3 structure.py <struct contract record id>
 python3 structure.py gated <amendment 1 record id>
 python3 structure.py dup <amendment 2 record id>

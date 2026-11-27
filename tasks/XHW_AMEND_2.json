@@ -1,0 +1,10 @@
+{
+ "written": "2026-11-26T20:32Z (read from the clock), before any Inkling code or workflow job existed",
+ "ask": "Chris 2026-11-26T20:31Z: 'Yes', to adding Inkling 2 Mini as one extra row on the Linux runners at its smallest GGUF",
+ "model": "INK: Thinking Machines' Inkling 2 Mini (released 2026-11-20; 26.2B parameters, 3.4B active, 128 experts with 8 per token, middle 12 of 24 layers looped three times, hybrid local and global attention), as unsloth/Inkling-2-Mini-GGUF file Mainline_Support/Inkling-2-Mini-UD-IQ1_S.gguf_file (7.76 GB, about 1.6 bits per weight). Unsloth's own table gives this file 89.4% same top token as its Q8 file, so this row measures a heavily compressed variant, not the published NVFP4 checkpoint, and every claim about it is stated that way.",
+ "engine": "mainline llama.cpp at tag b12699 (inkling2_loop support and the NVFP4 fix need b12611 or later), CPU only, built on each runner; logits read through a small C++ driver (harness/xhw_llama.cpp) over the llama.h API",
+ "machines": "ubuntu-24.04 (x86-64, the reference for this row) and ubuntu-24.04-arm. The Mac and Windows runners are left out: the Mac runner's memory is below the file size, and no Windows build is attempted. Both are UNMEASURED for this row, by design.",
+ "configs": "llama.cpp threads 4 (reference) and 1",
+ "claims": "X1-X5 as in tasks/XHW_CONTRACT.json and XHW_AMEND_1.json, with B = 4, the same 40 sealed prompts, the same methods and controls. Lean replay (X5) on both runners.",
+ "what_stands": "everything in XHW_CONTRACT and XHW_AMEND_1 stands."
+}

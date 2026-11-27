@@ -1,0 +1,14 @@
+{
+ "written": "2026-11-26T20:55Z, before harness/gap.py existed and before any point named here was scored on the other split",
+ "ask": "Chris 2026-11-26T20:07Z: 'not good enough'. The weakest reported number is that the gamed control (the ladder tuned on TEST, stopped at level 8) strictly dominates 11.95% of the level 10 fixed-point front on TEST (record 4978).",
+ "problem": "record 4978 compares the gamed level 8 front with the main level 10 front, which mixes two effects: tuning on the scored split, and resolution. Nor does it say whether DEV-tuning shows the same advantage on DEV, which is what pure overfitting to a split predicts.",
+ "inputs": "the certified fronts of levels 0-8 of both ladders, from their checkpoints (main: prlm-ckpt/ladder-rerun.pkl; gamed: prlm-ckpt/ladder-GAMED-rerun.pkl). Every main-front point is scored on TEST and every gamed-front point on DEV with the same evaluator (loop.evaluate through fixpoint._ev), so each level has both fronts on both splits.",
+ "measures": {
+  "G1": "per level 0-8, on TEST: share of the main front strictly dominated by the gamed front (gamed advantage on its own split), and the reverse",
+  "G2": "per level 0-8, on DEV: share of the gamed front strictly dominated by the main front (main advantage on its own split), and the reverse",
+  "G3": "the gap at like resolution: G1's gamed advantage minus G2's main advantage, per level"
+ },
+ "reading_rule": "if, at level 8, the gamed advantage on TEST and the main advantage on DEV differ by at most 0.05, the 11.95% is the generalization gap of selecting on one split, symmetric in the two splits, and no evidence that the ladder is a weaker optimizer than tuning on the scored data. If the gamed advantage exceeds the main advantage by more than 0.05, the TEST split is easier to tune than DEV or the ladder underfits; reported as an open gap. Weak-coverage shares are reported beside every strict share.",
+ "controls": "do-nothing: each front scored against itself on its own split gives strict share 0. The random-search control stays as in record 4973.",
+ "what_stands": "record 4978 stands as logged; this adds like-for-like numbers, it does not replace it."
+}

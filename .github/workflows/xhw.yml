@@ -1,0 +1,146 @@
+name: xhw
+# Cross-hardware audit of the certified rule (tasks/XHW_CONTRACT.json,
+# tasks/XHW_AMEND_1.json). Heavy: it downloads GPT-2 small and five current
+# open models on every machine, so it runs only when its own files change.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/xhw.yml
+      - harness/xhw.py
+      - harness/xhw_hf.py
+      - tasks/XHW_*.json
+env:
+  PINS_HF: torch==2.15.0 transformers==5.24.1 numpy==2.5.3 huggingface_hub safetensors
+  PINS_ORT: onnxruntime==1.29.0 numpy==2.5.3 tiktoken==0.14.0
+jobs:
+  # Reference trajectory and score vectors for each current model (ubuntu-24.04, 4 threads).
+  traj:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [Q35, Q3, LFM2, G4H, MOE]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS_HF
+      - run: cd harness && python xhw_hf.py traj ${{ matrix.model }} ../xhw-ref
+      - uses: actions/upload-artifact@v4
+        with: {name: "ref-${{ matrix.model }}", path: xhw-ref/, retention-days: 30}
+
+  # Every machine scores each reference trajectory and generates freely.
+  run:
+    needs: traj
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-latest, windows-latest, windows-11-arm]
+        model: [Q35, Q3, LFM2, G4H, MOE]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - shell: bash
+        run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS_HF
+      - uses: actions/download-artifact@v4
+        with: {name: "ref-${{ matrix.model }}", path: xhw-ref}
+      - name: Lean (Linux only)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          arch=$([ "$(uname -m)" = "aarch64" ] && echo linux_aarch64 || echo linux)
+          curl -sSL -o "$RUNNER_TEMP/lean.tar.zst" "https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-$arch.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$HOME"
+          echo "$HOME/lean-4.19.0-$arch/bin" >> "$GITHUB_PATH"
+      - if: runner.os == 'Linux'
+        run: bash lean/check.sh
+      - name: Audit (threads 4 and 1), then the reference config again in a fresh process
+        shell: bash
+        run: |
+          cd harness
+          lean=$([ "$RUNNER_OS" = "Linux" ] && echo --lean || true)
+          python xhw_hf.py run ${{ matrix.model }} ${{ matrix.os }} ../xhw-ref ../xhw-out --configs ALL $lean
+          python xhw_hf.py run ${{ matrix.model }} ${{ matrix.os }} ../xhw-ref ../xhw-again --configs reference
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "hf-${{ matrix.model }}-${{ matrix.os }}"
+          path: |
+            xhw-out/*.json
+            xhw-again/*.json
+
+  # GPT-2 baseline, scored against R (this repo's out/xhw).
+  gpt2:
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-latest, windows-latest, windows-11-arm]
+    runs-on: ${{ matrix.os }}
+    env:
+      PRLM_MODELS: ${{ github.workspace }}/models
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - shell: bash
+        run: python -m pip install $PINS_ORT
+      - name: Model and tokenizer (sha256 checked by xhw.py before use)
+        shell: bash
+        run: |
+          mkdir -p "$PRLM_MODELS"
+          curl -fsSL -o "$PRLM_MODELS/gpt2-lm-head-10.onnx" https://github.com/onnx/models/raw/main/validated/text/machine_comprehension/gpt-2/model/gpt2-lm-head-10.onnx
+          curl -fsSL -o "$PRLM_MODELS/encoder.json" https://openaipublic.blob.core.windows.net/gpt-2/encodings/main/encoder.json
+          curl -fsSL -o "$PRLM_MODELS/vocab.bpe" https://openaipublic.blob.core.windows.net/gpt-2/encodings/main/vocab.bpe
+      - name: Lean (Linux only)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          arch=$([ "$(uname -m)" = "aarch64" ] && echo linux_aarch64 || echo linux)
+          curl -sSL -o "$RUNNER_TEMP/lean.tar.zst" "https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-$arch.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$HOME"
+          echo "$HOME/lean-4.19.0-$arch/bin" >> "$GITHUB_PATH"
+      - if: runner.os == 'Linux'
+        run: bash lean/check.sh
+      - name: Audit, four configs, then the reference config again in a fresh process
+        shell: bash
+        run: |
+          cd harness
+          lean=$([ "$RUNNER_OS" = "Linux" ] && echo --lean || true)
+          python xhw.py run ../xhw-out ${{ matrix.os }} ../out/xhw --configs ALL $lean
+          python xhw.py run ../xhw-again ${{ matrix.os }} ../out/xhw --configs reference
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "gpt2-${{ matrix.os }}"
+          path: |
+            xhw-out/*.json
+            xhw-again/*.json
+
+  compare:
+    needs: [run, gpt2]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3
+      - uses: actions/download-artifact@v4
+        with: {pattern: "hf-*", path: hf}
+      - uses: actions/download-artifact@v4
+        with: {pattern: "gpt2-*", path: g2}
+      - name: Score every machine on the current models against ubuntu-24.04
+        continue-on-error: true
+        run: cd harness && python xhw_hf.py compare ../XHW-HF-SUMMARY.json ../hf
+      - name: Score every machine on GPT-2 against R (needs R's runs in out/xhw)
+        continue-on-error: true
+        run: cd harness && python xhw.py compare ../XHW-GPT2-SUMMARY.json ../g2 ../out/xhw/runs ../out/xhw/runs-again
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: xhw-summary, path: "XHW-*-SUMMARY.json"}

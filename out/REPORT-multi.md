@@ -1,6 +1,6 @@
 # Multi-model, architecture and density report (rebuilt from the log)
 
-Log: 4698 records, chain head 1f5763247eff08fc.
+Log: 4980 records, chain head deaef1b81161e405.
 
 ## Six models (tasks/MULTI_CONTRACT.json)
 
@@ -168,6 +168,8 @@ REFUTED at exact resolution: no fixed point in reach: stopped by hand at 39,106 
 
 ## Fixed point one resolution at a time (tasks/FIXPOINT_AMEND_1.json)
 
+Rerun from scratch under tasks/FIXPOINT_AMEND_2.json: 194 of 194 rounds compared with the first run match exactly. The gamed control was stopped under tasks/FIXPOINT_AMEND_3.json, so its result is a lower bound.
+
 | level | resolution (work, ban, topic, end, loops, drift) | cells on the front | evaluated so far |
 | --- | --- | --- | --- |
 | 0 | [64, 32, 32, 32, 32, 1024] | 7 | 164 |
@@ -177,6 +179,18 @@ REFUTED at exact resolution: no fixed point in reach: stopped by hand at 39,106 
 | 4 | [4, 2, 2, 2, 2, 64] | 2299 | 48104 |
 | 5 | [2, 1, 1, 1, 1, 32] | 6858 | 82519 |
 | 6 | [1, 1, 1, 1, 1, 16] | 13744 | 103875 |
+| 7 | [1, 1, 1, 1, 1, 8] | 24077 | 122845 |
+| 8 | [1, 1, 1, 1, 1, 4] | 33339 | 136068 |
+| 9 | [1, 1, 1, 1, 1, 2] | 37491 | 141009 |
+| 10 | [1, 1, 1, 1, 1, 1] | 38458 | 142391 |
+
+evaluations: 142391; lean_equals_archive_every_round: True; sparse_vs_dense_disagreements: 0; exact_fixed_point: True; test_fix_covers_round0: [0.5, 0.9]; test_round0_covers_fix: [0.0, 0.001]; test_fix_covers_pr4: [0.1115, 0.9538]; test_pr4_covers_fix: [0.0034, 0.0144]; test_fix_not_dominated_by_round0: 38458/38458; test_fix_not_dominated_by_pr4: 38329/38458.
+
+ladder:control:random: dev_front: 1292; evaluations: 142391; test_fix_covers_random: [0.8142, 0.8336]; test_random_covers_fix: [0.0144, 0.0183].
+
+ladder:control:GAMED: amend3_sha256: 9eca40d541252ed28a6468d8e88f472b87559ba30f3bf0d8ad25cbaa8e29c325; certified_to: 8; evaluations: 108910; stopped_in: {'evaluated': 108910, 'front': 31814, 'last_admitted': [14, 14, 15, 14, 14, 15, 15, 14, 14, 14], 'level': 9, 'rounds': 46}; test_fix_covers_gamed: [0.0004, 0.71]; test_front: 25904; test_gamed_covers_fix: [0.1195, 0.8186]; truncated: True.
+
+ladder:lean: all_exact: True; level: 3.
 
 ## Output structure (tasks/STRUCT_CONTRACT.json)
 

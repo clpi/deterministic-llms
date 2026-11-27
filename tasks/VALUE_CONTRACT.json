@@ -1,0 +1,39 @@
+{
+ "written": "2026-11-27T05:02Z (read from the clock), before harness/value.py or its workflow existed",
+ "ask": "Chris 2026-11-27T05:00Z: 'Not even close to good enough', then 'Value case', answering 'Which part of PRLM falls short for you: model scale, the value case, or speed?'",
+ "question": "At an equal generation budget, does a deterministic decoder that uses the certified margin beat greedy decoding and seeded sampling (single sample and majority vote) on answer accuracy for held-out problems?",
+ "why_this_design": "prlm-0 alone is greedy with integer rounding, so it cannot beat greedy on quality (CLAIMS U2, X4). The candidate value of the certificate is that it says where the model is unsure: a small margin marks a step where the pick could reasonably go another way. The tested decoder spends extra compute only at those steps, deterministically, and is compared with spending the same compute on random samples.",
+ "task": "GSM8K grade-school math word problems (openai/gsm8k, config main). Primary metric, fixed now: exact match of the final numeric answer (commas removed, compared as numbers) against the dataset's '#### N' answer.",
+ "split": "TEST = 400 problems of the GSM8K test split: numpy default_rng(20261127).permutation(1319)[:400], indices sorted. No tuning of any kind: every parameter below is fixed now, so there is no DEV split. The 8 exemplars are the standard 8-shot chain-of-thought prompt of Wei et al. (2022), taken verbatim, ending each answer with 'The answer is N.'",
+ "models": {
+  "primary": "Qwen/Qwen3-1.7B-Base",
+  "secondary": "Qwen/Qwen3-0.6B-Base",
+  "engine": "PyTorch CPU through transformers, float32, eager attention, KV cache; torch 2.15.0, transformers 5.24.1 as in XHW_AMEND_1. Each run records the repository commit and weight sha256; a mismatch between shards voids that model."
+ },
+ "generation": "prompt = 8 exemplars + 'Q: <question>\\nA:'. Stop at the first occurrence of '\\nQ:' or '\\n\\n' after at least one token, or at 256 new tokens. Answer = the number after the last 'The answer is', else the last number in the completion, else none (counted wrong).",
+ "methods": {
+  "greedy": "argmax of float32 logits",
+  "prlm-0": "certified pick: argmax of round(256*logit), ties to the lower id",
+  "sample": "one sample at temperature 0.7, numpy PCG64 seeded with the problem index",
+  "sc-8": "self-consistency: 8 samples at temperature 0.7 (seeds 1000*index + j, j=0..7), majority vote over extracted answers; ties to the earliest sample",
+  "margin-branch-8": "certified branching: path 1 is prlm-0. While fewer than 8 paths exist: over all positions of all paths so far that come before that path's answer and have not been branched, take the one with the smallest certified margin (ties: earlier path, then earlier position); create a new path equal to that path up to the position, then the second-ranked integer-score token there, then prlm-0 to the stop. Majority vote over the 8 answers; ties to the earliest path. Fully deterministic.",
+  "random-branch-8": "control: identical to margin-branch-8 except the branch position is drawn uniformly from the same eligible positions with numpy default_rng(index) instead of by smallest margin. It isolates whether the certificate's margin, rather than branching as such, is what helps."
+ },
+ "budget": "sc-8, margin-branch-8 and random-branch-8 each produce 8 completed paths. Report per method the mean number of generated tokens and model forward passes per problem; branching reuses its prefix, so it may cost fewer tokens; the comparison is at equal paths, with cost reported beside it.",
+ "claims": {
+  "V1": "margin-branch-8 accuracy > sc-8 accuracy on TEST for the primary model. WIN if the difference is positive and an exact two-sided McNemar test on the paired outcomes gives p < 0.05; LOSS if negative with p < 0.05; otherwise TIE.",
+  "V2": "margin-branch-8 accuracy > greedy accuracy, same test and thresholds.",
+  "V3": "margin-branch-8 accuracy > random-branch-8 accuracy, same test and thresholds. If V1 or V2 is a WIN but V3 is not, the gain is reported as coming from branching, not from the certificate.",
+  "V4": "the same three comparisons for the secondary model, reported with the same rule (a replication, not a separate claim).",
+  "V5": "determinism: one shard of each model is rerun in a fresh process; margin-branch-8's 8 paths must be token-identical, and sc-8 with the same seeds as well (seeded sampling is reproducible too; this checks the harness, it is not a claimed advantage)."
+ },
+ "controls": {
+  "do_nothing": "greedy, the decoder with no extra compute",
+  "gamed": "oracle best-of-8 for each 8-path method: correct if any path is correct. An upper bound only, never a claim; it shows how much a perfect selector could add.",
+  "random": "random-branch-8 (V3)",
+  "single_sample": "sample, to show what one seeded sample costs in accuracy"
+ },
+ "what_counts": "A WIN on V1 and V3 for the primary model, replicated in direction on V4, is reported as a measured quality advantage of certified decoding. Any other outcome is reported as it stands, including a LOSS. Contamination: Qwen3 base models may have seen GSM8K; this affects every method equally and is stated with the result.",
+ "machines": "GitHub-hosted ubuntu-24.04 runners, sharded by problem (each shard records its CPU). Quality does not depend on the machine; shards are not compared with each other.",
+ "what_stands": "every earlier claim stands; the Inkling cross-hardware refutation (CLAIMS X) stays on the record."
+}

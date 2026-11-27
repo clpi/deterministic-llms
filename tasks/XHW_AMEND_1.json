@@ -1,0 +1,19 @@
+{
+ "written": "2026-11-26T20:25Z (read from the clock), before harness/xhw_hf.py or any modern-model workflow existed",
+ "ask": "Chris 2026-11-26T20:22Z: 'Yes but it should be a more modern set of models and architectures', answering whether the CI runs may download the models from their public sources",
+ "change": "the audit adds five current open models, one per architecture family, downloaded in CI from Hugging Face (huggingface.co is blocked from this container, so none of them runs on R). GPT-2 stays as the baseline and keeps R as its reference.",
+ "models": {
+  "Q35": "Qwen/Qwen3.5-0.8B-Base (2026): hybrid of Gated DeltaNet linear attention and gated full attention every 4th layer, GQA, partial RoPE; text model only",
+  "Q3": "Qwen/Qwen3-0.6B-Base (2025): dense transformer, GQA, QK-norm, RoPE, SwiGLU",
+  "LFM2": "LiquidAI/LFM2-350M (2025): short gated convolutions mixed with GQA attention",
+  "G4H": "ibm-granite/granite-4.0-h-350m-base (2025): Mamba2 state-space layers mixed with attention",
+  "MOE": "ibm-granite/granite-3.1-1b-a400m-base (2025): sparse mixture of experts, 1.3B total, 400M active, top-k routing",
+  "rule": "only models whose architecture ships in transformers itself (no remote code), ungated, open licence. Each run records the repository commit and the sha256 of every weight file; all machines must have the same, or the comparison is void for that model"
+ },
+ "engine": "PyTorch CPU through transformers, float32 weights in memory, eager attention, KV cache as in serving; torch 2.15.0, transformers 5.24.1, numpy 2.5.3 on every machine",
+ "configs": "torch threads 4 (the reference) and threads 1. ONNX Runtime's optimization switch does not apply.",
+ "reference": "for the modern models the reference is the ubuntu-24.04 runner, threads 4. A first job there writes the reference trajectory (prlm-0 outputs on the 40 sealed prompts) and the reference score vectors; every machine then scores that trajectory and generates freely, as in the contract.",
+ "claims": "X1-X5 of tasks/XHW_CONTRACT.json apply per model, with the same declared bound B = 4 and the same controls (fresh-process repeat as do-nothing, observed bound as the gamed control, greedy and seeded sampling as baselines). The Lean replay (X5) runs on the Linux runners for the threads-4 teacher-forced records.",
+ "known_risks": "a model that fails to load or exceeds a runner's memory is reported UNMEASURED for that machine, with the error. MoE routing and Mamba2 scans may use different kernels per CPU; that is part of what is measured, not a reason to drop a model.",
+ "what_stands": "the GPT-2 part of the contract stands as written."
+}

@@ -310,18 +310,25 @@ under the chosen points; the same loop on the 20 architecture models.
 
 ## Stopping at a certified fixed point (2026-11-21)
 
-Contract tasks/FIXPOINT_CONTRACT.json (record 4468) and amendment
-tasks/FIXPOINT_AMEND_1.json (record 4491), each logged before its code;
+Contract tasks/FIXPOINT_CONTRACT.json (record 4468) and amendments
+tasks/FIXPOINT_AMEND_1.json (record 4491), tasks/FIXPOINT_AMEND_2.json
+(record 4705) and tasks/FIXPOINT_AMEND_3.json (record 4976), each logged
+before its code;
 proofs in lean/Prlm/Fix.lean (cold gate record 4671). The same DEV/TEST
 steps and objectives as the loop above.
 
 | # | Claim | Verdict | Numbers |
 | --- | --- | --- | --- |
 | F1 | A round that proposes nothing is exactly the closed condition, and then no unit neighbour of a front point dominates it | PROVED | `closed_iff_no_proposals`, `closed_local_opt`, `point_local_opt`, `fix_stable` |
-| F2 | A fixed point at exact resolution is within reach | REFUTED | with no budget the front doubled every round: 20, 54, 111, 277, 671, 1,615, 3,465, 6,768, 12,618 after rounds 0-8 (39,106 evaluations, records 4471-4489). Stopped by hand before the 200,000 cap (record 4490); Lean's front equalled the archive every round |
+| F2 | A fixed point at exact resolution is within reach | CORRECTED | with no budget the front doubled every round: 20, 54, 111, 277, 671, 1,615, 3,465, 6,768, 12,618 after rounds 0-8 (39,106 evaluations, records 4471-4489). Stopped by hand before the 200,000 cap (record 4490); Lean's front equalled the archive every round | Searching at exact resolution from the start: REFUTED as above. Climbing the resolution ladder (F4) reached it: level 10 reads every objective exactly and closed at 38,458 cells after 142,391 evaluations. The ladder differs in coarse-to-fine order and in keeping one point per cell; which of the two made the difference is UNMEASURED |
 | F3 | At resolution r, anything that exactly dominates a front point does so by less than r_i in every objective | PROVED | `coarse_le`, `coarse_front_within` |
-| F4 | The loop reaches certified fixed points one resolution at a time | VERIFIED to level 6 | levels 0-5 each ended with nothing left to evaluate. Cells on the front and evaluations so far: level 0: 7 (164), 1: 17 (288), 2: 101 (2,795), 3: 487 (11,797), 4: 2,299 (48,104), 5: 6,858 (82,519), 6: 13,744 (103,875). Level 6 reads every objective exactly except drift, in steps of 16 logits (records 4505-4685). Lean's front equalled the archive's cells in every round; 0 sparse-vs-dense disagreements |
-| F5 | Levels 7-10 (drift in steps of 8, 4, 2, 1 logits), TEST scoring of the finest front, random and GAMED controls, Lean replay | RUNNING | still running when this was written; results are appended to the log as ladder:* records |
+| F4 | The loop reaches certified fixed points one resolution at a time | VERIFIED to level 10 (exact) | levels 0-10 each ended with nothing left to evaluate. Cells on the front (evaluations so far): level 0: 7 (164), 1: 17 (288), 2: 101 (2,795), 3: 487 (11,797), 4: 2,299 (48,104), 5: 6,858 (82,519), 6: 13,744 (103,875), 7: 24,077 (122,845), 8: 33,339 (136,068), 9: 37,491 (141,009), 10: 38,458 (142,391), under the 200,000 cap. Lean's front equalled the archive's cells in every round; 0 sparse-vs-dense disagreements (rerun records 4706-4972) |
+| F5 | A rerun from scratch repeats the first run | VERIFIED | a machine restart killed the first run in level 7. Under tasks/FIXPOINT_AMEND_2.json (record 4705) the ladder checkpoints every round and was rerun from scratch: all 194 rounds that both runs reached match exactly. The rerun itself survived further restarts by resuming from its checkpoints (records 4956, 4975, 4977) |
+| F6 | On TEST the finest front improves on round 0 and on PR 4's loop | VERIFIED | share of the other front strictly dominated, weakly covered: fix covers round 0 (0.5, 0.9), round 0 covers fix (0.0, 0.001); fix covers PR 4's final front (0.1115, 0.9538), PR 4 covers fix (0.0034, 0.0144). All 38,458 fix points are undominated by round 0 and 38,329 by PR 4 (record 4972). The gap between strict and weak shares is wide: against PR 4, most of the cover is by points that tie in some objectives |
+| F7 | Random search and do-nothing controls | VERIFIED | random search with the same 142,391 evaluations reached a DEV front of 1,292; fix covers random (0.8142, 0.8336), random covers fix (0.0144, 0.0183) (record 4973). Doing nothing leaves the initial front unchanged (record 4974) |
+| F8 | GAMED control (the same ladder tuned on TEST) | TRUNCATED, lower bound | its level 9 ran 46 rounds without settling, admitting 14-15 points every round, with the cap about 1,200 rounds away. Under tasks/FIXPOINT_AMEND_3.json (record 4976, logged before the code change) it was stopped between rounds and scored at its finest certified level, 8: TEST front 25,904; gamed covers fix (0.1195, 0.8186), fix covers gamed (0.0004, 0.71) (record 4978). Tuning on TEST strictly beats 12% of fix; no claim that fix matches GAMED is drawn. Gamed level 9's fixed point is UNMEASURED; its state is checkpointed, so it can be resumed |
+| F9 | Lean replays the finest certified front of at most 600 points exactly | VERIFIED | level 3, all 487 front points: agree = agreeRe = reEqRec = sparseEq = 1,440/1,440, exit 0 (record 4979). Finer fronts (2,299 points and up) exceed the 600-point replay limit and are not replayed point by point |
+| F10 | Lean replays a random sample of the exact-resolution (level 10) front | VERIFIED | 600 of the 38,458 front points, drawn with default_rng(4972) before any replay (FIXPOINT_AMEND_4, records 4981-4982): agree = agreeRe = reEqRec = sparseEq = 1,440/1,440 and exit 0 on all 600 (864,000 steps, record 4986). A sample: with no failure in 600, the failing share of the whole front is below 0.5% at 95% confidence, not proved zero |
 
 One bug was found and fixed during the run: the first ladder run kept every
 point of an occupied cell, so phase A could not stop. It was stopped after
@@ -382,3 +389,106 @@ backend, with a certificate saying which steps are safe. The integer scores
 are also what make exact sparse reweighting and Lean replay possible (earlier
 sections). It pays for this with more repetition. prlm-0 and greedy made the
 same choices on every step here.
+
+## Cross-hardware audit (2026-11-26 to 27)
+
+Contract tasks/XHW_CONTRACT.json (record 4980), amendments XHW_AMEND_1
+(4984, five current models) and XHW_AMEND_2 (4985, Inkling 2 Mini), all
+logged before their code. The "written" times inside XHW_CONTRACT,
+FIXPOINT_AMEND_4 and GAP_CONTRACT were typed in, not read from a clock; the
+real write times were about 20:10-20:17Z. The log order (each record before
+the commit that adds its code) is the evidence of before-code, not those
+fields. Same 40 sealed prompts, 24 tokens each (960 teacher-forced steps
+per run), declared bound B = 4 score units (1/64 logit).
+
+Machines: this container (R, Intel Xeon), and GitHub's ubuntu-24.04 (x86:
+Intel Xeon 6975P-C or AMD EPYC 9V74, depending on the job), ubuntu-24.04-arm,
+macos-latest (Apple M1, virtual), windows-latest (x86: AMD Zen 3/Zen 5 or
+Intel, depending on the job) and windows-11-arm. Results were read from the
+compare jobs' logs (xhw-compare runs 45924158972 and 45924385434), because
+artifact downloads are blocked from this container; copies in
+out/xhw/ci/.
+
+| Model | Machines | Max score diff (X2) | Certified flips (X3) | Bound B=4 | Certified steps (margin > 2B) | prlm-0 / greedy identical (X4) | Lean (X5) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| GPT-2 small, ONNX Runtime, 4 configs | 6 of 6 | 3 | 0 | VERIFIED | 935/960 | 40/40 and 40/40 on every machine and config | exact (R, both Linux runners) |
+| Qwen3.5-0.8B-Base (DeltaNet hybrid) | 4 of 5 | 1 | 0 | VERIFIED | 928/960 | 40/40 and 40/40 | UNMEASURED (Lean exits -6, likely memory, 248k vocab) |
+| Qwen3-0.6B-Base (dense) | 5 of 5 | 1 | 0 | VERIFIED | 935/960 | 40/40 and 40/40 | exact |
+| LFM2-350M (conv + attention) | 5 of 5 | 1 | 0 | VERIFIED | 930/960 | 40/40 and 40/40 | exact |
+| Granite 4.0 H 350M (Mamba2 + attention) | 5 of 5 | 1 | 0 | VERIFIED | 927/960 | 40/40 and 40/40, except windows-latest: 39/40 and 40/40 | exact |
+| Granite 3.1 1B-A400M (MoE) | 5 of 5 | 1 | 0 | VERIFIED | 932/960 | 40/40 and 40/40 | exact |
+| Inkling 2 Mini, IQ1_S GGUF, llama.cpp | 2 of 2 (x86, Arm) | 1524 | 18 | REFUTED | 3/960 under the observed bound | 19/40 and 20/40 on Arm | exact on both |
+
+| # | Claim | Verdict | Numbers |
+| --- | --- | --- | --- |
+| X1 | Float logits bitwise equal across machines | no verdict (by contract) | GPT-2: windows-latest equals R on all 960 steps with graph optimization on; the ubuntu-24.04 x86 runner on 246; every Arm and Mac machine on 0. Current models: 0 steps on every machine other than the reference runner. Changing threads alone changes some floats on the same machine (912 or 792 of 960 for three models) |
+| X2 | Integer scores stay within the declared bound | VERIFIED for GPT-2 and the five current models; REFUTED for Inkling | largest difference 3 (GPT-2), 1 (current models), 1524 (Inkling) |
+| X3 | Every step with margin > 2B keeps its certified pick on every machine | VERIFIED for GPT-2 and the five current models; REFUTED for Inkling | 0 disagreements on certified steps over every measured machine and config; Inkling: 31 disagreements on 960 steps, 18 of them on steps certified under B = 4 |
+| X4 | Free generation identical to the reference | prlm-0 never beats greedy; it loses twice | prlm-0 and greedy 40/40 everywhere except Granite 4.0 H on windows-latest (prlm-0 39/40, greedy 40/40: one pick changed at step 739, where the reference margin was 1 unit: on windows-latest the two top scores came out equal (margin 0) and the tie went to the lower token id; the certificate had not covered that step, and greedy's float argmax kept its pick) and Inkling on Arm (19/40 against 20/40). Seeded sampling 34-40 (t0.7 and t1.0) on the current models, 36-40 on GPT-2, 4/40 and 1/40 on Inkling |
+| X5 | Lean replays each Linux machine's records exactly | VERIFIED where it ran | 960/960 agree on both Linux runners for GPT-2, four current models and Inkling; Qwen3.5 UNMEASURED (process abort, no verdict line) |
+
+Controls. Do-nothing: every machine's fresh-process repeat of its reference
+config is bitwise identical to its first run (every float hash and every
+free generation) wherever the repeat ran. Gamed: with the bound chosen after
+the data (B' = 1 for the current models, 3 for GPT-2) the certificate would
+cover 946-955 of 960 steps instead of 927-935; the declared B is the claim.
+
+UNMEASURED: Qwen3.5 on macos-latest (the job hit the 5-hour limit before its
+first config finished) and its fresh-process repeat on windows-11-arm (same
+limit); Qwen3.5's Lean replay; Inkling on Mac and Windows (left out by the
+amendment: memory, no Windows build).
+
+Verdict rule (contract): (a) X3 holds with the declared B for GPT-2 and the
+five current models, and fails for Inkling. (b) prlm-0's identical share is
+never above greedy's, and is below it twice, so the outputs themselves are
+not an unlock: greedy argmax replays just as well. (c) What prlm-0 adds is
+the certificate: it names in advance 927-935 of 960 steps (97%) that will
+not change on any of these machines, and none of them did. Inkling at 1.6
+bits per weight shows the limit: llama.cpp's x86 and Arm kernels quantize
+and accumulate differently, scores move by up to 1524 units (6 logits), and
+a fixed bound cannot certify anything. The certificate is only as good as
+the declared bound, and the bound has to be measured per engine.
+
+## Gamed control at like resolution (2026-11-27)
+
+Contract tasks/GAP_CONTRACT.json (record 4983), logged before harness/gap.py.
+Record 4978 had the gamed ladder (tuned on TEST, stopped at level 8) strictly
+dominating 11.95% of the main level 10 front on TEST. This scores both
+fronts on both splits at every level 0-8 (records 4987, 4988).
+
+| # | Measure (level 8; strict, weak) | Verdict | Numbers |
+| --- | --- | --- | --- |
+| G1 | Gamed advantage on its own split (TEST) | measured | gamed dominates 11.47% of main (weak 83.19%); main dominates 0.04% of gamed (weak 62.95%) |
+| G2 | Main advantage on its own split (DEV) | measured | main dominates 16.65% of gamed (weak 88.61%); gamed dominates 0.46% of main (weak 49.57%) |
+| G3 | Gap at like resolution, G1 minus G2 | main ahead by 0.0518 | about 0 at levels 0-2, then -0.016, -0.026, -0.044, -0.062, -0.064, -0.052 at levels 3-8 |
+
+Reading rule: a gap within 0.05 would have meant a symmetric
+generalization gap; a gamed lead above 0.05 an open gap. The result is
+neither: main leads by 0.0518, a case the rule did not name, and just
+outside the symmetric band. Tuning on DEV wins on DEV by more than tuning on
+TEST wins on TEST, so the 11.95% is not evidence that the ladder is a weaker
+optimizer than tuning on the scored data. Resolution accounts for little of
+it: 11.95% at gamed level 8 against main level 10, 11.47% at level 8 against
+level 8.
+
+Controls. The contracted do-nothing (each front against itself on its own
+split) gives strict share 0 at every level (record 4988, harness/gap_control.py).
+gap.py had logged a different self-comparison under the same name, each front
+against itself on the other split; it was added to record 4988 after the
+data, so it is reported as exploratory: on the split it was not selected on, a
+front's own points dominate each other at 11.09% (main on TEST) and 15.63%
+(gamed on DEV), close to G1 and G2. Most of either side's advantage is the
+spread any front shows on the split it was not selected on.
+
+## Value case: does certified decoding beat greedy and sampling on quality (2026-11-27, in progress)
+
+Contracts: tasks/VALUE_CONTRACT.json and amendments 1-5 (records 4989-4994), each logged before its code.
+
+| id | claim | status |
+|---|---|---|
+| D1 | Generation stopped at the end-of-document token | **CORRECTED** (amendment 5). It did not: answers were read from a made-up continuation. Rescoring run 45984809235: the do-nothing control holds on every row; 14B greedy 21% -> 69%, margin-branch 16% -> 76%, sc-8 72% -> 75%. Earlier 14B numbers are withdrawn. |
+| D2 | Branch points lie before the end of document | **REFUTED** for every row (14B margin 119 points in 61 of 100 rows; MBPP random-branch 61 and 23). Rows regenerated with the stop (workflow value5); rescored figures are provisional until then. |
+| V1-V3 | margin-branch-8 beats sc-8 / greedy / random-branch-8 (math) | provisional, rescored: 1.7B (280 of 400) vs greedy +5.4 (WIN), vs sc-8 -1.4 (TIE); 4B TIE; 14B TIE |
+| C1-C3 | the same on MBPP with a visible-test filter | margin rows not contaminated: 0.6B vs bo8 -0.4 (TIE), vs greedy +11.3 (WIN); 1.7B TIE / +9.3 (WIN) |
+| P2 | portfolio-27 clears the 3-point bar | provisional: MBPP 0.6B +5.4 over bo8-filter (p=0.007), +17.1 over greedy; MBPP 1.7B +3.5 (p=0.064, TIE); math rows TIE. It costs the sum of the baselines' compute. |
+| P1, Q3 | checker-monotone selection (Lean: portfolio_dominates_all, ratchet_monotone) | proved; measured violations 0 on both MBPP rows |

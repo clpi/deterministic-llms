@@ -1,0 +1,36 @@
+{
+  "written": "2026-11-26T20:20Z, before harness/xhw.py or its workflow existed",
+  "ask": "Chris 2026-11-26T20:07Z, answering 'Should I log a contract for a cross-hardware audit test?': 'Yes and not good enough'",
+  "question": "Does the certified rule's output, and its margin certificate, hold across different CPUs and operating systems, where float logits are not expected to be bitwise equal? And does it beat greedy argmax and seeded sampling on cross-hardware replay by these numbers?",
+  "model": "GPT-2 small fp32 ONNX (gpt2-lm-head-10.onnx, sha256 12fbb1ec2d2d70c8ebd21a290a348a4109447b98582af64c6f93b6526d5c8f35), tokenizer pinned as in harness/common.PINS. Runners do not download from the public model hosts: the files are copied from this container, with their sha256 checked on arrival.",
+  "software": "Python 3.13, onnxruntime 1.29.0, numpy 2.5.3, tiktoken 0.14.0, the same pins on every machine; each machine records the versions it actually ran",
+  "machines": {
+    "R": "this container (x86-64, Intel Xeon), the reference",
+    "ubuntu-24.04": "GitHub-hosted, x86-64",
+    "ubuntu-24.04-arm": "GitHub-hosted, Arm64",
+    "macos-latest": "GitHub-hosted, Apple arm64",
+    "windows-latest": "GitHub-hosted, x86-64",
+    "windows-11-arm": "GitHub-hosted, Arm64",
+    "note": "the CPU model behind a hosted runner is whatever GitHub assigns; each run records platform, machine and CPU model. A runner type that does not start is reported UNMEASURED, not dropped"
+  },
+  "configs": "on every machine, ONNX Runtime CPU with intra-op threads 1 and 4, each with graph optimization ORT_ENABLE_ALL and ORT_DISABLE_ALL: 4 configs. The reference config is R, 4 threads, ORT_ENABLE_ALL.",
+  "prompts": "tasks/usecase_prompts.json, the 40 sealed prompts, 24 new tokens each. Nothing is tuned on them.",
+  "runs": {
+    "teacher_forced": "every config scores the 960 steps of the reference trajectory (R's prlm-0 outputs). Per step: sha256 of the float32 logits, max |integer score difference| against R over the whole vocabulary, number of differing entries, the certified pick and its margin",
+    "free": "every config generates all 40 prompts with prlm-0, greedy-f32, samp-seeded-t0.7 and samp-seeded-t1.0 (numpy PCG64, seed = prompt index), as defined in tasks/USECASE_CONTRACT.json",
+    "lean": "on the two Linux runners, the Lean executable built there replays that machine's teacher-forced prlm-0 records (agree, sparseEq, exit 0)"
+  },
+  "claims": {
+    "X1": "float logits are bitwise equal to R on some machines or configs and not on others; reported per machine and config as a count of 960 steps, no verdict",
+    "X2": "integer scores: per machine and config, steps whose whole score vector equals R's, and the largest |difference|",
+    "X3": "the margin certificate with the bound declared now, B = 4 (record of tasks/USECASE_CONTRACT.json U2: the largest |score difference| between ONNX Runtime and the numpy KV-cache backend on this container): every step whose certified margin exceeds 2B has the same certified pick on every machine and config. REFUTED by one disagreement. Separately, the declared bound itself: VERIFIED if no step on any machine differs from R by more than B, REFUTED otherwise, with the bound that would have been needed",
+    "X4": "free generation: outputs identical to R's, per method, machine and config",
+    "X5": "Lean replay exact on both Linux runners"
+  },
+  "controls": {
+    "do_nothing": "R runs the same config twice in fresh processes, and each runner repeats its reference config in a fresh process: outputs and logits must be bitwise identical. A failure means nondeterminism inside one machine and is reported first",
+    "gamed": "the bound B' = the largest difference actually observed, chosen after the data. Its certificate coverage is reported beside B's and never as the claim",
+    "baselines": "greedy-f32 (argmax of floats, no margin) and seeded sampling are scored on X4 exactly as prlm-0"
+  },
+  "verdict_rule": "cross-hardware replay counts as an unlock of the certified rule only if (a) X3 holds with the declared B, (b) prlm-0's identical share on X4 is at least that of every other method on every machine, and (c) the certificate marks the stable steps in advance (share of steps with margin > 2B). If greedy-f32 matches prlm-0 everywhere, the unlock is the certificate (knowing in advance), not the outputs, and is reported that way. Every machine or method where another method beats prlm-0 is reported as a loss."
+}
