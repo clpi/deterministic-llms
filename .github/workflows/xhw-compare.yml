@@ -35,6 +35,7 @@ jobs:
           python xhw_hf.py compare ../XHW-HF-SUMMARY.json ../hf || true
           python xhw.py compare ../XHW-GPT2-SUMMARY.json ../g2 ../out/xhw/runs ../out/xhw/runs-again || true
           python xhw_ink.py compare ../XHW-INK-SUMMARY.json ../ink || true
+          python xhw_controls.py ../XHW-CONTROLS-SUMMARY.json ../hf ../g2 ../ink ../out/xhw/runs ../out/xhw/runs-again || true
           for f in ../XHW-*-SUMMARY.json; do echo "=== $f"; python -c "import json,sys;print(json.dumps(json.load(open(sys.argv[1]))))" "$f"; done
       - uses: actions/upload-artifact@v4
         if: always()
