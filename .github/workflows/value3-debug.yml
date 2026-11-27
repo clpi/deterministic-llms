@@ -1,0 +1,28 @@
+name: value3-debug
+# Diagnostic for the 14B row of tasks/VALUE_AMEND_2.json: greedy and sampled text for 3 problems.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/value3-debug.yml
+      - harness/value_llama_debug.py
+env:
+  LLAMA_TAG: b12699
+jobs:
+  debug:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 huggingface_hub pyarrow
+      - name: Build llama.cpp and the driver
+        run: |
+          git clone -q --depth 1 --branch "$LLAMA_TAG" https://github.com/ggml-org/llama.cpp "$RUNNER_TEMP/llama.cpp"
+          cmake -S "$RUNNER_TEMP/llama.cpp" -B "$RUNNER_TEMP/lb" -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=OFF -DLLAMA_CURL=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TOOLS=OFF -DLLAMA_BUILD_SERVER=OFF
+          cmake --build "$RUNNER_TEMP/lb" --target llama -j4
+          g++ -O2 -std=c++17 harness/value_llama.cpp -I"$RUNNER_TEMP/llama.cpp/include" -I"$RUNNER_TEMP/llama.cpp/ggml/include" -L"$RUNNER_TEMP/lb/bin" -lllama -Wl,-rpath,"$RUNNER_TEMP/lb/bin" -o "$RUNNER_TEMP/value_llama"
+          echo "VALUE_LLAMA=$RUNNER_TEMP/value_llama" >> "$GITHUB_ENV"
+      - name: Greedy and sampled text for 3 problems
+        run: cd harness && python value_llama_debug.py 3
