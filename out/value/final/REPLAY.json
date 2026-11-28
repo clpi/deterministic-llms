@@ -1,0 +1,344 @@
+{
+ "14b:pinned": {
+  "pairs": 40,
+  "cross_cpu": {
+   "pairs": 34,
+   "greedy_equal": 34,
+   "prlm0_equal": 34
+  },
+  "same_cpu": {
+   "pairs": 6,
+   "greedy_equal": 6,
+   "prlm0_equal": 6
+  },
+  "certified_flips": 0,
+  "divergences": [],
+  "accuracy": {
+   "greedy": 0.725,
+   "prlm-0": 0.725
+  },
+  "tokens_per_s": {
+   "INTEL(R) XEON(R) PLATINUM 8573C": 2.3,
+   "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz": 2.34,
+   "AMD EPYC 9V74 80-Core Processor": 3.28,
+   "AMD EPYC 7763 64-Core Processor": 3.07,
+   "AMD EPYC 9V45 96-Core Processor": 3.88,
+   "Intel(R) Xeon(R) 6975P-C": 2.88
+  },
+  "problems": 40,
+  "X1_holds": true,
+  "X3_measured": true
+ },
+ "14b:unpinned": {
+  "pairs": 40,
+  "cross_cpu": {
+   "pairs": 28,
+   "greedy_equal": 12,
+   "prlm0_equal": 12
+  },
+  "same_cpu": {
+   "pairs": 12,
+   "greedy_equal": 12,
+   "prlm0_equal": 12
+  },
+  "certified_flips": 16,
+  "divergences": [
+   {
+    "index": 17,
+    "step": 41,
+    "margin_a": 112,
+    "margin_b": 4,
+    "certified_flip": true,
+    "cpu_a": "Intel(R) Xeon(R) 6975P-C",
+    "cpu_b": "AMD EPYC 7763 64-Core Processor"
+   },
+   {
+    "index": 23,
+    "step": 33,
+    "margin_a": 80,
+    "margin_b": 8,
+    "certified_flip": true,
+    "cpu_a": "Intel(R) Xeon(R) 6975P-C",
+    "cpu_b": "AMD EPYC 9V45 96-Core Processor"
+   },
+   {
+    "index": 60,
+    "step": 0,
+    "margin_a": 32,
+    "margin_b": 23,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 67,
+    "step": 48,
+    "margin_a": 30,
+    "margin_b": 23,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 68,
+    "step": 2,
+    "margin_a": 7,
+    "margin_b": 15,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 75,
+    "step": 16,
+    "margin_a": 39,
+    "margin_b": 23,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "AMD EPYC 9V74 80-Core Processor"
+   },
+   {
+    "index": 86,
+    "step": 10,
+    "margin_a": 2,
+    "margin_b": 52,
+    "certified_flip": true,
+    "cpu_a": "Intel(R) Xeon(R) 6975P-C",
+    "cpu_b": "AMD EPYC 7763 64-Core Processor"
+   },
+   {
+    "index": 98,
+    "step": 47,
+    "margin_a": 24,
+    "margin_b": 60,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 102,
+    "step": 29,
+    "margin_a": 18,
+    "margin_b": 54,
+    "certified_flip": true,
+    "cpu_a": "Intel(R) Xeon(R) 6975P-C",
+    "cpu_b": "AMD EPYC 9V45 96-Core Processor"
+   },
+   {
+    "index": 109,
+    "step": 23,
+    "margin_a": 24,
+    "margin_b": 80,
+    "certified_flip": true,
+    "cpu_a": "Intel(R) Xeon(R) 6975P-C",
+    "cpu_b": "AMD EPYC 7763 64-Core Processor"
+   },
+   {
+    "index": 114,
+    "step": 0,
+    "margin_a": 50,
+    "margin_b": 4,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 122,
+    "step": 36,
+    "margin_a": 65,
+    "margin_b": 21,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 124,
+    "step": 9,
+    "margin_a": 43,
+    "margin_b": 20,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 132,
+    "step": 9,
+    "margin_a": 23,
+    "margin_b": 11,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 135,
+    "step": 8,
+    "margin_a": 30,
+    "margin_b": 57,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "AMD EPYC 9V74 80-Core Processor"
+   },
+   {
+    "index": 145,
+    "step": 72,
+    "margin_a": 27,
+    "margin_b": 23,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "AMD EPYC 9V74 80-Core Processor"
+   }
+  ],
+  "accuracy": {
+   "greedy": 0.75,
+   "prlm-0": 0.75
+  },
+  "tokens_per_s": {
+   "Intel(R) Xeon(R) 6975P-C": 2.44,
+   "AMD EPYC 7763 64-Core Processor": 3.04,
+   "AMD EPYC 9V74 80-Core Processor": 3.15,
+   "AMD EPYC 9V45 96-Core Processor": 4.02
+  },
+  "problems": 40,
+  "X1_holds": null,
+  "X3_measured": true
+ },
+ "14b:X0_control_detects": true,
+ "4b:pinned": {
+  "pairs": 40,
+  "cross_cpu": {
+   "pairs": 30,
+   "greedy_equal": 30,
+   "prlm0_equal": 30
+  },
+  "same_cpu": {
+   "pairs": 10,
+   "greedy_equal": 10,
+   "prlm0_equal": 10
+  },
+  "certified_flips": 0,
+  "divergences": [],
+  "accuracy": {
+   "greedy": 0.85,
+   "prlm-0": 0.85
+  },
+  "tokens_per_s": {
+   "AMD EPYC 9V74 80-Core Processor": 2.34,
+   "Intel(R) Xeon(R) 6975P-C": 2.25,
+   "AMD EPYC 7763 64-Core Processor": 1.66,
+   "AMD EPYC 9V45 96-Core Processor": 3.08
+  },
+  "problems": 40,
+  "X1_holds": true,
+  "X3_measured": true
+ },
+ "4b:unpinned": {
+  "pairs": 40,
+  "cross_cpu": {
+   "pairs": 30,
+   "greedy_equal": 22,
+   "prlm0_equal": 22
+  },
+  "same_cpu": {
+   "pairs": 10,
+   "greedy_equal": 10,
+   "prlm0_equal": 10
+  },
+  "certified_flips": 8,
+  "divergences": [
+   {
+    "index": 8,
+    "step": 93,
+    "margin_a": 0,
+    "margin_b": 64,
+    "certified_flip": true,
+    "cpu_a": "Intel(R) Xeon(R) 6975P-C",
+    "cpu_b": "AMD EPYC 7763 64-Core Processor"
+   },
+   {
+    "index": 10,
+    "step": 2,
+    "margin_a": 0,
+    "margin_b": 64,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 23,
+    "step": 5,
+    "margin_a": 0,
+    "margin_b": 64,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 91,
+    "step": 4,
+    "margin_a": 0,
+    "margin_b": 64,
+    "certified_flip": true,
+    "cpu_a": "Intel(R) Xeon(R) 6975P-C",
+    "cpu_b": "AMD EPYC 9V74 80-Core Processor"
+   },
+   {
+    "index": 98,
+    "step": 33,
+    "margin_a": 64,
+    "margin_b": 0,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "INTEL(R) XEON(R) PLATINUM 8573C"
+   },
+   {
+    "index": 102,
+    "step": 9,
+    "margin_a": 0,
+    "margin_b": 64,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 7763 64-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   },
+   {
+    "index": 106,
+    "step": 14,
+    "margin_a": 64,
+    "margin_b": 0,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_b": "AMD EPYC 7763 64-Core Processor"
+   },
+   {
+    "index": 122,
+    "step": 87,
+    "margin_a": 0,
+    "margin_b": 128,
+    "certified_flip": true,
+    "cpu_a": "AMD EPYC 9V45 96-Core Processor",
+    "cpu_b": "Intel(R) Xeon(R) 6975P-C"
+   }
+  ],
+  "accuracy": {
+   "greedy": 0.85,
+   "prlm-0": 0.85
+  },
+  "tokens_per_s": {
+   "Intel(R) Xeon(R) 6975P-C": 3.25,
+   "AMD EPYC 7763 64-Core Processor": 1.66,
+   "AMD EPYC 9V74 80-Core Processor": 2.93,
+   "Intel(R) Xeon(R) 6973P-C": 3.0,
+   "INTEL(R) XEON(R) PLATINUM 8573C": 2.64,
+   "AMD EPYC 9V45 96-Core Processor": 4.09
+  },
+  "problems": 40,
+  "X1_holds": null,
+  "X3_measured": true
+ },
+ "4b:X0_control_detects": true,
+ "_source": {
+  "workflow": "replay",
+  "run": 46137855876,
+  "amendment": "VALUE_AMEND_7",
+  "read": "2026-11-28 from the summary job log (=== REPLAY line)"
+ }
+}
