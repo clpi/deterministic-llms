@@ -1,0 +1,25 @@
+{
+ "written": "2026-11-28T11:01Z (read from the clock), before any code for it existed and before any of the rules below was computed on any row",
+ "ask": "Chris 2026-11-28T10:56Z: 'Not even close to good enough'. Math is the open loss: on the regenerated rows the lazy ratchet ties sc-8 on all four math rows, and margin-branch-8 loses to sc-8 on 0.6B.",
+ "seen_before_writing": "Aggregate accuracies and tokens of greedy, prlm-0, sample, sc-8, margin-branch-8, random-branch-8, the portfolio, the eager and lazy ratchets on every row (out/value/final). No per-problem table of the rules below.",
+ "suspected_cause": "The ratchet's math pool adds prlm-0 and its 7 margin branches to the 8 samples. Branch paths share prlm-0's prefix, so they are correlated with it and add up to 8 votes for one family's answer; the equation filter also drops answers. Both can pull the vote away from sc-8's.",
+ "rules": {
+  "V0": "sc-8 vote (reference; value.vote, ties to the earliest)",
+  "V1": "sc-8 vote over answers whose path passes the equation checker; all 8 if none pass",
+  "V2": "vote over 9 independent samples: sc-8 and the single seeded sample",
+  "V3": "V2 restricted to equation-checked answers; all 9 if none pass",
+  "V4": "family vote: the 8 sc-8 answers plus one vote for the majority answer of the prlm-0 family (prlm-0 and margin-branch paths 2-8; ties to prlm-0's answer)",
+  "V5": "V4 restricted to equation-checked answers (the family majority taken over its checked paths; all if none pass)",
+  "V6": "the eager R2 ratchet vote (as lazy-R2; reference)",
+  "V7": "weighted vote: each sc-8 sample weight 1, prlm-0 weight 1, each margin-branch path 2-8 weight 1/8",
+  "V8": "sc-8 vote with ties broken by the prlm-0 family majority, then by prlm-0's answer (changes only tied votes; same tokens as sc-8)"
+ },
+ "selection": "Select one rule on DEV = even problem indices of the 0.6B and 1.7B 400-problem regenerated rows, pooled: the highest DEV accuracy; ties go to fewer mean generated tokens, then to the lower rule number. V0 and V6 are references and cannot be selected.",
+ "test": "The selected rule against sc-8 (V0) on TEST = odd indices of 0.6B and 1.7B (200 each) and on all problems of 4B and 14B, each row separately, by the exact McNemar rule and the 3-point bar of VALUE_AMEND_2; tokens reported, and BETTER ON BOTH as in VALUE_AMEND_6 (L5). All nine rules are also reported on every row so the selection can be checked.",
+ "claims": {
+  "M1": "the selected rule clears the 3-point bar over sc-8 on at least one TEST row and loses (McNemar LOSS) on none",
+  "M2": "the selected rule is a McNemar WIN over sc-8 on the pooled TEST problems (odd 0.6B and 1.7B, all 4B and 14B)"
+ },
+ "rows": "The regenerated rows of VALUE_AMEND_5 (value5 run 45985595874). No model is run.",
+ "what_stands": "VALUE_CONTRACT and amendments 1-7 stand as logged."
+}
