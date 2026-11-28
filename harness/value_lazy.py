@@ -83,7 +83,7 @@ def main(outfile, dirs):
         if code and tests is None:
             import value_code as C
             tests = {q["index"]: q for q in C.mbpp_load(os.environ.get("VALUE_MBPP_DATA"))}
-        dec = P.tokenizer(repo)
+        dec = None if code else P.tokenizer(repo)     # code rows never decode (review: no tokenizer download for MBPP)
         key = "pass" if code else "correct"
         n = P.names(task)
         steps = P.ratchet_steps(task)
@@ -104,7 +104,8 @@ def main(outfile, dirs):
                 else:
                     pred, t, e = lazy_math(r, order, dec)
                     ep = eager_math(r, order, dec)
-                    same += int((pred is None and ep is None) or V.same(pred, ep))
+                    # exact vote keys (review: V.same's 1e-6 tolerance could merge two distinct keys)
+                    same += int((pred is None and ep is None) or (pred is not None and ep is not None and round(pred, 6) == round(ep, 6)))
                     ok = V.same(pred, r["gold"])
                 acc.append(bool(ok)); toks.append(t); evals.append(e)
             mt = sum(toks) / len(idx)
@@ -122,6 +123,9 @@ def main(outfile, dirs):
         out[f"{task}:{repo}"] = res
     json.dump(out, open(outfile, "w"), indent=1)
     print(json.dumps(out))
+    bad = [k for k, r in out.items() for v in ("lazy-R2", "lazy-R4") if v in r and not r[v]["L3_holds"]]
+    if bad:
+        raise SystemExit(f"L3 violated (lazy selection differs from eager) on: {bad}")
 
 
 if __name__ == "__main__":

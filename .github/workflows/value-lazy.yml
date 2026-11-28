@@ -8,6 +8,9 @@ on:
     paths:
       - .github/workflows/value-lazy.yml
       - harness/value_lazy.py
+      - harness/value_vote.py
+      - harness/value_portfolio.py
+      - harness/value_eos.py
       - out/value/lazy-runs.json
 permissions:
   contents: read
@@ -56,19 +59,19 @@ jobs:
           cd harness
           python test_eq_regex.py
           python value_eos.py ../C ../r1 ../r2 ../r3 > /dev/null
-          python value_lazy.py ../LAZY_RESCORED.json ../C/r1 ../C/r2 ../C/r3 || true
-          python value_lazy.py ../LAZY_REGEN.json ../r5 || true
+          python value_lazy.py ../LAZY_RESCORED.json ../C/r1 ../C/r2 ../C/r3
+          python value_lazy.py ../LAZY_REGEN.json ../r5
           # value5's own summary job hung on the backtracking EQ regex (fixed in value_portfolio.py);
           # its control, summaries, bar and portfolio are recomputed here from the same artifacts.
           if [ -n "$(ls -A ../r5)" ]; then
             mkdir -p ../old && cp -r ../r1 ../r2 ../r3 ../old/
-            python value_eos_compare.py ../CONTROL.json ../r5 ../old || true
-            python value_code.py summary ../S5.json ../r5 || true
-            python value_llama.py bar ../BAR5.json ../r5 || true
-            python value_portfolio.py ../PORTFOLIO5.json ../r5 || true
+            python value_eos_compare.py ../CONTROL.json ../r5 ../old
+            python value_code.py summary ../S5.json ../r5
+            python value_llama.py bar ../BAR5.json ../r5
+            python value_portfolio.py ../PORTFOLIO5.json ../r5
           fi
           # amendment 8: math vote rules, one selected on DEV, tested against sc-8
-          python value_vote.py ../VOTE.json ../r5 || true
+          python value_vote.py ../VOTE.json ../r5
           for f in LAZY_RESCORED LAZY_REGEN CONTROL S5 BAR5 PORTFOLIO5 VOTE; do [ -f ../$f.json ] && python -c "import json,sys;print('=== $f', json.dumps(json.load(open(sys.argv[1]))))" ../$f.json; done
       - uses: actions/upload-artifact@v4
         if: always()
