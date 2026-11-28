@@ -1,0 +1,117 @@
+name: conf
+# Value amendment 10 (tasks/VALUE_AMEND_10.json, record 4999): trace confidences for the stored
+# chain-of-thought rows (VALUE_AMEND_5, value5) and program-aided rows (VALUE_AMEND_9, pal) of
+# Qwen3-0.6B-Base and Qwen3-1.7B-Base, then the state-of-the-art floor and the decoder search.
+# Runs when out/value/conf-runs.json (the two source run ids) changes.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - out/value/conf-runs.json
+permissions:
+  contents: read
+  actions: read
+env:
+  PINS: torch==2.15.0 transformers==5.24.1 numpy==2.5.3 huggingface_hub safetensors pyarrow
+jobs:
+  inputs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Download the stored rows once, with retries and counts
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          V5=$(jq -r .value5 out/value/conf-runs.json); PAL=$(jq -r .pal out/value/conf-runs.json)
+          [ "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$PAL --jq .status)" = completed ]
+          mkdir -p in/cot in/pal
+          for g in gsm17 gsm06; do
+            for t in 1 2 3 4 5; do gh run download "$V5" -R "$GITHUB_REPOSITORY" -p "value5-$g-*" -D in/cot && break; sleep $((60 * t)); done
+          done
+          for t in 1 2 3 4 5; do gh run download "$PAL" -R "$GITHUB_REPOSITORY" -p "pal-[0-9]*" -D in/pal && break; sleep $((60 * t)); done
+          echo "cot artifacts: $(ls in/cot | wc -l), pal artifacts: $(ls in/pal | wc -l)"
+          [ "$(ls in/cot | wc -l)" -eq 75 ]
+          [ "$(ls in/pal | wc -l)" -eq 60 ]
+      - uses: actions/upload-artifact@v4
+        with: {name: conf-inputs, path: in}
+  run:
+    needs: inputs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        model: [Qwen/Qwen3-1.7B-Base, Qwen/Qwen3-0.6B-Base]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+        exclude:
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 20}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 21}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 22}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 23}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 24}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 25}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 26}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 27}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 28}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 29}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 30}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 31}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 32}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 33}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 34}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 35}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 36}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 37}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 38}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 39}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS
+      - uses: actions/download-artifact@v4
+        with: {name: conf-inputs, path: in}
+      - name: Score the shard (resumable; retried once if the download fails)
+        env: {MODEL: "${{ matrix.model }}", SHARD: "${{ matrix.shard }}", NSH: "${{ matrix.model == 'Qwen/Qwen3-0.6B-Base' && 20 || 40 }}"}
+        run: |
+          cd harness
+          python value_conf.py "$MODEL" ../conf-out ../in/cot ../in/pal --shard "$SHARD" --nshards "$NSH" \
+            || (sleep 60 && python value_conf.py "$MODEL" ../conf-out ../in/cot ../in/pal --shard "$SHARD" --nshards "$NSH")
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: conf-${{ strategy.job-index }}
+          path: conf-out/*.jsonl
+          if-no-files-found: ignore
+  summary:
+    needs: run
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 transformers==5.24.1 huggingface_hub pyarrow
+      - uses: actions/download-artifact@v4
+        with: {name: conf-inputs, path: in}
+      - name: Download the confidence rows, with retries and a count
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          mkdir -p confres
+          for t in 1 2 3 4 5; do gh run download "$GITHUB_RUN_ID" -R "$GITHUB_REPOSITORY" -p "conf-[0-9]*" -D confres && break; sleep $((60 * t)); done
+          echo "conf artifacts: $(ls confres | wc -l)"
+          [ "$(ls confres | wc -l)" -eq 60 ]
+      - name: Checks, then the floor and the search (printed in full to the log)
+        run: |
+          cd harness
+          python test_value_search.py > /dev/null
+          python value_conf.py check ../confres
+          python value_search.py ../SEARCH.json ../confres ../in/cot ../in/pal > /dev/null
+          python -c "import json;print('=== SEARCH', json.dumps(json.load(open('../SEARCH.json'))))"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: conf-summary, path: SEARCH.json}
