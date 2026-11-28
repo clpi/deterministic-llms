@@ -21,9 +21,22 @@ K_TOP = 20
 WINDOW = 32
 TAIL = 32
 EOS = {151643, 151645}
+QSCALE, B = 256, 4                                         # common.qscores and the xhw.py bound (amendment 11)
 
 
-def summarize(C, SC, LP, AM=None):
+def windows(x, w=WINDOW):
+    n = len(x)
+    if n <= w:
+        return [sum(x) / n]
+    s = sum(x[:w])
+    out = [s / w]
+    for i in range(w, n):
+        s += x[i] - x[i - w]
+        out.append(s / w)
+    return out
+
+
+def summarize(C, SC, LP, AM=None, CERT=None):
     n = len(C)
     if n == 0:
         return None
@@ -40,7 +53,9 @@ def summarize(C, SC, LP, AM=None):
     tail = C[-TAIL:]
     return {"tokens": n, "mean": sum(C) / n, "bottom10": sum(g[:b]) / b, "lowest": g[0],
             "tail": sum(tail) / len(tail), "selfcert": sum(SC) / n, "mean_lp": sum(LP) / n,
-            "argmax_rate": None if AM is None else sum(AM) / n}
+            "argmax_rate": None if AM is None else sum(AM) / n,
+            "cert_share": None if CERT is None else sum(CERT) / n,
+            "cert_low": None if CERT is None else min(windows([float(c) for c in CERT]))}
 
 
 def cut(p):
@@ -71,7 +86,10 @@ def score_paths(lm, prompt_ids, paths):
             SC = (-math.log(Vn) - lp.mean(-1)).tolist()
             LP = lp[torch.arange(len(p)), torch.tensor(p)].tolist()
             AM = (lp.argmax(-1) == torch.tensor(p)).tolist()      # alignment check: 1.0 on greedy paths
-            out.append(summarize(C, SC, LP, AM))
+            q = torch.round(logits.double() * QSCALE)              # = np.rint, as common.qscores
+            t2 = q.topk(2, -1).values
+            CERT = ((t2[:, 0] - t2[:, 1]) > 2 * B).tolist()        # amendment 11: certified step
+            out.append(summarize(C, SC, LP, AM, CERT))
     return out
 
 

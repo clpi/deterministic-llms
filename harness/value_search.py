@@ -14,9 +14,11 @@ import value as V
 from value_lazy import cost
 
 CONF = ("mean", "bottom10", "lowest", "tail", "selfcert")
+CERT = ("cert_share", "cert_low")                          # amendment 11
+CONF11 = CONF + CERT
 ETAS = (0.1, 0.5, 0.9)
 POWERS = (0.3, 1.0)
-LEAST = {k: -1e9 for k in CONF}
+LEAST = {k: -1e9 for k in CONF11}
 
 
 def load(d, pred):
@@ -87,9 +89,9 @@ def aggregate(tr, agg):
     return max(score, key=lambda k: (score[k], -first[k]))
 
 
-def rule_space():
-    aggs = [("maj",)] + [("w", c) for c in CONF] + [("top", c, e) for c in CONF for e in ETAS] + \
-           [("borda", c, p) for c in CONF for p in POWERS]
+def rule_space(conf=CONF):
+    aggs = [("maj",)] + [("w", c) for c in conf] + [("top", c, e) for c in conf for e in ETAS] + \
+           [("borda", c, p) for c in conf for p in POWERS]
     out = []
     for pool in ("cot8", "pal8", "mix8", "fam8", "cot8+pal8", "cot8+fam8"):
         for a in aggs:
@@ -110,63 +112,91 @@ def name(rule):
     return pool + ":" + "/".join(str(x) for x in a)
 
 
+def uses(rule, feats):
+    a = rule[1]
+    return len(a) > 1 and a[1] in feats
+
+
 def main(outfile, confdir, cotdir, paldir):
     conf = load(confdir, lambda r: (r["repo"], r["index"]) if r.get("amendment") == "VALUE_AMEND_10" else None)
     cot = load(cotdir, lambda r: (r["inputs"]["repo"], r["index"]) if r.get("task", "gsm8k") == "gsm8k" else None)
     pal = load(paldir, lambda r: (r["inputs"]["repo"], r["index"]) if r.get("task") == "pal" else None)
     keys = sorted(k for k in conf if k in cot and k in pal)
-    space = rule_space()
-    rules = {name(r): r for r in space}
+    space, space11 = rule_space(), rule_space(CONF11)
+    rules = {name(r): r for r in space11}
     rules.update({f: r for f, r in FLOOR.items()})
     rules.update({f + "@16": r for f, r in FLOOR16.items()})
     res = {}                                   # key -> rule name -> (correct, tokens)
     for k in keys:
         tr = traces(cot[k], pal[k], conf[k])
         g = cot[k]["gold"]
-        res[k] = {}
-        for nm, (pool, a) in rules.items():
-            t = tr[pool]
-            res[k][nm] = (V.same(aggregate(t, a), g), sum(x[3] for x in t))
+        res[k] = {nm: (V.same(aggregate(tr[pool], a), g), sum(x[3] for x in tr[pool])) for nm, (pool, a) in rules.items()}
     repos = sorted({k[0] for k in keys})
     dev = [k for k in keys if k[1] % 2 == 0]
     test = {r: [k for k in keys if k[0] == r and k[1] % 2 == 1] for r in repos}
-    out = {"problems": len(keys), "dev_problems": len(dev), "rows": {}, "selected": {}}
-    for cls in (8, 16):
-        cands = [name(r) for r in space if CLASS[r[0]] == cls]
-        score = {nm: (sum(res[k][nm][0] for k in dev), -sum(res[k][nm][1] for k in dev), -i) for i, nm in enumerate(cands)}
-        out["selected"][str(cls)] = max(cands, key=lambda nm: score[nm])
-        out[f"dev_top10_{cls}"] = [(nm, score[nm][0]) for nm in sorted(cands, key=lambda nm: score[nm], reverse=True)[:10]]
-    pooled = {"8": ([], []), "16": ([], [])}
+    alltest = [k for r in repos for k in test[r]]
+
+    def pick(cands, on):
+        sc = {nm: (sum(res[k][nm][0] for k in on), -sum(res[k][nm][1] for k in on), -i) for i, nm in enumerate(cands)}
+        return max(cands, key=lambda nm: sc[nm]), sc
+
+    acc = lambda nm, T: sum(res[k][nm][0] for k in T) / len(T)
+    tok = lambda nm, T: sum(res[k][nm][1] for k in T) / len(T)
+    floor = {}
     for r in repos:
-        T = test[r]
-        acc = lambda nm: sum(res[k][nm][0] for k in T) / len(T)
-        tok = lambda nm: sum(res[k][nm][1] for k in T) / len(T)
-        floor8 = max(FLOOR, key=lambda f: (acc(f), -tok(f)))
-        floor16 = max(FLOOR16, key=lambda f: (acc(f + "@16"), -tok(f + "@16")))
-        row = {"test_problems": len(T), "floor_rules_test": {f: round(acc(f), 4) for f in FLOOR},
-               "floor16_rules_test": {f: round(acc(f + "@16"), 4) for f in FLOOR16},
-               "best_floor8": floor8, "best_floor16": floor16 + "@16"}
-        for cls, fl in (("8", floor8), ("16", floor16 + "@16")):
-            sel = out["selected"][cls]
-            a = [res[k][sel][0] for k in T]
-            b = [res[k][fl][0] for k in T]
+        floor[(r, "8")] = max(FLOOR, key=lambda f: (acc(f, test[r]), -tok(f, test[r])))
+        floor[(r, "16")] = max([f + "@16" for f in FLOOR16], key=lambda f: (acc(f, test[r]), -tok(f, test[r])))
+
+    def against(sel, other=None, cls="8"):
+        """sel vs other (default: the per-row best floor) on every row's TEST problems and pooled."""
+        out, pa, pb = {}, [], []
+        for r in repos:
+            T = test[r]
+            fl = other or floor[(r, cls)]
+            a, b = [res[k][sel][0] for k in T], [res[k][fl][0] for k in T]
             v = V.verdict(a, b)
             v["bar_3pt"] = v["verdict"] == "WIN" and v["diff"] >= 0.03
-            v["selected_accuracy"], v["floor_accuracy"] = round(acc(sel), 4), round(acc(fl), 4)
-            v["token_ratio"] = round(tok(sel) / tok(fl), 3) if tok(fl) else None
-            row[f"S_{cls}"] = v
-            pooled[cls][0].extend(a); pooled[cls][1].extend(b)
-        allk = [k for k in keys if k[0] == r]
-        row["S4_floor_vs_F0_all"] = {f: V.verdict([res[k][f][0] for k in allk], [res[k]["F0"][0] for k in allk]) for f in FLOOR if f != "F0"}
-        out["rows"][r] = row
+            v["selected_accuracy"], v["other_accuracy"], v["other"] = round(acc(sel, T), 4), round(acc(fl, T), 4), fl
+            v["token_ratio"] = round(tok(sel, T) / tok(fl, T), 3) if tok(fl, T) else None
+            out[r] = v
+            pa += a; pb += b
+        out["pooled"] = V.verdict(pa, pb)
+        return out
+
+    out = {"problems": len(keys), "dev_problems": len(dev), "rows": {}, "selected": {}, "amend11": {}}
+    for r in repos:
+        out["rows"][r] = {"test_problems": len(test[r]),
+                          "floor_rules_test": {f: round(acc(f, test[r]), 4) for f in FLOOR},
+                          "floor16_rules_test": {f: round(acc(f + "@16", test[r]), 4) for f in FLOOR16},
+                          "best_floor8": floor[(r, "8")], "best_floor16": floor[(r, "16")],
+                          "S4_floor_vs_F0_all": {f: V.verdict([res[k][f][0] for k in keys if k[0] == r],
+                                                              [res[k]["F0"][0] for k in keys if k[0] == r]) for f in FLOOR if f != "F0"}}
+    # amendment 10: pre-registered space
     for cls in ("8", "16"):
-        a, b = pooled[cls]
-        out[f"pooled_S_{cls}"] = V.verdict(a, b) if a else None
-    s8 = [out["rows"][r]["S_8"] for r in repos]
-    out["S1_primary"] = bool(out["pooled_S_8"]) and out["pooled_S_8"]["verdict"] == "WIN" and not any(v["verdict"] == "LOSS" for v in s8)
-    out["S2"] = out["S1_primary"] and any(v["bar_3pt"] for v in s8)
-    s16 = out["pooled_S_16"]
-    out["S3"] = bool(s16) and s16["verdict"] == "WIN"
+        cands = [name(x) for x in space if CLASS[x[0]] == int(cls)]
+        sel, sc = pick(cands, dev)
+        out["selected"][cls] = sel
+        out[f"dev_top10_{cls}"] = [(nm, sc[nm][0]) for nm in sorted(cands, key=lambda nm: sc[nm], reverse=True)[:10]]
+        out[f"S_{cls}"] = against(sel, cls=cls)
+        out[f"gamed_test_pick_{cls}"] = {"rule": pick(cands, alltest)[0], "vs_floor": against(pick(cands, alltest)[0], cls=cls)}
+    rows8 = [out["S_8"][r] for r in repos]
+    out["S1_primary"] = out["S_8"]["pooled"]["verdict"] == "WIN" and not any(v["verdict"] == "LOSS" for v in rows8)
+    out["S2"] = out["S1_primary"] and any(v["bar_3pt"] for v in rows8)
+    out["S3"] = out["S_16"]["pooled"]["verdict"] == "WIN"
+    # amendment 11: certificate features added
+    A = out["amend11"]
+    c8 = [name(x) for x in space11 if CLASS[x[0]] == 8]
+    A["selected_8"], sc = pick(c8, dev)
+    A["dev_top10_8"] = [(nm, sc[nm][0]) for nm in sorted(c8, key=lambda nm: sc[nm], reverse=True)[:10]]
+    A["vs_floor"] = against(A["selected_8"])
+    rows = [A["vs_floor"][r] for r in repos]
+    A["A1_primary"] = A["vs_floor"]["pooled"]["verdict"] == "WIN" and not any(v["verdict"] == "LOSS" for v in rows)
+    cert = [name(x) for x in space11 if CLASS[x[0]] == 8 and uses(x, CERT)]
+    publ = [name(x) for x in space11 if CLASS[x[0]] == 8 and uses(x, CONF)]
+    A["best_cert_dev"], A["best_published_dev"] = pick(cert, dev)[0], pick(publ, dev)[0]
+    A["cert_vs_published"] = against(A["best_cert_dev"], A["best_published_dev"])
+    A["A2"] = A["cert_vs_published"]["pooled"]["verdict"] == "WIN"
+    A["gamed_test_pick_8"] = {"rule": pick(c8, alltest)[0], "vs_floor": against(pick(c8, alltest)[0])}
     json.dump(out, open(outfile, "w"), indent=1)
     print(json.dumps(out))
 

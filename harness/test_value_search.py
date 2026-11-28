@@ -5,7 +5,7 @@ import json, os, random, sys, tempfile
 import value as V
 import value_search as S
 
-C = lambda x: {k: x for k in S.CONF}
+C = lambda x: {k: x for k in S.CONF11}
 
 
 def unit():
@@ -71,7 +71,12 @@ def run():
             assert row["test_problems"] == 30
         # with confidence planted on correct traces, a confidence rule must beat plain majority on DEV
         assert not r["selected"]["8"].endswith(":maj"), r["selected"]
-        print("ok", r["selected"], r["S1_primary"])
+        for k in ("S1_primary", "S2", "S3"):
+            assert isinstance(r[k], bool)
+        A = r["amend11"]
+        assert isinstance(A["A1_primary"], bool) and isinstance(A["A2"], bool)
+        assert any(c in A["best_cert_dev"] for c in S.CERT) and not any(c in A["best_published_dev"] for c in S.CERT)
+        print("ok", r["selected"], A["selected_8"], r["S1_primary"], A["A1_primary"], A["A2"])
 
 
 if __name__ == "__main__":
