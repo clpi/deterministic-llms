@@ -1,0 +1,115 @@
+name: replay
+# Value amendment 7 (tasks/VALUE_AMEND_7.json, record 4996): does pinning the instruction set
+# make greedy and prlm-0 replay exactly across CPU models? Qwen3-14B Q4_K_M (llama.cpp) and
+# Qwen3-4B bfloat16 (torch), first 40 GSM8K TEST problems, every shard run as two replicas,
+# pinned and unpinned (the current build, as the control) in the same run.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/replay.yml
+      - harness/replay.py
+env:
+  PINS: torch==2.15.0 transformers==5.24.1 numpy==2.5.3 huggingface_hub safetensors pyarrow
+  LLAMA_TAG: b12699
+jobs:
+  r14b:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        arm: [pinned, unpinned]
+        replica: [a, b]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 huggingface_hub pyarrow
+      - name: Build llama.cpp (pinned instruction set or the default native build) and the driver
+        run: |
+          git clone -q --depth 1 --branch "$LLAMA_TAG" https://github.com/ggml-org/llama.cpp "$RUNNER_TEMP/llama.cpp"
+          COMMON="-DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=OFF -DLLAMA_CURL=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TOOLS=OFF -DLLAMA_BUILD_SERVER=OFF"
+          if [ "${{ matrix.arm }}" = pinned ]; then
+            ISA="-DGGML_NATIVE=OFF -DGGML_BACKEND_DL=OFF -DGGML_CPU_ALL_VARIANTS=OFF -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_FMA=ON -DGGML_F16C=ON -DGGML_AVX512=OFF -DGGML_AVX512_VBMI=OFF -DGGML_AVX512_VNNI=OFF -DGGML_AVX512_BF16=OFF -DGGML_AVX_VNNI=OFF -DGGML_AMX_TILE=OFF -DGGML_AMX_INT8=OFF -DGGML_AMX_BF16=OFF"
+            echo "LLAMA_ISA=avx2-fma-f16c" >> "$GITHUB_ENV"
+          else
+            ISA=""
+            echo "LLAMA_ISA=native" >> "$GITHUB_ENV"
+          fi
+          cmake -S "$RUNNER_TEMP/llama.cpp" -B "$RUNNER_TEMP/lb" $COMMON $ISA
+          cmake --build "$RUNNER_TEMP/lb" --target llama -j4
+          g++ -O2 -std=c++17 harness/value_llama.cpp -I"$RUNNER_TEMP/llama.cpp/include" -I"$RUNNER_TEMP/llama.cpp/ggml/include" -L"$RUNNER_TEMP/lb/bin" -lllama -Wl,-rpath,"$RUNNER_TEMP/lb/bin" -o "$RUNNER_TEMP/value_llama"
+          echo "VALUE_LLAMA=$RUNNER_TEMP/value_llama" >> "$GITHUB_ENV"
+      - name: Run the shard (resumable; retried once if the download fails)
+        run: |
+          cd harness
+          python replay.py 14b ../replay-out --shard ${{ matrix.shard }} --nshards 20 --replica ${{ matrix.replica }} --arm ${{ matrix.arm }} \
+            || (sleep 60 && python replay.py 14b ../replay-out --shard ${{ matrix.shard }} --nshards 20 --replica ${{ matrix.replica }} --arm ${{ matrix.arm }})
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: replay-14b-${{ matrix.arm }}-${{ matrix.replica }}-${{ matrix.shard }}
+          path: replay-out/*.jsonl
+          if-no-files-found: ignore
+  r4b:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        arm: [pinned, unpinned]
+        replica: [a, b]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS
+      - name: Pin the torch instruction set (pinned arm only)
+        if: matrix.arm == 'pinned'
+        run: |
+          echo "ATEN_CPU_CAPABILITY=avx2" >> "$GITHUB_ENV"
+          echo "ONEDNN_MAX_CPU_ISA=AVX2" >> "$GITHUB_ENV"
+          echo "DNNL_MAX_CPU_ISA=AVX2" >> "$GITHUB_ENV"
+      - name: Run the shard (resumable; retried once if the download fails)
+        run: |
+          cd harness
+          python replay.py 4b ../replay-out --shard ${{ matrix.shard }} --nshards 20 --replica ${{ matrix.replica }} --arm ${{ matrix.arm }} \
+            || (sleep 60 && python replay.py 4b ../replay-out --shard ${{ matrix.shard }} --nshards 20 --replica ${{ matrix.replica }} --arm ${{ matrix.arm }})
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: replay-4b-${{ matrix.arm }}-${{ matrix.replica }}-${{ matrix.shard }}
+          path: replay-out/*.jsonl
+          if-no-files-found: ignore
+  summary:
+    needs: [r14b, r4b]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - name: Download the replicas by group, with retries (avoids the listing cap and the secondary rate limit)
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          mkdir -p res
+          for g in 14b-pinned 14b-unpinned 4b-pinned 4b-unpinned; do
+            for t in 1 2 3 4 5; do
+              gh run download "$GITHUB_RUN_ID" -R "$GITHUB_REPOSITORY" -p "replay-$g-*" -D res && break
+              echo "retry $g ($t)"; sleep $((60 * t))
+            done
+          done
+          echo "replica artifacts: $(ls res | wc -l)"
+      - name: Replay summary (printed in full to the log)
+        run: |
+          cd harness
+          python replay.py summary ../REPLAY.json ../res
+          python -c "import json;print('=== REPLAY', json.dumps(json.load(open('../REPLAY.json'))))"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: replay-summary, path: REPLAY.json}
