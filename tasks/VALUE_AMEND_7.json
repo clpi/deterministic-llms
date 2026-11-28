@@ -1,0 +1,20 @@
+{
+ "written": "2026-11-28T10:58Z (read from the clock), before any code for it existed",
+ "ask": "Chris 2026-11-28T10:56Z: 'Not even close to good enough' (after the value-case results; PR 8 marked ready for review on his word).",
+ "seen_before_writing": "Everything in the record through VALUE_AMEND_6, including D3: the regeneration control (value-lazy 46116645319) matched every float32 greedy path across six CPU models, but 14B llama.cpp Q4_K_M matched 40 of 40 rows rerun on the same CPU model and 26 of 60 on a different one, and 4B bfloat16 34 of 34 against 45 of 64.",
+ "hypothesis": "The cross-CPU divergence comes from kernels chosen per CPU, not from the model or the decoder: the workflows build llama.cpp on each runner with its default GGML_NATIVE=ON (compiled for that runner's CPU), and PyTorch/oneDNN pick bfloat16 kernels by the CPU's instruction set (AMX, AVX512-BF16 or emulation).",
+ "intervention": {
+  "name": "pinned instruction set",
+  "llama.cpp": "built once per job with GGML_NATIVE=OFF and a fixed x86-64 set: AVX, AVX2, FMA, F16C on; AVX512 (all variants), AVX-VNNI and AMX off; dynamic backend loading off; 4 threads.",
+  "torch": "ATEN_CPU_CAPABILITY=avx2, ONEDNN_MAX_CPU_ISA=AVX2 and DNNL_MAX_CPU_ISA=AVX2 set before torch is imported; 4 threads; weights and dtype unchanged.",
+  "unchanged": "Weights, tokenizer, prompts, decoders (greedy, prlm-0 with QSCALE 256), the end-of-document stop of VALUE_AMEND_5, max 256 new tokens."
+ },
+ "design": "The first 40 GSM8K TEST problems, methods greedy and prlm-0, for Qwen3-14B-Base Q4_K_M (llama.cpp) and Qwen3-4B-Base bfloat16 (torch). 20 shards of 2 problems; every shard runs as two independent jobs, replicas a and b, so pairs land on whatever CPUs the runners have. Pinned and unpinned (the current build) are both run, the unpinned arm as the positive control in the same run. Each row records the CPU model and its flag set.",
+ "claims": {
+  "X1": "pinned: for every problem whose two replicas ran on different CPU models, the greedy and prlm-0 token paths are identical. Any mismatch refutes X1 for that backend.",
+  "X0_control": "unpinned, same run: at least one cross-CPU pair differs on each backend (the test can detect divergence). If no cross-CPU pair differs, X1 is UNMEASURED for that backend, not supported.",
+  "X2": "cost: generated tokens per second, pinned against unpinned, per CPU model; and accuracy of greedy and prlm-0 on the 40 problems, pinned against unpinned, reported (no claim of equality).",
+  "X3": "if fewer than 5 problems per backend land on different CPU models in the pinned arm, X1 is UNMEASURED for that backend."
+ },
+ "what_stands": "VALUE_CONTRACT and amendments 1-6 stand as logged. D3 stands as measured."
+}
