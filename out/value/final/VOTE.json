@@ -1,0 +1,468 @@
+{
+    "rows": {
+        "gsm14b:mradermacher/Qwen3-14B-Base-GGUF": {
+            "problems": 100,
+            "test_problems": 100,
+            "all": {
+                "V0": {
+                    "accuracy": 0.73,
+                    "mean_gen_tokens": 744.7
+                },
+                "V1": {
+                    "accuracy": 0.72,
+                    "mean_gen_tokens": 744.7
+                },
+                "V2": {
+                    "accuracy": 0.75,
+                    "mean_gen_tokens": 842.1
+                },
+                "V3": {
+                    "accuracy": 0.74,
+                    "mean_gen_tokens": 842.1
+                },
+                "V4": {
+                    "accuracy": 0.73,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V5": {
+                    "accuracy": 0.72,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V6": {
+                    "accuracy": 0.72,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V7": {
+                    "accuracy": 0.73,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V8": {
+                    "accuracy": 0.74,
+                    "mean_gen_tokens": 798.4
+                }
+            },
+            "dev": null,
+            "test": {
+                "V0": {
+                    "accuracy": 0.73,
+                    "mean_gen_tokens": 744.7
+                },
+                "V1": {
+                    "accuracy": 0.72,
+                    "mean_gen_tokens": 744.7
+                },
+                "V2": {
+                    "accuracy": 0.75,
+                    "mean_gen_tokens": 842.1
+                },
+                "V3": {
+                    "accuracy": 0.74,
+                    "mean_gen_tokens": 842.1
+                },
+                "V4": {
+                    "accuracy": 0.73,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V5": {
+                    "accuracy": 0.72,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V6": {
+                    "accuracy": 0.72,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V7": {
+                    "accuracy": 0.73,
+                    "mean_gen_tokens": 1158.0
+                },
+                "V8": {
+                    "accuracy": 0.74,
+                    "mean_gen_tokens": 798.4
+                }
+            },
+            "selected_vs_sc8_test": {
+                "diff": 0.0,
+                "a_only": 3,
+                "b_only": 3,
+                "p": 1.0,
+                "verdict": "TIE",
+                "bar_3pt": false,
+                "token_ratio": 1.555,
+                "better_on_both": false
+            }
+        },
+        "gsm4b:Qwen/Qwen3-4B-Base": {
+            "problems": 100,
+            "test_problems": 100,
+            "all": {
+                "V0": {
+                    "accuracy": 0.85,
+                    "mean_gen_tokens": 823.0
+                },
+                "V1": {
+                    "accuracy": 0.84,
+                    "mean_gen_tokens": 823.0
+                },
+                "V2": {
+                    "accuracy": 0.86,
+                    "mean_gen_tokens": 924.3
+                },
+                "V3": {
+                    "accuracy": 0.84,
+                    "mean_gen_tokens": 924.3
+                },
+                "V4": {
+                    "accuracy": 0.88,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V5": {
+                    "accuracy": 0.86,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V6": {
+                    "accuracy": 0.83,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V7": {
+                    "accuracy": 0.88,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V8": {
+                    "accuracy": 0.86,
+                    "mean_gen_tokens": 838.2
+                }
+            },
+            "dev": null,
+            "test": {
+                "V0": {
+                    "accuracy": 0.85,
+                    "mean_gen_tokens": 823.0
+                },
+                "V1": {
+                    "accuracy": 0.84,
+                    "mean_gen_tokens": 823.0
+                },
+                "V2": {
+                    "accuracy": 0.86,
+                    "mean_gen_tokens": 924.3
+                },
+                "V3": {
+                    "accuracy": 0.84,
+                    "mean_gen_tokens": 924.3
+                },
+                "V4": {
+                    "accuracy": 0.88,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V5": {
+                    "accuracy": 0.86,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V6": {
+                    "accuracy": 0.83,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V7": {
+                    "accuracy": 0.88,
+                    "mean_gen_tokens": 1382.6
+                },
+                "V8": {
+                    "accuracy": 0.86,
+                    "mean_gen_tokens": 838.2
+                }
+            },
+            "selected_vs_sc8_test": {
+                "diff": 0.03,
+                "a_only": 3,
+                "b_only": 0,
+                "p": 0.25,
+                "verdict": "TIE",
+                "bar_3pt": false,
+                "token_ratio": 1.68,
+                "better_on_both": false
+            }
+        },
+        "gsm8k:Qwen/Qwen3-0.6B-Base": {
+            "problems": 400,
+            "test_problems": 199,
+            "all": {
+                "V0": {
+                    "accuracy": 0.655,
+                    "mean_gen_tokens": 885.3
+                },
+                "V1": {
+                    "accuracy": 0.64,
+                    "mean_gen_tokens": 885.3
+                },
+                "V2": {
+                    "accuracy": 0.65,
+                    "mean_gen_tokens": 994.7
+                },
+                "V3": {
+                    "accuracy": 0.645,
+                    "mean_gen_tokens": 994.7
+                },
+                "V4": {
+                    "accuracy": 0.6525,
+                    "mean_gen_tokens": 1384.4
+                },
+                "V5": {
+                    "accuracy": 0.6475,
+                    "mean_gen_tokens": 1384.4
+                },
+                "V6": {
+                    "accuracy": 0.625,
+                    "mean_gen_tokens": 1384.4
+                },
+                "V7": {
+                    "accuracy": 0.66,
+                    "mean_gen_tokens": 1384.4
+                },
+                "V8": {
+                    "accuracy": 0.665,
+                    "mean_gen_tokens": 970.0
+                }
+            },
+            "dev": {
+                "V0": {
+                    "accuracy": 0.6667,
+                    "mean_gen_tokens": 882.5
+                },
+                "V1": {
+                    "accuracy": 0.6567,
+                    "mean_gen_tokens": 882.5
+                },
+                "V2": {
+                    "accuracy": 0.6667,
+                    "mean_gen_tokens": 993.7
+                },
+                "V3": {
+                    "accuracy": 0.6517,
+                    "mean_gen_tokens": 993.7
+                },
+                "V4": {
+                    "accuracy": 0.6617,
+                    "mean_gen_tokens": 1372.8
+                },
+                "V5": {
+                    "accuracy": 0.6517,
+                    "mean_gen_tokens": 1372.8
+                },
+                "V6": {
+                    "accuracy": 0.6318,
+                    "mean_gen_tokens": 1372.8
+                },
+                "V7": {
+                    "accuracy": 0.6716,
+                    "mean_gen_tokens": 1372.8
+                },
+                "V8": {
+                    "accuracy": 0.6766,
+                    "mean_gen_tokens": 958.8
+                }
+            },
+            "test": {
+                "V0": {
+                    "accuracy": 0.6432,
+                    "mean_gen_tokens": 888.2
+                },
+                "V1": {
+                    "accuracy": 0.6231,
+                    "mean_gen_tokens": 888.2
+                },
+                "V2": {
+                    "accuracy": 0.6332,
+                    "mean_gen_tokens": 995.8
+                },
+                "V3": {
+                    "accuracy": 0.6382,
+                    "mean_gen_tokens": 995.8
+                },
+                "V4": {
+                    "accuracy": 0.6432,
+                    "mean_gen_tokens": 1396.1
+                },
+                "V5": {
+                    "accuracy": 0.6432,
+                    "mean_gen_tokens": 1396.1
+                },
+                "V6": {
+                    "accuracy": 0.6181,
+                    "mean_gen_tokens": 1396.1
+                },
+                "V7": {
+                    "accuracy": 0.6482,
+                    "mean_gen_tokens": 1396.1
+                },
+                "V8": {
+                    "accuracy": 0.6533,
+                    "mean_gen_tokens": 981.3
+                }
+            },
+            "selected_vs_sc8_test": {
+                "diff": 0.0,
+                "a_only": 2,
+                "b_only": 2,
+                "p": 1.0,
+                "verdict": "TIE",
+                "bar_3pt": false,
+                "token_ratio": 1.572,
+                "better_on_both": false
+            }
+        },
+        "gsm8k:Qwen/Qwen3-1.7B-Base": {
+            "problems": 400,
+            "test_problems": 199,
+            "all": {
+                "V0": {
+                    "accuracy": 0.66,
+                    "mean_gen_tokens": 763.1
+                },
+                "V1": {
+                    "accuracy": 0.645,
+                    "mean_gen_tokens": 763.1
+                },
+                "V2": {
+                    "accuracy": 0.6825,
+                    "mean_gen_tokens": 862.6
+                },
+                "V3": {
+                    "accuracy": 0.675,
+                    "mean_gen_tokens": 862.6
+                },
+                "V4": {
+                    "accuracy": 0.6975,
+                    "mean_gen_tokens": 1177.7
+                },
+                "V5": {
+                    "accuracy": 0.685,
+                    "mean_gen_tokens": 1177.7
+                },
+                "V6": {
+                    "accuracy": 0.6525,
+                    "mean_gen_tokens": 1177.7
+                },
+                "V7": {
+                    "accuracy": 0.685,
+                    "mean_gen_tokens": 1177.7
+                },
+                "V8": {
+                    "accuracy": 0.6875,
+                    "mean_gen_tokens": 833.4
+                }
+            },
+            "dev": {
+                "V0": {
+                    "accuracy": 0.6219,
+                    "mean_gen_tokens": 761.6
+                },
+                "V1": {
+                    "accuracy": 0.602,
+                    "mean_gen_tokens": 761.6
+                },
+                "V2": {
+                    "accuracy": 0.6617,
+                    "mean_gen_tokens": 861.7
+                },
+                "V3": {
+                    "accuracy": 0.6517,
+                    "mean_gen_tokens": 861.7
+                },
+                "V4": {
+                    "accuracy": 0.6816,
+                    "mean_gen_tokens": 1187.6
+                },
+                "V5": {
+                    "accuracy": 0.6667,
+                    "mean_gen_tokens": 1187.6
+                },
+                "V6": {
+                    "accuracy": 0.6567,
+                    "mean_gen_tokens": 1187.6
+                },
+                "V7": {
+                    "accuracy": 0.6567,
+                    "mean_gen_tokens": 1187.6
+                },
+                "V8": {
+                    "accuracy": 0.6617,
+                    "mean_gen_tokens": 837.8
+                }
+            },
+            "test": {
+                "V0": {
+                    "accuracy": 0.6985,
+                    "mean_gen_tokens": 764.6
+                },
+                "V1": {
+                    "accuracy": 0.6884,
+                    "mean_gen_tokens": 764.6
+                },
+                "V2": {
+                    "accuracy": 0.7035,
+                    "mean_gen_tokens": 863.6
+                },
+                "V3": {
+                    "accuracy": 0.6985,
+                    "mean_gen_tokens": 863.6
+                },
+                "V4": {
+                    "accuracy": 0.7136,
+                    "mean_gen_tokens": 1167.6
+                },
+                "V5": {
+                    "accuracy": 0.7035,
+                    "mean_gen_tokens": 1167.6
+                },
+                "V6": {
+                    "accuracy": 0.6482,
+                    "mean_gen_tokens": 1167.6
+                },
+                "V7": {
+                    "accuracy": 0.7136,
+                    "mean_gen_tokens": 1167.6
+                },
+                "V8": {
+                    "accuracy": 0.7136,
+                    "mean_gen_tokens": 829.0
+                }
+            },
+            "selected_vs_sc8_test": {
+                "diff": 0.0151,
+                "a_only": 5,
+                "b_only": 2,
+                "p": 0.45312,
+                "verdict": "TIE",
+                "bar_3pt": false,
+                "token_ratio": 1.527,
+                "better_on_both": false
+            }
+        }
+    },
+    "dev_problems": 402,
+    "dev_correct": {
+        "V1": 253,
+        "V2": 267,
+        "V3": 262,
+        "V4": 270,
+        "V5": 265,
+        "V7": 267,
+        "V8": 269
+    },
+    "dev_correct_references": {
+        "V0": 259,
+        "V6": 259
+    },
+    "selected": "V4",
+    "pooled_test": {
+        "problems": 598,
+        "diff": 0.01,
+        "a_only": 13,
+        "b_only": 7,
+        "p": 0.26318,
+        "verdict": "TIE",
+        "bar_3pt": false
+    },
+    "M1": false,
+    "M2": false
+}
