@@ -34,10 +34,22 @@ jobs:
       - uses: actions/download-artifact@v4
         with: {pattern: "value3-*", path: r3, run-id: "${{ steps.ids.outputs.value3 }}", github-token: "${{ github.token }}"}
         continue-on-error: true
-      - uses: actions/download-artifact@v4
+      # value5 has 225 artifacts: the action listed only 200 and then hit GitHub's secondary rate
+      # limit. Download one job group at a time with gh (which pages fully), retrying with a wait,
+      # and fail loudly if the count is short.
+      - name: Download value5 rows
         if: steps.ids.outputs.value5 != ''
-        with: {pattern: "value5-*", path: r5, run-id: "${{ steps.ids.outputs.value5 }}", github-token: "${{ github.token }}"}
-        continue-on-error: true
+        env: {GH_TOKEN: "${{ github.token }}", RUN: "${{ steps.ids.outputs.value5 }}"}
+        run: |
+          mkdir -p r5
+          for g in gsm14b gsm4b mbpp17 mbpp06 gsm17 gsm06; do
+            for t in 1 2 3 4 5; do
+              gh run download "$RUN" -R "$GITHUB_REPOSITORY" -p "value5-$g-*" -D r5 && break
+              echo "retry $g ($t)"; sleep $((60 * t))
+            done
+          done
+          n=$(ls r5 | wc -l); echo "value5 artifacts: $n"
+          [ "$n" -eq 225 ]
       - name: Lazy ratchet on rescored and regenerated rows (printed in full to the log)
         run: |
           mkdir -p r1 r2 r3 r5
