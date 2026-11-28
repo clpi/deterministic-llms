@@ -1,0 +1,94 @@
+name: pal
+# Value amendment 9 (tasks/VALUE_AMEND_9.json, record 4998): program-aided certified decoding on
+# the 400 GSM8K TEST problems for Qwen3-0.6B-Base and Qwen3-1.7B-Base (float32), scored
+# against the stored regenerated chain-of-thought rows of VALUE_AMEND_5 (value5).
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/pal.yml
+      - harness/value_pal.py
+permissions:
+  contents: read
+  actions: read
+env:
+  PINS: torch==2.15.0 transformers==5.24.1 numpy==2.5.3 huggingface_hub safetensors pyarrow
+jobs:
+  run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        model: [Qwen/Qwen3-1.7B-Base, Qwen/Qwen3-0.6B-Base]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+        exclude:
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 20}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 21}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 22}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 23}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 24}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 25}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 26}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 27}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 28}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 29}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 30}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 31}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 32}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 33}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 34}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 35}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 36}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 37}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 38}
+          - {model: Qwen/Qwen3-0.6B-Base, shard: 39}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu $PINS
+      - name: Run the shard (resumable; retried once if the download fails)
+        env: {MODEL: "${{ matrix.model }}", SHARD: "${{ matrix.shard }}", NSH: "${{ matrix.model == 'Qwen/Qwen3-0.6B-Base' && 20 || 40 }}"}
+        run: |
+          cd harness
+          python value_pal.py run "$MODEL" ../pal-out --shard "$SHARD" --nshards "$NSH" \
+            || (sleep 60 && python value_pal.py run "$MODEL" ../pal-out --shard "$SHARD" --nshards "$NSH")
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pal-${{ strategy.job-index }}
+          path: pal-out/*.jsonl
+          if-no-files-found: ignore
+  summary:
+    needs: run
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 transformers==5.24.1 huggingface_hub pyarrow
+      - name: Download the PAL rows and the stored chain-of-thought rows (value5), with retries
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          mkdir -p palres cot
+          for t in 1 2 3 4 5; do gh run download "$GITHUB_RUN_ID" -R "$GITHUB_REPOSITORY" -p "pal-*" -D palres && break; sleep $((60 * t)); done
+          V5=$(python -c "import json;print(json.load(open('out/value/lazy-runs.json'))['value5'])")
+          for g in gsm17 gsm06; do
+            for t in 1 2 3 4 5; do gh run download "$V5" -R "$GITHUB_REPOSITORY" -p "value5-$g-*" -D cot && break; sleep $((60 * t)); done
+          done
+          echo "pal artifacts: $(ls palres | wc -l), cot artifacts: $(ls cot | wc -l)"
+          [ "$(ls cot | wc -l)" -eq 75 ]
+      - name: PAL summary (printed in full to the log)
+        run: |
+          cd harness
+          python value_pal.py summary ../PAL.json ../palres ../cot
+          python -c "import json;print('=== PAL', json.dumps(json.load(open('../PAL.json'))))"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: pal-summary, path: PAL.json}
