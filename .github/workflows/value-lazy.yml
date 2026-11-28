@@ -67,7 +67,9 @@ jobs:
             python value_llama.py bar ../BAR5.json ../r5 || true
             python value_portfolio.py ../PORTFOLIO5.json ../r5 || true
           fi
-          for f in LAZY_RESCORED LAZY_REGEN CONTROL S5 BAR5 PORTFOLIO5; do [ -f ../$f.json ] && python -c "import json,sys;print('=== $f', json.dumps(json.load(open(sys.argv[1]))))" ../$f.json; done
+          # amendment 8: math vote rules, one selected on DEV, tested against sc-8
+          python value_vote.py ../VOTE.json ../r5 || true
+          for f in LAZY_RESCORED LAZY_REGEN CONTROL S5 BAR5 PORTFOLIO5 VOTE; do [ -f ../$f.json ] && python -c "import json,sys;print('=== $f', json.dumps(json.load(open(sys.argv[1]))))" ../$f.json; done
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: value-lazy, path: "*.json"}
