@@ -480,15 +480,20 @@ front's own points dominate each other at 11.09% (main on TEST) and 15.63%
 (gamed on DEV), close to G1 and G2. Most of either side's advantage is the
 spread any front shows on the split it was not selected on.
 
-## Value case: does certified decoding beat greedy and sampling on quality (2026-11-27, in progress)
+## Value case: does certified decoding beat greedy and sampling on quality (2026-11-27 to 28)
 
 Contracts: tasks/VALUE_CONTRACT.json and amendments 1-5 (records 4989-4994), each logged before its code.
 
 | id | claim | status |
 |---|---|---|
 | D1 | Generation stopped at the end-of-document token | **CORRECTED** (amendment 5). It did not: answers were read from a made-up continuation. Rescoring run 45984809235: the do-nothing control holds on every row; 14B greedy 21% -> 69%, margin-branch 16% -> 76%, sc-8 72% -> 75%. Earlier 14B numbers are withdrawn. |
-| D2 | Branch points lie before the end of document | **REFUTED** for every row (14B margin 119 points in 61 of 100 rows; MBPP random-branch 61 and 23). Rows regenerated with the stop (workflow value5); rescored figures are provisional until then. |
-| V1-V3 | margin-branch-8 beats sc-8 / greedy / random-branch-8 (math) | provisional, rescored: 1.7B (280 of 400) vs greedy +5.4 (WIN), vs sc-8 -1.4 (TIE); 4B TIE; 14B TIE |
-| C1-C3 | the same on MBPP with a visible-test filter | margin rows not contaminated: 0.6B vs bo8 -0.4 (TIE), vs greedy +11.3 (WIN); 1.7B TIE / +9.3 (WIN) |
-| P2 | portfolio-27 clears the 3-point bar | provisional: MBPP 0.6B +5.4 over bo8-filter (p=0.007), +17.1 over greedy; MBPP 1.7B +3.5 (p=0.064, TIE); math rows TIE. It costs the sum of the baselines' compute. |
+| D2 | Branch points lie before the end of document | **REFUTED** for every row (14B margin 119 points in 61 of 100 rows; MBPP random-branch 61 and 23). All rows regenerated with the stop: value5 run 45985595874, 225 jobs; scored in value-lazy 46116194993 (receipts out/value/final/). |
+| V1-V3 | margin-branch-8 beats sc-8 / greedy / random-branch-8 (math) | regenerated rows (BAR5.json): 0.6B vs sc-8 **LOSS** -6.75 (p<0.001), vs greedy TIE, vs random WIN +4.5; 1.7B TIE / WIN +6.5 / WIN +5.75; 4B TIE on all three; 14B TIE / WIN +7 / TIE. V1 is not supported anywhere and refuted at 0.6B. |
+| C1-C3 | the same on MBPP with a visible-test filter | regenerated rows: 0.6B vs bo8 TIE -0.4, vs greedy WIN +11.3, vs random WIN +5.1; 1.7B TIE -0.4 / WIN +9.3 / TIE +2.3 |
+| P2 | portfolio-27 clears the 3-point bar | regenerated rows: MBPP 0.6B yes over all three (+5.5 over bo8-filter); MBPP 1.7B over greedy and margin-branch, TIE +3.5 over bo8-filter; math clears it over greedy only (0.6B, 1.7B) and ties sc-8 everywhere. It costs the sum of the baselines' compute. |
 | P1, Q3 | checker-monotone selection (Lean: portfolio_dominates_all, ratchet_monotone) | proved; measured violations 0 on both MBPP rows |
+| L1, L2 | lazy ratchet (amendment 6) selects exactly what the eager ratchet selects (Lean: lazyFirst_sel, decided_mode) | proved; measured equal on every problem: 1,512 of 1,512 rescored and 1,514 of 1,514 regenerated (out/value/final/LAZY_RESCORED.json, LAZY_REGEN.json) |
+| L3 | the lazy ratchet generates fewer tokens than the eager one at the same accuracy | holds on every row: MBPP 0.6B 930 -> 273 tokens a problem (6.9 of 25 candidates), 1.7B 951 -> 215 (4.7 of 25); math 1.2x to 1.7x fewer |
+| L4 | lazy-R4 on MBPP clears the 3-point bar over every baseline | **holds** on the regenerated rows, all six WIN: 0.6B 69.3% vs bo8-filter 63.4% (+5.8, p=0.006) at 0.78x its tokens, vs margin-branch-8-filter +6.2 (p<0.001), vs greedy +17.5; 1.7B 79.4% vs bo8-filter 75.1% (+4.3, p=0.019) at 0.54x its tokens, vs margin-branch-8-filter +4.7 (p<0.001) at 0.92x its tokens, vs greedy +14.0. More accurate and cheaper than both sampling baselines at 1.7B, than bo8-filter at 0.6B. |
+| L5 | the lazy ratchet beats sc-8 on math | **not supported**: TIE on all four math rows, regenerated (R2: 0.6B -3.0, p=0.088; 1.7B -0.75; 4B -2; 14B -1). R2 costs 0.94x to 1.09x sc-8's tokens. It clears the bar over greedy on 0.6B and 1.7B (400 rows each) and over margin-branch on 0.6B (+3.75, p=0.017); 4B and 14B are TIE throughout. |
+| D3 | regeneration control: every non-branch path equals the old path cut at its first end of document | **REFUTED** on four rows, explained by the CPU (CONTROL.json, value-lazy 46116645319). Float32 HF rows (0.6B and 1.7B math, both MBPP): greedy equal on 1,314 of 1,314, across six CPU models; 3 of about 14,000 seeded sampling paths differ. 14B llama.cpp Q4_K_M: greedy equal on 40 of 40 rows regenerated on the same CPU model, 26 of 60 on a different one. 4B bfloat16: 34 of 34 same CPU, 45 of 64 different. The certified pick (prlm-0, B=4) did not make the quantized and bfloat16 backends reproducible across CPUs. |

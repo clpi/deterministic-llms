@@ -1,0 +1,21 @@
+{
+ "written": "2026-11-27T11:02Z (read from the clock), before the lazy decoder's code or Lean file existed",
+ "ask": "Chris 2026-11-27T10:52Z: 'Not good enough improve end to end', then 'All of them' (every task).",
+ "seen_before_writing": "Everything in VALUE_AMEND_5's record: the rescored rows (run 45984809235), including the rescored portfolio and ratchet, and nothing of the regenerated rows (run 45985595874 had not started).",
+ "decoder": {
+  "name": "lazy ratchet",
+  "rule": "Produce candidates one at a time in the ratchet order of VALUE_AMEND_4 (prlm-0, margin-branch paths 2-8, the 8 seeded samples, greedy, the single sample, random-branch paths 2-8) and stop as soon as the eager rule's answer is settled. Code: stop at the first candidate passing VISIBLE (the eager rule returns that candidate). Math: after each candidate, among the answers of candidates passing the equation checker so far, stop when the leading answer's count exceeds every other answer's count by more than the number of candidates not yet produced (no later candidate can change the majority).",
+  "pools": "Code: the full ratchet (R4, 25 candidates). Math: R2 (prlm-0, margin-branch paths 2-8, 8 samples; 16 candidates) and R4.",
+  "fallback": "As the eager rule: if no candidate passes, the prlm-0 path (code) or the prlm-0 answer (math). When no answer is settled early, all candidates are produced and the eager vote decides.",
+  "simulation": "The decoder is simulated exactly from stored paths: branch paths depend only on earlier paths of the same branch run and samples are independent, so stopping after candidate k produces exactly the first k stored candidates. Cost counts each candidate's own generated tokens (a branch path from its branch point on), cut at its first end-of-document token (VALUE_AMEND_5)."
+ },
+ "claims": {
+  "L1": "theorem (Lean, lean/Prlm/Lazy.lean): stopping at the first passing candidate returns what firstPass over the whole list returns, after evaluating at most the whole list",
+  "L2": "theorem (Lean): if in the produced prefix one answer leads every other by more than the number of candidates left, then in the whole list that answer has strictly the highest count, so every majority rule returns it",
+  "L3_control": "measured, every row: the lazy decoder's selected answer or program equals the eager ratchet's on every problem. Must be 100%; any difference is a bug and is reported",
+  "L4": "measured, every row: accuracy and mean generated tokens of lazy-R4 (code), lazy-R2 and lazy-R4 (math) against greedy, sc-8 or bo8-filter, and margin-branch-8(-filter), by the exact McNemar rule and the 3-point bar of VALUE_AMEND_2",
+  "L5": "a row counts as BETTER ON BOTH against a baseline only if accuracy is a McNemar WIN and mean generated tokens are lower; reported per row, with the token ratio"
+ },
+ "rows": "Primary: the regenerated rows of VALUE_AMEND_5 (run 45985595874) once they exist. Until then the rescored rows are scored and labeled provisional.",
+ "what_stands": "VALUE_CONTRACT and amendments 1-5 stand as logged."
+}

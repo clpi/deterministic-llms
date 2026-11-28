@@ -1,0 +1,73 @@
+name: value-lazy
+# Value amendment 6 (tasks/VALUE_AMEND_6.json, record 4995): the lazy ratchet, scored on
+# the rows named in out/value/lazy-runs.json. Rescored rows (VALUE_AMEND_5's rule applied to
+# the original runs) are provisional; the regenerated rows (value5), when named, are primary.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/value-lazy.yml
+      - harness/value_lazy.py
+      - out/value/lazy-runs.json
+permissions:
+  contents: read
+  actions: read
+jobs:
+  score:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python -m pip install numpy==2.5.3 transformers==5.24.1 huggingface_hub pyarrow
+      - id: ids
+        run: |
+          for k in value value2 value3 value5; do
+            echo "$k=$(python -c "import json;print(json.load(open('out/value/lazy-runs.json')).get('$k') or '')")" >> "$GITHUB_OUTPUT"
+          done
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value-*", path: r1, run-id: "${{ steps.ids.outputs.value }}", github-token: "${{ github.token }}"}
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value2-*", path: r2, run-id: "${{ steps.ids.outputs.value2 }}", github-token: "${{ github.token }}"}
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: {pattern: "value3-*", path: r3, run-id: "${{ steps.ids.outputs.value3 }}", github-token: "${{ github.token }}"}
+        continue-on-error: true
+      # value5 has 225 artifacts: the action listed only 200 and then hit GitHub's secondary rate
+      # limit. Download one job group at a time with gh (which pages fully), retrying with a wait,
+      # and fail loudly if the count is short.
+      - name: Download value5 rows
+        if: steps.ids.outputs.value5 != ''
+        env: {GH_TOKEN: "${{ github.token }}", RUN: "${{ steps.ids.outputs.value5 }}"}
+        run: |
+          mkdir -p r5
+          for g in gsm14b gsm4b mbpp17 mbpp06 gsm17 gsm06; do
+            for t in 1 2 3 4 5; do
+              gh run download "$RUN" -R "$GITHUB_REPOSITORY" -p "value5-$g-*" -D r5 && break
+              echo "retry $g ($t)"; sleep $((60 * t))
+            done
+          done
+          n=$(ls r5 | wc -l); echo "value5 artifacts: $n"
+          [ "$n" -eq 225 ]
+      - name: Lazy ratchet on rescored and regenerated rows (printed in full to the log)
+        run: |
+          mkdir -p r1 r2 r3 r5
+          cd harness
+          python test_eq_regex.py
+          python value_eos.py ../C ../r1 ../r2 ../r3 > /dev/null
+          python value_lazy.py ../LAZY_RESCORED.json ../C/r1 ../C/r2 ../C/r3 || true
+          python value_lazy.py ../LAZY_REGEN.json ../r5 || true
+          # value5's own summary job hung on the backtracking EQ regex (fixed in value_portfolio.py);
+          # its control, summaries, bar and portfolio are recomputed here from the same artifacts.
+          if [ -n "$(ls -A ../r5)" ]; then
+            mkdir -p ../old && cp -r ../r1 ../r2 ../r3 ../old/
+            python value_eos_compare.py ../CONTROL.json ../r5 ../old || true
+            python value_code.py summary ../S5.json ../r5 || true
+            python value_llama.py bar ../BAR5.json ../r5 || true
+            python value_portfolio.py ../PORTFOLIO5.json ../r5 || true
+          fi
+          for f in LAZY_RESCORED LAZY_REGEN CONTROL S5 BAR5 PORTFOLIO5; do [ -f ../$f.json ] && python -c "import json,sys;print('=== $f', json.dumps(json.load(open(sys.argv[1]))))" ../$f.json; done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: value-lazy, path: "*.json"}

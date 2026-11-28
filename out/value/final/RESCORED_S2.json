@@ -1,0 +1,246 @@
+{
+    "gsm14b:mradermacher/Qwen3-14B-Base-GGUF": {
+        "task": "gsm14b",
+        "problems": 100,
+        "inputs": [
+            "{\"commit\": \"7c835dd1a0c22634be5569f4d583279c7eb9cae0\", \"engine\": \"llama.cpp b12699\", \"file\": \"Qwen3-14B-Base.Q4_K_M.gguf\", \"repo\": \"mradermacher/Qwen3-14B-Base-GGUF\", \"weights_sha256\": {\"Qwen3-14B-Base.Q4_K_M.gguf\": \"30d27f5291ef4ec25caddbf6468fa9fbb3e4ceffadbcf098bc618b54b65d9708\"}}"
+        ],
+        "accuracy": {
+            "greedy": 0.69,
+            "prlm-0": 0.69,
+            "sample": 0.64,
+            "sc-8": 0.75,
+            "margin-branch-8": 0.76,
+            "random-branch-8": 0.74
+        },
+        "oracle_best_of_8": {
+            "sc-8": 0.93,
+            "margin-branch-8": 0.8,
+            "random-branch-8": 0.83
+        },
+        "mean_gen_tokens": {
+            "greedy": 102.1,
+            "prlm-0": 102.1,
+            "sample": 100.7,
+            "sc-8": 748.2,
+            "margin-branch-8": 384.4,
+            "random-branch-8": 317.2
+        },
+        "mean_forwards": {
+            "greedy": 155.8,
+            "prlm-0": 155.8,
+            "sample": 132.5,
+            "sc-8": 981.9,
+            "margin-branch-8": 743.3,
+            "random-branch-8": 632.6
+        },
+        "branch_vs_sampling": {
+            "diff": 0.01,
+            "a_only": 8,
+            "b_only": 7,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "branch_vs_greedy": {
+            "diff": 0.07,
+            "a_only": 7,
+            "b_only": 0,
+            "p": 0.01562,
+            "verdict": "WIN"
+        },
+        "branch_vs_random": {
+            "diff": 0.02,
+            "a_only": 3,
+            "b_only": 1,
+            "p": 0.625,
+            "verdict": "TIE"
+        }
+    },
+    "gsm4b:Qwen/Qwen3-4B-Base": {
+        "task": "gsm4b",
+        "problems": 98,
+        "inputs": [
+            "{\"commit\": \"906bfd4b4dc7f14ee4320094d8b41684abff8539\", \"dtype\": \"bfloat16\", \"repo\": \"Qwen/Qwen3-4B-Base\", \"weights_sha256\": {\"model-00001-of-00003.safetensors\": \"4c807e2503d68ae373d508689d00a41f4b33f33c2536da97ab81a20caddc1241\", \"model-00002-of-00003.safetensors\": \"f4707585548b2fc75a6b1d732e8465c62040a8699903c32850781beeb9b27826\", \"model-00003-of-00003.safetensors\": \"c7b1aa8fb672de2e00423c99876926022e50b18d4f0d140670788510a27f9965\"}}"
+        ],
+        "accuracy": {
+            "greedy": 0.8163,
+            "prlm-0": 0.8163,
+            "sample": 0.7245,
+            "sc-8": 0.8163,
+            "margin-branch-8": 0.8367,
+            "random-branch-8": 0.8571
+        },
+        "oracle_best_of_8": {
+            "sc-8": 0.9388,
+            "margin-branch-8": 0.8878,
+            "random-branch-8": 0.8878
+        },
+        "mean_gen_tokens": {
+            "greedy": 112.0,
+            "prlm-0": 112.0,
+            "sample": 109.3,
+            "sc-8": 826.9,
+            "margin-branch-8": 555.5,
+            "random-branch-8": 430.4
+        },
+        "mean_forwards": {
+            "greedy": 111.0,
+            "prlm-0": 111.0,
+            "sample": 120.4,
+            "sc-8": 902.0,
+            "margin-branch-8": 554.5,
+            "random-branch-8": 484.5
+        },
+        "branch_vs_sampling": {
+            "diff": 0.0204,
+            "a_only": 8,
+            "b_only": 6,
+            "p": 0.79053,
+            "verdict": "TIE"
+        },
+        "branch_vs_greedy": {
+            "diff": 0.0204,
+            "a_only": 2,
+            "b_only": 0,
+            "p": 0.5,
+            "verdict": "TIE"
+        },
+        "branch_vs_random": {
+            "diff": -0.0204,
+            "a_only": 1,
+            "b_only": 3,
+            "p": 0.625,
+            "verdict": "TIE"
+        }
+    },
+    "mbpp:Qwen/Qwen3-0.6B-Base": {
+        "task": "mbpp",
+        "problems": 257,
+        "inputs": [
+            "{\"commit\": \"da87bfb608c14b7cf20ba1ce41287e8de496c0cd\", \"repo\": \"Qwen/Qwen3-0.6B-Base\", \"weights_sha256\": {\"model.safetensors\": \"cd2a512003e2f9f3cd3c32a9c3573f820bb28c940f73c57b1ddaa983d9223eba\"}}"
+        ],
+        "accuracy": {
+            "greedy": 0.5175,
+            "prlm-0": 0.5136,
+            "sample": 0.3619,
+            "bo8-filter": 0.6342,
+            "margin-branch-8-filter": 0.6304,
+            "random-branch-8-filter": 0.5798
+        },
+        "oracle_best_of_8": {
+            "bo8-filter": 0.6732,
+            "margin-branch-8-filter": 0.6381,
+            "random-branch-8-filter": 0.5875
+        },
+        "mean_gen_tokens": {
+            "greedy": 43.2,
+            "prlm-0": 43.4,
+            "sample": 44.4,
+            "bo8-filter": 348.7,
+            "margin-branch-8-filter": 222.6,
+            "random-branch-8-filter": 304.0
+        },
+        "mean_forwards": {
+            "greedy": 42.2,
+            "prlm-0": 42.4,
+            "sample": 43.4,
+            "bo8-filter": 342.6,
+            "margin-branch-8-filter": 221.6,
+            "random-branch-8-filter": 392.0
+        },
+        "branch_vs_sampling": {
+            "diff": -0.0039,
+            "a_only": 19,
+            "b_only": 20,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "branch_vs_greedy": {
+            "diff": 0.1128,
+            "a_only": 29,
+            "b_only": 0,
+            "p": 0.0,
+            "verdict": "WIN"
+        },
+        "branch_vs_random": {
+            "diff": 0.0506,
+            "a_only": 16,
+            "b_only": 3,
+            "p": 0.00443,
+            "verdict": "WIN"
+        },
+        "visible_pass_hidden_fail": {
+            "greedy": 13,
+            "prlm-0": 13,
+            "sample": 21,
+            "bo8-filter": 28,
+            "margin-branch-8-filter": 26,
+            "random-branch-8-filter": 19
+        }
+    },
+    "mbpp:Qwen/Qwen3-1.7B-Base": {
+        "task": "mbpp",
+        "problems": 257,
+        "inputs": [
+            "{\"commit\": \"ea980cb0a6c2ae4b936e82123acc929f1cec04c1\", \"repo\": \"Qwen/Qwen3-1.7B-Base\", \"weights_sha256\": {\"model.safetensors\": \"6df85b39330e5a425ee36253d0f894e4387e4f0a15b9c53cb467d668e6b3a841\"}}"
+        ],
+        "accuracy": {
+            "greedy": 0.6537,
+            "prlm-0": 0.6537,
+            "sample": 0.537,
+            "bo8-filter": 0.751,
+            "margin-branch-8-filter": 0.7471,
+            "random-branch-8-filter": 0.7237
+        },
+        "oracle_best_of_8": {
+            "bo8-filter": 0.7938,
+            "margin-branch-8-filter": 0.7704,
+            "random-branch-8-filter": 0.7393
+        },
+        "mean_gen_tokens": {
+            "greedy": 41.7,
+            "prlm-0": 41.7,
+            "sample": 45.0,
+            "bo8-filter": 399.2,
+            "margin-branch-8-filter": 232.8,
+            "random-branch-8-filter": 270.9
+        },
+        "mean_forwards": {
+            "greedy": 40.7,
+            "prlm-0": 40.7,
+            "sample": 44.6,
+            "bo8-filter": 391.2,
+            "margin-branch-8-filter": 231.8,
+            "random-branch-8-filter": 287.7
+        },
+        "branch_vs_sampling": {
+            "diff": -0.0039,
+            "a_only": 9,
+            "b_only": 10,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "branch_vs_greedy": {
+            "diff": 0.0934,
+            "a_only": 24,
+            "b_only": 0,
+            "p": 0.0,
+            "verdict": "WIN"
+        },
+        "branch_vs_random": {
+            "diff": 0.0233,
+            "a_only": 13,
+            "b_only": 7,
+            "p": 0.26318,
+            "verdict": "TIE"
+        },
+        "visible_pass_hidden_fail": {
+            "greedy": 15,
+            "prlm-0": 15,
+            "sample": 17,
+            "bo8-filter": 29,
+            "margin-branch-8-filter": 20,
+            "random-branch-8-filter": 20
+        }
+    }
+}

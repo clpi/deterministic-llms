@@ -19,6 +19,7 @@ import Prlm.Fix
 import Prlm.Struct
 import Prlm.Robust
 import Prlm.Portfolio
+import Prlm.Lazy
 open Prlm
 #print axioms best_perm
 #print axioms max_unique
@@ -76,6 +77,13 @@ open Prlm
 #print axioms Prlm.Portfolio.fresh_spec
 #print axioms Prlm.Portfolio.fresh_le
 #print axioms Prlm.Portfolio.fresh_self
+#print axioms Prlm.Lazy.lazyFirst_sel
+#print axioms Prlm.Lazy.lazyFirst_cost_le
+#print axioms Prlm.Lazy.lazyFirst_prefix
+#print axioms Prlm.Lazy.firstPass_append_some
+#print axioms Prlm.Lazy.firstPass_append_none
+#print axioms Prlm.Lazy.decided
+#print axioms Prlm.Lazy.decided_mode
 X
 ax=$(lake env lean /tmp/prlm_axioms.lean 2>&1) || { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }
 echo "$ax" | grep -q "error" && { echo "$ax"; echo "AXIOM CHECK FAILED"; exit 1; }

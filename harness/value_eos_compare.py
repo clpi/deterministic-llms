@@ -40,6 +40,16 @@ def main(outfile, new, old):
         if o is None:
             continue
         s["rows_with_old"] += 1
+        # Diagnostic (added after the control failed on 14B/4B): does a mismatch go with a
+        # change of CPU between the old and the regenerating runner?
+        same = (r.get("machine") or {}).get("cpu") == (o.get("machine") or {}).get("cpu")
+        g = s.setdefault("by_cpu", {}).setdefault("same_cpu" if same else "different_cpu",
+                                                   {"rows": 0, "greedy_equal": 0, "cpus": {}})
+        g["rows"] += 1
+        if "greedy" in r["methods"] and "greedy" in o["methods"]:
+            g["greedy_equal"] += int(r["methods"]["greedy"]["paths"][0] == cut(o["methods"]["greedy"]["paths"][0]))
+        pair = f'{(o.get("machine") or {}).get("cpu")} -> {(r.get("machine") or {}).get("cpu")}'
+        g["cpus"][pair] = g["cpus"].get(pair, 0) + 1
         for m, M in r["methods"].items():
             if m not in o["methods"]:
                 continue

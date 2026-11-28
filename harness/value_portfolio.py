@@ -27,7 +27,13 @@ def arith(expr):
     return ev(ast.parse(expr, mode="eval"))
 
 ORDER = ["prlm-0", "greedy", "sample", "SAMPLES", "BRANCH", "RANDOM"]
-EQ = re.compile(r"((?:[\d.,$]+|[-+*/x×()]|\s)+?)=\s*\$?(-?[\d,]*\.?\d+)")
+# One character class, not a run of alternated runs: the old form ((?:[\d.,$]+|...|\s)+?) matched
+# the same strings but backtracked exponentially on a long digit run with no "=" (2x per
+# digit; a 0.6B completion of repeated digits hung the scoring jobs for hours). Same matches:
+# "=" is outside the class, so from any start the group runs exactly to the first "=" and
+# the right-hand side is unchanged (harness/test_eq_regex.py checks both forms agree).
+EQ = re.compile(r"([\d.,$\-+*/x×()\s]+?)=\s*\$?(-?[\d,]*\.?\d+)")
+EQ_OLD = r"((?:[\d.,$]+|[-+*/x×()]|\s)+?)=\s*\$?(-?[\d,]*\.?\d+)"
 TOK = {}
 
 

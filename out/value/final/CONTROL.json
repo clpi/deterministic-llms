@@ -1,0 +1,361 @@
+{
+    "gsm14b:mradermacher/Qwen3-14B-Base-GGUF": {
+        "rows": 100,
+        "rows_with_old": 100,
+        "methods": {
+            "greedy": {
+                "paths": 100,
+                "equal_to_cut": 66
+            },
+            "prlm-0": {
+                "paths": 100,
+                "equal_to_cut": 66
+            },
+            "sample": {
+                "paths": 100,
+                "equal_to_cut": 63
+            },
+            "sc-8": {
+                "paths": 800,
+                "equal_to_cut": 502
+            },
+            "margin-branch-8": {
+                "paths": 800,
+                "equal_to_cut": 293
+            },
+            "random-branch-8": {
+                "paths": 800,
+                "equal_to_cut": 246
+            }
+        },
+        "by_cpu": {
+            "same_cpu": {
+                "rows": 40,
+                "greedy_equal": 40,
+                "cpus": {
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 9V74 80-Core Processor": 4,
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) 6975P-C": 32,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 7763 64-Core Processor": 2,
+                    "AMD EPYC 9V45 96-Core Processor -> AMD EPYC 9V45 96-Core Processor": 2
+                }
+            },
+            "different_cpu": {
+                "rows": 60,
+                "greedy_equal": 26,
+                "cpus": {
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V45 96-Core Processor": 6,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 7763 64-Core Processor": 4,
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) 6975P-C": 10,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 7763 64-Core Processor": 4,
+                    "AMD EPYC 9V74 80-Core Processor -> INTEL(R) XEON(R) PLATINUM 8573C": 2,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V74 80-Core Processor": 10,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V74 80-Core Processor": 4,
+                    "AMD EPYC 7763 64-Core Processor -> Intel(R) Xeon(R) 6975P-C": 6,
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz": 2,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> Intel(R) Xeon(R) 6975P-C": 2,
+                    "AMD EPYC 9V45 96-Core Processor -> Intel(R) Xeon(R) 6975P-C": 4,
+                    "AMD EPYC 9V45 96-Core Processor -> AMD EPYC 7763 64-Core Processor": 2,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> AMD EPYC 9V74 80-Core Processor": 2,
+                    "Intel(R) Xeon(R) 6975P-C -> INTEL(R) XEON(R) PLATINUM 8573C": 2
+                }
+            }
+        },
+        "control_holds": false
+    },
+    "gsm4b:Qwen/Qwen3-4B-Base": {
+        "rows": 100,
+        "rows_with_old": 98,
+        "methods": {
+            "greedy": {
+                "paths": 98,
+                "equal_to_cut": 79
+            },
+            "prlm-0": {
+                "paths": 98,
+                "equal_to_cut": 79
+            },
+            "sample": {
+                "paths": 98,
+                "equal_to_cut": 60
+            },
+            "sc-8": {
+                "paths": 784,
+                "equal_to_cut": 510
+            },
+            "margin-branch-8": {
+                "paths": 784,
+                "equal_to_cut": 458
+            },
+            "random-branch-8": {
+                "paths": 784,
+                "equal_to_cut": 474
+            }
+        },
+        "by_cpu": {
+            "different_cpu": {
+                "rows": 64,
+                "greedy_equal": 45,
+                "cpus": {
+                    "AMD EPYC 9V45 96-Core Processor -> Intel(R) Xeon(R) 6975P-C": 6,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 7763 64-Core Processor": 10,
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) 6973P-C": 2,
+                    "AMD EPYC 7763 64-Core Processor -> Intel(R) Xeon(R) 6975P-C": 8,
+                    "AMD EPYC 7763 64-Core Processor -> INTEL(R) XEON(R) PLATINUM 8573C": 2,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V74 80-Core Processor": 8,
+                    "Intel(R) Xeon(R) 6975P-C -> INTEL(R) XEON(R) PLATINUM 8573C": 4,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V74 80-Core Processor": 6,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> AMD EPYC 9V74 80-Core Processor": 2,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V45 96-Core Processor": 4,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 9V45 96-Core Processor": 2,
+                    "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz -> Intel(R) Xeon(R) 6975P-C": 2,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 7763 64-Core Processor": 4,
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz": 2,
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) 6975P-C": 2
+                }
+            },
+            "same_cpu": {
+                "rows": 34,
+                "greedy_equal": 34,
+                "cpus": {
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) 6975P-C": 32,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 9V74 80-Core Processor": 2
+                }
+            }
+        },
+        "control_holds": false
+    },
+    "gsm8k:Qwen/Qwen3-0.6B-Base": {
+        "rows": 400,
+        "rows_with_old": 400,
+        "methods": {
+            "greedy": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "prlm-0": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sample": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sc-8": {
+                "paths": 3200,
+                "equal_to_cut": 3198
+            },
+            "margin-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 3182
+            },
+            "random-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 3155
+            }
+        },
+        "by_cpu": {
+            "different_cpu": {
+                "rows": 208,
+                "greedy_equal": 208,
+                "cpus": {
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) 6975P-C": 32,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> Intel(R) Xeon(R) 6975P-C": 32,
+                    "Intel(R) Xeon(R) 6973P-C -> AMD EPYC 9V74 80-Core Processor": 16,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V74 80-Core Processor": 16,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V74 80-Core Processor": 16,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 7763 64-Core Processor": 32,
+                    "AMD EPYC 7763 64-Core Processor -> Intel(R) Xeon(R) 6975P-C": 16,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V45 96-Core Processor": 16,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V45 96-Core Processor": 16,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> AMD EPYC 7763 64-Core Processor": 16
+                }
+            },
+            "same_cpu": {
+                "rows": 192,
+                "greedy_equal": 192,
+                "cpus": {
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) 6975P-C": 192
+                }
+            }
+        },
+        "control_holds": false
+    },
+    "gsm8k:Qwen/Qwen3-1.7B-Base": {
+        "rows": 400,
+        "rows_with_old": 400,
+        "methods": {
+            "greedy": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "prlm-0": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sample": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sc-8": {
+                "paths": 3200,
+                "equal_to_cut": 3200
+            },
+            "margin-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 3085
+            },
+            "random-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 2931
+            }
+        },
+        "by_cpu": {
+            "different_cpu": {
+                "rows": 272,
+                "greedy_equal": 272,
+                "cpus": {
+                    "AMD EPYC 9V45 96-Core Processor -> AMD EPYC 9V74 80-Core Processor": 16,
+                    "Intel(R) Xeon(R) 6975P-C -> INTEL(R) XEON(R) PLATINUM 8573C": 8,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V45 96-Core Processor": 16,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 7763 64-Core Processor": 8,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 7763 64-Core Processor": 48,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> Intel(R) Xeon(R) 6975P-C": 8,
+                    "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz -> Intel(R) Xeon(R) 6975P-C": 16,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V45 96-Core Processor": 24,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> AMD EPYC 9V74 80-Core Processor": 8,
+                    "AMD EPYC 7763 64-Core Processor -> Intel(R) Xeon(R) 6975P-C": 32,
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) 6973P-C": 8,
+                    "AMD EPYC 9V74 80-Core Processor -> INTEL(R) XEON(R) PLATINUM 8573C": 8,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V74 80-Core Processor": 8,
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) 6975P-C": 16,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 9V45 96-Core Processor": 8,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> AMD EPYC 7763 64-Core Processor": 8,
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz": 8,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V74 80-Core Processor": 8,
+                    "AMD EPYC 9V45 96-Core Processor -> Intel(R) Xeon(R) 6975P-C": 16
+                }
+            },
+            "same_cpu": {
+                "rows": 128,
+                "greedy_equal": 128,
+                "cpus": {
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) 6975P-C": 104,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 7763 64-Core Processor": 16,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 9V74 80-Core Processor": 8
+                }
+            }
+        },
+        "control_holds": true
+    },
+    "mbpp:Qwen/Qwen3-0.6B-Base": {
+        "rows": 257,
+        "rows_with_old": 257,
+        "methods": {
+            "greedy": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "prlm-0": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "sample": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "bo8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "margin-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "random-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 1980
+            }
+        },
+        "by_cpu": {
+            "different_cpu": {
+                "rows": 137,
+                "greedy_equal": 137,
+                "cpus": {
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V74 80-Core Processor": 31,
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) 6975P-C": 16,
+                    "AMD EPYC 9V45 96-Core Processor -> Intel(R) Xeon(R) 6975P-C": 15,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 7763 64-Core Processor": 15,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V45 96-Core Processor": 15,
+                    "AMD EPYC 7763 64-Core Processor -> Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz": 15,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V74 80-Core Processor": 15,
+                    "AMD EPYC 7763 64-Core Processor -> Intel(R) Xeon(R) 6975P-C": 15
+                }
+            },
+            "same_cpu": {
+                "rows": 120,
+                "greedy_equal": 120,
+                "cpus": {
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) 6975P-C": 105,
+                    "AMD EPYC 9V45 96-Core Processor -> AMD EPYC 9V45 96-Core Processor": 15
+                }
+            }
+        },
+        "control_holds": true
+    },
+    "mbpp:Qwen/Qwen3-1.7B-Base": {
+        "rows": 257,
+        "rows_with_old": 257,
+        "methods": {
+            "greedy": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "prlm-0": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "sample": {
+                "paths": 257,
+                "equal_to_cut": 256
+            },
+            "bo8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "margin-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "random-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2005
+            }
+        },
+        "by_cpu": {
+            "different_cpu": {
+                "rows": 163,
+                "greedy_equal": 163,
+                "cpus": {
+                    "AMD EPYC 9V74 80-Core Processor -> Intel(R) Xeon(R) 6975P-C": 16,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 7763 64-Core Processor": 62,
+                    "Intel(R) Xeon(R) 6975P-C -> AMD EPYC 9V74 80-Core Processor": 31,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 9V45 96-Core Processor": 15,
+                    "INTEL(R) XEON(R) PLATINUM 8573C -> Intel(R) Xeon(R) 6975P-C": 8,
+                    "AMD EPYC 7763 64-Core Processor -> Intel(R) Xeon(R) 6975P-C": 8,
+                    "AMD EPYC 7763 64-Core Processor -> AMD EPYC 9V74 80-Core Processor": 8,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 7763 64-Core Processor": 8,
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz": 7
+                }
+            },
+            "same_cpu": {
+                "rows": 94,
+                "greedy_equal": 94,
+                "cpus": {
+                    "Intel(R) Xeon(R) 6975P-C -> Intel(R) Xeon(R) 6975P-C": 87,
+                    "AMD EPYC 9V74 80-Core Processor -> AMD EPYC 9V74 80-Core Processor": 7
+                }
+            }
+        },
+        "control_holds": false
+    }
+}

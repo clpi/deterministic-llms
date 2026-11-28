@@ -1,0 +1,520 @@
+{
+    "gsm14b:mradermacher/Qwen3-14B-Base-GGUF": {
+        "task": "gsm14b",
+        "problems": 100,
+        "baselines": {
+            "greedy": {
+                "accuracy": 0.68,
+                "mean_gen_tokens": 100.5
+            },
+            "sc-8": {
+                "accuracy": 0.73,
+                "mean_gen_tokens": 744.7
+            },
+            "margin-branch-8": {
+                "accuracy": 0.75,
+                "mean_gen_tokens": 415.1
+            }
+        },
+        "lazy-R2": {
+            "accuracy": 0.72,
+            "mean_gen_tokens": 701.7,
+            "eager_mean_gen_tokens": 1158.0,
+            "mean_candidates": 11.12,
+            "candidates": 16,
+            "L3_equal_to_eager": 100,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.04,
+                    "a_only": 7,
+                    "b_only": 3,
+                    "p": 0.34375,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 6.98,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.01,
+                    "a_only": 7,
+                    "b_only": 8,
+                    "p": 1.0,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 0.942,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": -0.03,
+                    "a_only": 0,
+                    "b_only": 3,
+                    "p": 0.25,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.69,
+                    "better_on_both": false
+                }
+            }
+        },
+        "lazy-R4": {
+            "accuracy": 0.7,
+            "mean_gen_tokens": 1240.6,
+            "eager_mean_gen_tokens": 1661.9,
+            "mean_candidates": 17.38,
+            "candidates": 25,
+            "L3_equal_to_eager": 100,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.02,
+                    "a_only": 5,
+                    "b_only": 3,
+                    "p": 0.72656,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 12.341,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.03,
+                    "a_only": 6,
+                    "b_only": 9,
+                    "p": 0.60724,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.666,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": -0.05,
+                    "a_only": 2,
+                    "b_only": 7,
+                    "p": 0.17969,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 2.989,
+                    "better_on_both": false
+                }
+            }
+        }
+    },
+    "gsm4b:Qwen/Qwen3-4B-Base": {
+        "task": "gsm4b",
+        "problems": 100,
+        "baselines": {
+            "greedy": {
+                "accuracy": 0.81,
+                "mean_gen_tokens": 112.4
+            },
+            "sc-8": {
+                "accuracy": 0.85,
+                "mean_gen_tokens": 823.0
+            },
+            "margin-branch-8": {
+                "accuracy": 0.81,
+                "mean_gen_tokens": 559.6
+            }
+        },
+        "lazy-R2": {
+            "accuracy": 0.83,
+            "mean_gen_tokens": 856.2,
+            "eager_mean_gen_tokens": 1382.6,
+            "mean_candidates": 10.84,
+            "candidates": 16,
+            "L3_equal_to_eager": 100,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.02,
+                    "a_only": 4,
+                    "b_only": 2,
+                    "p": 0.6875,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 7.617,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.02,
+                    "a_only": 3,
+                    "b_only": 5,
+                    "p": 0.72656,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.04,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": 0.02,
+                    "a_only": 4,
+                    "b_only": 2,
+                    "p": 0.6875,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.53,
+                    "better_on_both": false
+                }
+            }
+        },
+        "lazy-R4": {
+            "accuracy": 0.83,
+            "mean_gen_tokens": 1401.6,
+            "eager_mean_gen_tokens": 1918.2,
+            "mean_candidates": 16.56,
+            "candidates": 25,
+            "L3_equal_to_eager": 100,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.02,
+                    "a_only": 4,
+                    "b_only": 2,
+                    "p": 0.6875,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 12.469,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.02,
+                    "a_only": 4,
+                    "b_only": 6,
+                    "p": 0.75391,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.703,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": 0.02,
+                    "a_only": 4,
+                    "b_only": 2,
+                    "p": 0.6875,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 2.504,
+                    "better_on_both": false
+                }
+            }
+        }
+    },
+    "gsm8k:Qwen/Qwen3-0.6B-Base": {
+        "task": "gsm8k",
+        "problems": 400,
+        "baselines": {
+            "greedy": {
+                "accuracy": 0.565,
+                "mean_gen_tokens": 113.3
+            },
+            "sc-8": {
+                "accuracy": 0.655,
+                "mean_gen_tokens": 885.3
+            },
+            "margin-branch-8": {
+                "accuracy": 0.5875,
+                "mean_gen_tokens": 499.3
+            }
+        },
+        "lazy-R2": {
+            "accuracy": 0.625,
+            "mean_gen_tokens": 967.5,
+            "eager_mean_gen_tokens": 1384.4,
+            "mean_candidates": 12.03,
+            "candidates": 16,
+            "L3_equal_to_eager": 400,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.06,
+                    "a_only": 36,
+                    "b_only": 12,
+                    "p": 0.00072,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 8.538,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.03,
+                    "a_only": 15,
+                    "b_only": 27,
+                    "p": 0.08843,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.093,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": 0.0375,
+                    "a_only": 25,
+                    "b_only": 10,
+                    "p": 0.01667,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 1.938,
+                    "better_on_both": false
+                }
+            }
+        },
+        "lazy-R4": {
+            "accuracy": 0.6225,
+            "mean_gen_tokens": 1561.0,
+            "eager_mean_gen_tokens": 1944.2,
+            "mean_candidates": 18.55,
+            "candidates": 25,
+            "L3_equal_to_eager": 400,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.0575,
+                    "a_only": 29,
+                    "b_only": 6,
+                    "p": 0.00012,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 13.775,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.0325,
+                    "a_only": 17,
+                    "b_only": 30,
+                    "p": 0.07894,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.763,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": 0.035,
+                    "a_only": 24,
+                    "b_only": 10,
+                    "p": 0.02431,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 3.126,
+                    "better_on_both": false
+                }
+            }
+        }
+    },
+    "gsm8k:Qwen/Qwen3-1.7B-Base": {
+        "task": "gsm8k",
+        "problems": 400,
+        "baselines": {
+            "greedy": {
+                "accuracy": 0.595,
+                "mean_gen_tokens": 100.1
+            },
+            "sc-8": {
+                "accuracy": 0.66,
+                "mean_gen_tokens": 763.1
+            },
+            "margin-branch-8": {
+                "accuracy": 0.66,
+                "mean_gen_tokens": 414.6
+            }
+        },
+        "lazy-R2": {
+            "accuracy": 0.6525,
+            "mean_gen_tokens": 730.0,
+            "eager_mean_gen_tokens": 1177.7,
+            "mean_candidates": 11.3,
+            "candidates": 16,
+            "L3_equal_to_eager": 400,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.0575,
+                    "a_only": 26,
+                    "b_only": 3,
+                    "p": 2e-05,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 7.289,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.0075,
+                    "a_only": 29,
+                    "b_only": 32,
+                    "p": 0.79815,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 0.957,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": -0.0075,
+                    "a_only": 3,
+                    "b_only": 6,
+                    "p": 0.50781,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.761,
+                    "better_on_both": false
+                }
+            }
+        },
+        "lazy-R4": {
+            "accuracy": 0.6525,
+            "mean_gen_tokens": 1277.7,
+            "eager_mean_gen_tokens": 1681.5,
+            "mean_candidates": 17.82,
+            "candidates": 25,
+            "L3_equal_to_eager": 400,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.0575,
+                    "a_only": 24,
+                    "b_only": 1,
+                    "p": 0.0,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 12.759,
+                    "better_on_both": false
+                },
+                "sc-8": {
+                    "diff": -0.0075,
+                    "a_only": 30,
+                    "b_only": 33,
+                    "p": 0.80131,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 1.674,
+                    "better_on_both": false
+                },
+                "margin-branch-8": {
+                    "diff": -0.0075,
+                    "a_only": 8,
+                    "b_only": 11,
+                    "p": 0.64761,
+                    "verdict": "TIE",
+                    "bar_3pt": false,
+                    "token_ratio": 3.082,
+                    "better_on_both": false
+                }
+            }
+        }
+    },
+    "mbpp:Qwen/Qwen3-0.6B-Base": {
+        "task": "mbpp",
+        "problems": 257,
+        "baselines": {
+            "greedy": {
+                "accuracy": 0.5175,
+                "mean_gen_tokens": 43.2
+            },
+            "bo8-filter": {
+                "accuracy": 0.6342,
+                "mean_gen_tokens": 348.7
+            },
+            "margin-branch-8-filter": {
+                "accuracy": 0.6304,
+                "mean_gen_tokens": 222.6
+            }
+        },
+        "lazy-R4": {
+            "accuracy": 0.6926,
+            "mean_gen_tokens": 273.1,
+            "eager_mean_gen_tokens": 929.8,
+            "mean_candidates": 6.89,
+            "candidates": 25,
+            "L3_equal_to_eager": 257,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.1751,
+                    "a_only": 45,
+                    "b_only": 0,
+                    "p": 0.0,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 6.321,
+                    "better_on_both": false
+                },
+                "bo8-filter": {
+                    "diff": 0.0584,
+                    "a_only": 21,
+                    "b_only": 6,
+                    "p": 0.00592,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 0.783,
+                    "better_on_both": true
+                },
+                "margin-branch-8-filter": {
+                    "diff": 0.0623,
+                    "a_only": 16,
+                    "b_only": 0,
+                    "p": 3e-05,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 1.227,
+                    "better_on_both": false
+                }
+            }
+        }
+    },
+    "mbpp:Qwen/Qwen3-1.7B-Base": {
+        "task": "mbpp",
+        "problems": 257,
+        "baselines": {
+            "greedy": {
+                "accuracy": 0.6537,
+                "mean_gen_tokens": 41.7
+            },
+            "bo8-filter": {
+                "accuracy": 0.751,
+                "mean_gen_tokens": 399.2
+            },
+            "margin-branch-8-filter": {
+                "accuracy": 0.7471,
+                "mean_gen_tokens": 232.8
+            }
+        },
+        "lazy-R4": {
+            "accuracy": 0.7938,
+            "mean_gen_tokens": 214.9,
+            "eager_mean_gen_tokens": 951.1,
+            "mean_candidates": 4.74,
+            "candidates": 25,
+            "L3_equal_to_eager": 257,
+            "L3_holds": true,
+            "vs": {
+                "greedy": {
+                    "diff": 0.1401,
+                    "a_only": 36,
+                    "b_only": 0,
+                    "p": 0.0,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 5.156,
+                    "better_on_both": false
+                },
+                "bo8-filter": {
+                    "diff": 0.0428,
+                    "a_only": 15,
+                    "b_only": 4,
+                    "p": 0.01921,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 0.538,
+                    "better_on_both": true
+                },
+                "margin-branch-8-filter": {
+                    "diff": 0.0467,
+                    "a_only": 12,
+                    "b_only": 0,
+                    "p": 0.00049,
+                    "verdict": "WIN",
+                    "bar_3pt": true,
+                    "token_ratio": 0.923,
+                    "better_on_both": true
+                }
+            }
+        }
+    }
+}
