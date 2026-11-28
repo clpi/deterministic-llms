@@ -1,0 +1,20 @@
+{
+ "written": "2026-11-28T11:23Z (read from the clock), before any code for it existed",
+ "ask": "Chris 2026-11-28T10:56Z: 'Not even close to good enough'. Math still only ties sc-8: amendment 8's selected vote rule tied it on every TEST row.",
+ "seen_before_writing": "Everything through amendment 8's result (out/value/final/VOTE.json). sc-8's best-of-8 oracle is 0.79 on 0.6B against its vote's 0.655: the loss is in choosing among samples, which a vote cannot fix. No program-aided output of any model has been seen.",
+ "decoder": {
+  "name": "program-aided certified decoding (PAL)",
+  "prompt": "The same 8 GSM8K exemplars as value.py, each written as 'Q: <question>' followed by a Python function solution() that computes and returns the answer, in the style of Gao et al. (2023); the test question follows in the same form.",
+  "paths": "pal-greedy, pal-prlm-0 (the certified pick at every step) and pal-8 (8 samples, temperature 0.7, seeds 2000*index+j). Stop at the next 'Q:', at the end-of-document token (VALUE_AMEND_5) or at 256 new tokens.",
+  "execution": "Each program runs once in a fresh temporary directory with python -I, an empty environment, a 5 second limit, 1 GB address space and no checkout credentials; the answer is float(solution()) when it returns a number, otherwise none. Execution is deterministic, so the answer is a function of the program text.",
+  "rows": "Qwen3-0.6B-Base and Qwen3-1.7B-Base, float32, on the same 400 GSM8K TEST problems as value.py; compared with the stored regenerated rows of VALUE_AMEND_5 on the same problems."
+ },
+ "claims": {
+  "P1": "pal-8 vote of executed answers against sc-8 vote (8 generations each): exact McNemar and the 3-point bar of VALUE_AMEND_2, per model; mean generated tokens reported.",
+  "P2_primary": "mixed-8: the vote over the first 4 sc-8 answers and the first 4 pal-8 answers (8 generations, ties to the earliest, CoT first) against sc-8, per model. Primary claim: a 3-point WIN on at least one model and no LOSS.",
+  "P3": "union-16: the vote over sc-8 and pal-8 (16 generations) against sc-8, reported with its doubled cost; it cannot count as better on both.",
+  "P4": "pal-prlm-0 (one certified program) against CoT greedy and CoT prlm-0, per model.",
+  "P5_control": "replay: pal-prlm-0 and pal-greedy are re-decoded for the first 5 problems of each shard on the same job and must match token for token."
+ },
+ "what_stands": "VALUE_CONTRACT and amendments 1-8 stand as logged. No rule here is selected after seeing results; every comparison above is fixed now."
+}
