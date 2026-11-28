@@ -1,0 +1,167 @@
+{
+ "Qwen/Qwen3-0.6B-Base": {
+  "problems": 400,
+  "accuracy": {
+   "sc-8": 0.655,
+   "pal-8": 0.445,
+   "mixed-8": 0.595,
+   "union-16": 0.65,
+   "pal-prlm-0": 0.3775,
+   "pal-greedy": 0.38,
+   "cot-greedy": 0.565,
+   "cot-prlm-0": 0.5625
+  },
+  "mean_gen_tokens": {
+   "sc-8": 885.3,
+   "pal-8": 448.5,
+   "mixed-8": 669.2,
+   "union-16": 1333.8,
+   "pal-prlm-0": 53.7,
+   "pal-greedy": 53.7,
+   "cot-greedy": 113.3,
+   "cot-prlm-0": 113.3
+  },
+  "P1_pal8_vs_sc8": {
+   "diff": -0.21,
+   "a_only": 23,
+   "b_only": 107,
+   "p": 0.0,
+   "verdict": "LOSS",
+   "bar_3pt": false,
+   "token_ratio": 0.507,
+   "better_on_both": false
+  },
+  "P2_mixed8_vs_sc8": {
+   "diff": -0.06,
+   "a_only": 16,
+   "b_only": 40,
+   "p": 0.00184,
+   "verdict": "LOSS",
+   "bar_3pt": false,
+   "token_ratio": 0.756,
+   "better_on_both": false
+  },
+  "P3_union16_vs_sc8": {
+   "diff": -0.005,
+   "a_only": 14,
+   "b_only": 16,
+   "p": 0.85554,
+   "verdict": "TIE",
+   "bar_3pt": false,
+   "token_ratio": 1.507,
+   "better_on_both": false
+  },
+  "P4_palprlm_vs_cotgreedy": {
+   "diff": -0.1875,
+   "a_only": 31,
+   "b_only": 106,
+   "p": 0.0,
+   "verdict": "LOSS",
+   "bar_3pt": false,
+   "token_ratio": 0.474,
+   "better_on_both": false
+  },
+  "P4_palprlm_vs_cotprlm": {
+   "diff": -0.185,
+   "a_only": 32,
+   "b_only": 106,
+   "p": 0.0,
+   "verdict": "LOSS",
+   "bar_3pt": false,
+   "token_ratio": 0.474,
+   "better_on_both": false
+  },
+  "P5_replay": {
+   "problems": 100,
+   "identical": 100,
+   "holds": true
+  },
+  "executed_none_rate_pal8": 0.0419
+ },
+ "Qwen/Qwen3-1.7B-Base": {
+  "problems": 400,
+  "accuracy": {
+   "sc-8": 0.66,
+   "pal-8": 0.6675,
+   "mixed-8": 0.745,
+   "union-16": 0.7625,
+   "pal-prlm-0": 0.58,
+   "pal-greedy": 0.5825,
+   "cot-greedy": 0.595,
+   "cot-prlm-0": 0.595
+  },
+  "mean_gen_tokens": {
+   "sc-8": 763.1,
+   "pal-8": 433.6,
+   "mixed-8": 594.4,
+   "union-16": 1196.8,
+   "pal-prlm-0": 51.3,
+   "pal-greedy": 51.4,
+   "cot-greedy": 100.1,
+   "cot-prlm-0": 100.1
+  },
+  "P1_pal8_vs_sc8": {
+   "diff": 0.0075,
+   "a_only": 52,
+   "b_only": 49,
+   "p": 0.84238,
+   "verdict": "TIE",
+   "bar_3pt": false,
+   "token_ratio": 0.568,
+   "better_on_both": false
+  },
+  "P2_mixed8_vs_sc8": {
+   "diff": 0.085,
+   "a_only": 46,
+   "b_only": 12,
+   "p": 1e-05,
+   "verdict": "WIN",
+   "bar_3pt": true,
+   "token_ratio": 0.779,
+   "better_on_both": true
+  },
+  "P3_union16_vs_sc8": {
+   "diff": 0.1025,
+   "a_only": 47,
+   "b_only": 6,
+   "p": 0.0,
+   "verdict": "WIN",
+   "bar_3pt": true,
+   "token_ratio": 1.568,
+   "better_on_both": false
+  },
+  "P4_palprlm_vs_cotgreedy": {
+   "diff": -0.015,
+   "a_only": 54,
+   "b_only": 60,
+   "p": 0.63977,
+   "verdict": "TIE",
+   "bar_3pt": false,
+   "token_ratio": 0.512,
+   "better_on_both": false
+  },
+  "P4_palprlm_vs_cotprlm": {
+   "diff": -0.015,
+   "a_only": 54,
+   "b_only": 60,
+   "p": 0.63977,
+   "verdict": "TIE",
+   "bar_3pt": false,
+   "token_ratio": 0.513,
+   "better_on_both": false
+  },
+  "P5_replay": {
+   "problems": 200,
+   "identical": 200,
+   "holds": true
+  },
+  "executed_none_rate_pal8": 0.0191
+ },
+ "P2_primary_holds": false,
+ "_source": {
+  "workflow": "pal",
+  "run": 46139793614,
+  "amendment": "VALUE_AMEND_9",
+  "read": "2026-11-28 from the summary job log (=== PAL line)"
+ }
+}

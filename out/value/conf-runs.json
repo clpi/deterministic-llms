@@ -1,0 +1,5 @@
+{
+ "value5": 45985595874,
+ "pal": 46139793614,
+ "note": "Sources of the stored rows that amendments 10 and 11 score (value5: chain of thought, VALUE_AMEND_5; pal: program-aided, VALUE_AMEND_9). Changing this file runs .github/workflows/conf.yml."
+}
