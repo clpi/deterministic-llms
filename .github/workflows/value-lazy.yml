@@ -42,10 +42,20 @@ jobs:
         run: |
           mkdir -p r1 r2 r3 r5
           cd harness
+          python test_eq_regex.py
           python value_eos.py ../C ../r1 ../r2 ../r3 > /dev/null
           python value_lazy.py ../LAZY_RESCORED.json ../C/r1 ../C/r2 ../C/r3 || true
           python value_lazy.py ../LAZY_REGEN.json ../r5 || true
-          for f in LAZY_RESCORED LAZY_REGEN; do [ -f ../$f.json ] && python -c "import json,sys;print('=== $f', json.dumps(json.load(open(sys.argv[1]))))" ../$f.json; done
+          # value5's own summary job hung on the backtracking EQ regex (fixed in value_portfolio.py);
+          # its control, summaries, bar and portfolio are recomputed here from the same artifacts.
+          if [ -n "$(ls -A ../r5)" ]; then
+            mkdir -p ../old && cp -r ../r1 ../r2 ../r3 ../old/
+            python value_eos_compare.py ../CONTROL.json ../r5 ../old || true
+            python value_code.py summary ../S5.json ../r5 || true
+            python value_llama.py bar ../BAR5.json ../r5 || true
+            python value_portfolio.py ../PORTFOLIO5.json ../r5 || true
+          fi
+          for f in LAZY_RESCORED LAZY_REGEN CONTROL S5 BAR5 PORTFOLIO5; do [ -f ../$f.json ] && python -c "import json,sys;print('=== $f', json.dumps(json.load(open(sys.argv[1]))))" ../$f.json; done
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: value-lazy, path: "*.json"}
