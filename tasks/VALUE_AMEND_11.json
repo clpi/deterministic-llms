@@ -1,0 +1,22 @@
+{
+ "written": "2026-11-28T11:45Z (read from the clock), after amendment 10's code was pushed and before any confidence of any stored path was computed (the confidence workflow had not run)",
+ "ask": "Chris 2026-11-28T11:37Z: search out new, especially adjacent, vectors and syntheses, composing all work end to end.",
+ "idea": "Compose the PRLM certificate with confidence-based selection. A step is certified when the quantized margin round(256*z1) - round(256*z2) of the raw logits exceeds 2B with B = 4 (xhw.py, the bound proved for prlm-0). The share of certified steps in a trace is a confidence that is integer-valued, machine-independent wherever the certificate holds, and cheap; no published selection rule uses it. Question: is it a better trace confidence than the published ones (DeepConf token confidence, self-certainty)?",
+ "features": {
+  "cert_share": "fraction of a trace's generated tokens whose teacher-forced step is certified (margin > 2B)",
+  "cert_low": "lowest certified share over overlapping windows of 32 tokens (a trace shorter than 32 tokens is one window)",
+  "computed_by": "the same teacher-forced float32 pass as amendment 10 (value_conf.py), on the raw logits before any softmax"
+ },
+ "space": "Amendment 10's space (pools x aggregators, same pools, same enumeration rule), with the two certificate features added as confidences to every confidence aggregator (weighted vote, top-eta filters, Borda). Amendment 10's pre-registered selection and its claims S1-S4 are reported unchanged and separately.",
+ "selection": "As amendment 10: highest pooled DEV accuracy within the compute class, ties to fewer mean tokens, then to the enumeration order.",
+ "claims": {
+  "A1_primary": "the 8-generation rule selected in the extended space is a McNemar WIN over the per-row best floor rule (amendment 10's F0-F6) on the pooled TEST problems, and a LOSS on no row",
+  "A2": "the best certificate-only rule on DEV (aggregators using cert_share or cert_low, 8-generation class) is a McNemar WIN on the pooled TEST problems over the best published-confidence rule on DEV (aggregators using DeepConf or self-certainty confidences, 8-generation class): the certificate is the better confidence",
+  "A3_cost": "the certificate features need no top-k or full-vocabulary log-softmax; reported, not claimed"
+ },
+ "controls": {
+  "do_nothing": "majority vote of the same pool (F0 for CoT-8) is in the space and reported on every row",
+  "gamed": "a rule picked on TEST is reported beside the DEV-selected rule as the optimistic ceiling of the space, and is never the claim"
+ },
+ "outcomes": "A1 or A2 false is reported as NOT SUPPORTED; a LOSS as REFUTED."
+}
