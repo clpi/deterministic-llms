@@ -1,0 +1,188 @@
+{
+    "gsm14b:mradermacher/Qwen3-14B-Base-GGUF": {
+        "rows": 100,
+        "rows_with_old": 100,
+        "methods": {
+            "greedy": {
+                "paths": 100,
+                "equal_to_cut": 66
+            },
+            "prlm-0": {
+                "paths": 100,
+                "equal_to_cut": 66
+            },
+            "sample": {
+                "paths": 100,
+                "equal_to_cut": 63
+            },
+            "sc-8": {
+                "paths": 800,
+                "equal_to_cut": 502
+            },
+            "margin-branch-8": {
+                "paths": 800,
+                "equal_to_cut": 293
+            },
+            "random-branch-8": {
+                "paths": 800,
+                "equal_to_cut": 246
+            }
+        },
+        "control_holds": false
+    },
+    "gsm4b:Qwen/Qwen3-4B-Base": {
+        "rows": 100,
+        "rows_with_old": 98,
+        "methods": {
+            "greedy": {
+                "paths": 98,
+                "equal_to_cut": 79
+            },
+            "prlm-0": {
+                "paths": 98,
+                "equal_to_cut": 79
+            },
+            "sample": {
+                "paths": 98,
+                "equal_to_cut": 60
+            },
+            "sc-8": {
+                "paths": 784,
+                "equal_to_cut": 510
+            },
+            "margin-branch-8": {
+                "paths": 784,
+                "equal_to_cut": 458
+            },
+            "random-branch-8": {
+                "paths": 784,
+                "equal_to_cut": 474
+            }
+        },
+        "control_holds": false
+    },
+    "gsm8k:Qwen/Qwen3-0.6B-Base": {
+        "rows": 400,
+        "rows_with_old": 400,
+        "methods": {
+            "greedy": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "prlm-0": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sample": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sc-8": {
+                "paths": 3200,
+                "equal_to_cut": 3198
+            },
+            "margin-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 3182
+            },
+            "random-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 3155
+            }
+        },
+        "control_holds": false
+    },
+    "gsm8k:Qwen/Qwen3-1.7B-Base": {
+        "rows": 400,
+        "rows_with_old": 400,
+        "methods": {
+            "greedy": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "prlm-0": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sample": {
+                "paths": 400,
+                "equal_to_cut": 400
+            },
+            "sc-8": {
+                "paths": 3200,
+                "equal_to_cut": 3200
+            },
+            "margin-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 3085
+            },
+            "random-branch-8": {
+                "paths": 3200,
+                "equal_to_cut": 2931
+            }
+        },
+        "control_holds": true
+    },
+    "mbpp:Qwen/Qwen3-0.6B-Base": {
+        "rows": 257,
+        "rows_with_old": 257,
+        "methods": {
+            "greedy": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "prlm-0": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "sample": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "bo8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "margin-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "random-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 1980
+            }
+        },
+        "control_holds": true
+    },
+    "mbpp:Qwen/Qwen3-1.7B-Base": {
+        "rows": 257,
+        "rows_with_old": 257,
+        "methods": {
+            "greedy": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "prlm-0": {
+                "paths": 257,
+                "equal_to_cut": 257
+            },
+            "sample": {
+                "paths": 257,
+                "equal_to_cut": 256
+            },
+            "bo8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "margin-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2056
+            },
+            "random-branch-8-filter": {
+                "paths": 2056,
+                "equal_to_cut": 2005
+            }
+        },
+        "control_holds": false
+    }
+}

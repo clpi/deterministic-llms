@@ -1,0 +1,132 @@
+{
+    "Qwen/Qwen3-0.6B-Base": {
+        "problems": 400,
+        "inputs": [
+            "{\"commit\": \"da87bfb608c14b7cf20ba1ce41287e8de496c0cd\", \"repo\": \"Qwen/Qwen3-0.6B-Base\", \"weights_sha256\": {\"model.safetensors\": \"cd2a512003e2f9f3cd3c32a9c3573f820bb28c940f73c57b1ddaa983d9223eba\"}}"
+        ],
+        "data_sha256": [
+            "ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59"
+        ],
+        "accuracy": {
+            "greedy": 0.565,
+            "prlm-0": 0.5625,
+            "sample": 0.5025,
+            "sc-8": 0.655,
+            "margin-branch-8": 0.5875,
+            "random-branch-8": 0.54
+        },
+        "oracle_best_of_8": {
+            "sc-8": 0.7925,
+            "margin-branch-8": 0.6925,
+            "random-branch-8": 0.6625
+        },
+        "mean_gen_tokens": {
+            "greedy": 113.3,
+            "prlm-0": 113.3,
+            "sample": 109.4,
+            "sc-8": 885.1,
+            "margin-branch-8": 498.0,
+            "random-branch-8": 449.5
+        },
+        "mean_forwards": {
+            "greedy": 234.1,
+            "prlm-0": 233.7,
+            "sample": 168.5,
+            "sc-8": 1337.2,
+            "margin-branch-8": 1422.0,
+            "random-branch-8": 1372.2
+        },
+        "V1_branch_vs_sc8": {
+            "diff": -0.0675,
+            "a_only": 18,
+            "b_only": 45,
+            "p": 0.0009,
+            "verdict": "LOSS"
+        },
+        "V2_branch_vs_greedy": {
+            "diff": 0.0225,
+            "a_only": 23,
+            "b_only": 14,
+            "p": 0.18774,
+            "verdict": "TIE"
+        },
+        "V3_branch_vs_random": {
+            "diff": 0.0475,
+            "a_only": 37,
+            "b_only": 18,
+            "p": 0.01445,
+            "verdict": "WIN"
+        },
+        "prlm0_vs_greedy_same_answer": 397,
+        "V5_rerun": {
+            "problems": 5,
+            "branch_paths_identical": 5,
+            "sc8_paths_identical": 5
+        }
+    },
+    "Qwen/Qwen3-1.7B-Base": {
+        "problems": 400,
+        "inputs": [
+            "{\"commit\": \"ea980cb0a6c2ae4b936e82123acc929f1cec04c1\", \"repo\": \"Qwen/Qwen3-1.7B-Base\", \"weights_sha256\": {\"model.safetensors\": \"6df85b39330e5a425ee36253d0f894e4387e4f0a15b9c53cb467d668e6b3a841\"}}"
+        ],
+        "data_sha256": [
+            "ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59"
+        ],
+        "accuracy": {
+            "greedy": 0.595,
+            "prlm-0": 0.595,
+            "sample": 0.5175,
+            "sc-8": 0.66,
+            "margin-branch-8": 0.6575,
+            "random-branch-8": 0.5975
+        },
+        "oracle_best_of_8": {
+            "sc-8": 0.8475,
+            "margin-branch-8": 0.715,
+            "random-branch-8": 0.705
+        },
+        "mean_gen_tokens": {
+            "greedy": 100.1,
+            "prlm-0": 100.1,
+            "sample": 99.5,
+            "sc-8": 763.1,
+            "margin-branch-8": 407.0,
+            "random-branch-8": 394.1
+        },
+        "mean_forwards": {
+            "greedy": 134.0,
+            "prlm-0": 134.0,
+            "sample": 126.9,
+            "sc-8": 963.5,
+            "margin-branch-8": 765.8,
+            "random-branch-8": 718.5
+        },
+        "V1_branch_vs_sc8": {
+            "diff": -0.0025,
+            "a_only": 33,
+            "b_only": 34,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "V2_branch_vs_greedy": {
+            "diff": 0.0625,
+            "a_only": 28,
+            "b_only": 3,
+            "p": 0.0,
+            "verdict": "WIN"
+        },
+        "V3_branch_vs_random": {
+            "diff": 0.06,
+            "a_only": 36,
+            "b_only": 12,
+            "p": 0.00072,
+            "verdict": "WIN"
+        },
+        "prlm0_vs_greedy_same_answer": 400,
+        "V5_rerun": {
+            "problems": 8,
+            "branch_paths_identical": 8,
+            "sc8_paths_identical": 8
+        }
+    }
+}

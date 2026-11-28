@@ -1,0 +1,152 @@
+{
+    "gsm14b:mradermacher/Qwen3-14B-Base-GGUF": {
+        "problems": 100,
+        "vs_sampling": {
+            "diff": 0.01,
+            "a_only": 8,
+            "b_only": 7,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "vs_greedy": {
+            "diff": 0.07,
+            "a_only": 7,
+            "b_only": 0,
+            "p": 0.01562,
+            "verdict": "WIN"
+        },
+        "vs_random": {
+            "diff": 0.02,
+            "a_only": 3,
+            "b_only": 1,
+            "p": 0.625,
+            "verdict": "TIE"
+        },
+        "bar": "TIE (gain not from the margin)"
+    },
+    "gsm4b:Qwen/Qwen3-4B-Base": {
+        "problems": 98,
+        "vs_sampling": {
+            "diff": 0.0204,
+            "a_only": 8,
+            "b_only": 6,
+            "p": 0.79053,
+            "verdict": "TIE"
+        },
+        "vs_greedy": {
+            "diff": 0.0204,
+            "a_only": 2,
+            "b_only": 0,
+            "p": 0.5,
+            "verdict": "TIE"
+        },
+        "vs_random": {
+            "diff": -0.0204,
+            "a_only": 1,
+            "b_only": 3,
+            "p": 0.625,
+            "verdict": "TIE"
+        },
+        "bar": "TIE"
+    },
+    "gsm8k:Qwen/Qwen3-0.6B-Base": {
+        "problems": 400,
+        "vs_sampling": {
+            "diff": -0.0675,
+            "a_only": 18,
+            "b_only": 45,
+            "p": 0.0009,
+            "verdict": "LOSS"
+        },
+        "vs_greedy": {
+            "diff": 0.0225,
+            "a_only": 23,
+            "b_only": 14,
+            "p": 0.18774,
+            "verdict": "TIE"
+        },
+        "vs_random": {
+            "diff": 0.0475,
+            "a_only": 37,
+            "b_only": 18,
+            "p": 0.01445,
+            "verdict": "WIN"
+        },
+        "bar": "LOSS"
+    },
+    "gsm8k:Qwen/Qwen3-1.7B-Base": {
+        "problems": 400,
+        "vs_sampling": {
+            "diff": -0.0025,
+            "a_only": 33,
+            "b_only": 34,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "vs_greedy": {
+            "diff": 0.0625,
+            "a_only": 28,
+            "b_only": 3,
+            "p": 0.0,
+            "verdict": "WIN"
+        },
+        "vs_random": {
+            "diff": 0.06,
+            "a_only": 36,
+            "b_only": 12,
+            "p": 0.00072,
+            "verdict": "WIN"
+        },
+        "bar": "SMALL WIN"
+    },
+    "mbpp:Qwen/Qwen3-0.6B-Base": {
+        "problems": 257,
+        "vs_sampling": {
+            "diff": -0.0039,
+            "a_only": 19,
+            "b_only": 20,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "vs_greedy": {
+            "diff": 0.1128,
+            "a_only": 29,
+            "b_only": 0,
+            "p": 0.0,
+            "verdict": "WIN"
+        },
+        "vs_random": {
+            "diff": 0.0506,
+            "a_only": 16,
+            "b_only": 3,
+            "p": 0.00443,
+            "verdict": "WIN"
+        },
+        "bar": "SMALL WIN"
+    },
+    "mbpp:Qwen/Qwen3-1.7B-Base": {
+        "problems": 257,
+        "vs_sampling": {
+            "diff": -0.0039,
+            "a_only": 9,
+            "b_only": 10,
+            "p": 1.0,
+            "verdict": "TIE"
+        },
+        "vs_greedy": {
+            "diff": 0.0934,
+            "a_only": 24,
+            "b_only": 0,
+            "p": 0.0,
+            "verdict": "WIN"
+        },
+        "vs_random": {
+            "diff": 0.0233,
+            "a_only": 13,
+            "b_only": 7,
+            "p": 0.26318,
+            "verdict": "TIE"
+        },
+        "bar": "TIE (gain not from the margin)"
+    }
+}
