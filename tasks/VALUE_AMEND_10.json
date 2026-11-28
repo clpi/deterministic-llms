@@ -1,0 +1,27 @@
+{
+ "written": "2026-11-28T11:39Z (read from the clock), before any code for it existed, before amendment 9's PAL rows existed and before any confidence of any stored path was computed",
+ "ask": "Chris 2026-11-28T11:37Z: 'the floor must be the state of the art and there is no ceiling', search out new adjacent vectors, compose all work end to end.",
+ "floor": {
+  "definition": "At a fixed budget of 8 generations per problem, the floor on a row is the best of the published training-free selection rules below on that row's TEST problems (chosen after the fact per row, which favors the floor).",
+  "F0": "self-consistency, majority vote of 8 CoT samples (Wang et al. 2023; our sc-8)",
+  "F1": "DeepConf Mean@8: vote weighted by average trace confidence (Fu et al. 2025, arXiv 2508.15260, Eq. 2-3)",
+  "F2": "DeepConf Bottom-10% group confidence, top-90% filter, then weighted vote",
+  "F3": "DeepConf Lowest group confidence, top-10% filter (at N=8: the single most confident trace), then weighted vote",
+  "F4": "DeepConf Tail confidence, top-90% filter, then weighted vote",
+  "F5": "Self-certainty Borda voting, p=0.3 for N<=16 (Kang et al. 2025, arXiv 2502.18581, Eq. 4)",
+  "F6": "program-aided self-consistency, vote of 8 executed PAL programs (Gao et al. 2023; amendment 9's pal-8)",
+  "our_settings": "Token confidence C_i = -mean of the top-k log-probabilities with k=20. Our traces are 100-256 tokens, shorter than the paper's 2,048-token windows, so groups are overlapping windows of n=32 tokens (a trace shorter than 32 tokens is one group) and the tail is the last 32 tokens. Top-eta keeps ceil(eta*N) traces. Self-certainty per token = -(1/V) sum_j log(V p_j), averaged over the trace. Confidences are computed by one teacher-forced float32 pass over each stored path's generated tokens up to its first end of document."
+ },
+ "search": {
+  "space": "Pools: CoT-8, PAL-8, CoT-4+PAL-4, prlm-0 family (prlm-0 and margin-branch paths 2-8), and the 16-generation pools CoT-8+PAL-8 and CoT-8+family. Aggregators: majority; vote weighted by each confidence (mean, bottom-10 group, lowest group, tail, self-certainty); top-eta filter with eta in {0.1, 0.5, 0.9} before the weighted vote; Borda with p in {0.3, 1.0} on each confidence; a cross-format agreement weight (an answer reached by both a CoT and a PAL trace has its weight multiplied by 2).",
+  "selection": "Within each compute class (8 generations; 16 generations) select the rule with the highest pooled DEV accuracy (even problem indices of the 0.6B and 1.7B rows); ties to fewer mean tokens, then to the first in a fixed enumeration order written in the code before any score.",
+  "test": "TEST = odd indices of 0.6B and 1.7B. Rows: Qwen3-0.6B-Base and Qwen3-1.7B-Base, GSM8K, the 400 problems of value.py."
+ },
+ "claims": {
+  "S1_primary": "the selected 8-generation rule is a McNemar WIN over the per-row best floor rule on the pooled TEST problems, and a LOSS on no row",
+  "S2": "S1 clears the 3-point bar of VALUE_AMEND_2 on at least one row",
+  "S3": "the selected 16-generation rule against the best floor rule applied to the same 16-generation pool (F0-F5 on CoT-8+PAL-8), same test",
+  "S4_sanity": "each floor rule against F0 on all problems, reported (no claim: shows whether our implementation reproduces the published direction at this scale)"
+ },
+ "what_stands": "VALUE_CONTRACT and amendments 1-9 stand as logged."
+}
